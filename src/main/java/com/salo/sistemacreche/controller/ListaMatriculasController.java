@@ -4,10 +4,9 @@ import com.salo.sistemacreche.components.EmptyCard;
 import com.salo.sistemacreche.components.MatriculaCard;
 import com.salo.sistemacreche.dao.DBConnection;
 import com.salo.sistemacreche.entidades.Matricula;
-import com.salo.sistemacreche.entidades.Crianca;
+import com.salo.sistemacreche.entidades.Matricula.SituacaoMatricula;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -29,12 +28,21 @@ public class ListaMatriculasController {
     @FXML
     public void initialize() {
         configurarComboBox();
-        carregarMatriculas(); // Carrega todas as matrículas inicialmente
+        carregarMatriculas();
     }
 
     private void configurarComboBox() {
-        comboSituacao.getItems().addAll("Todas", "Ativa", "Inativa", "Pendente", "Cancelada");
+        // CORREÇÃO: Use os valores exatos que correspondem ao Enum
+        comboSituacao.getItems().addAll("Todas", "Matriculado", "Concluída", "Cancelada");
         comboSituacao.setValue("Todas");
+    }
+
+    private SituacaoMatricula converterStringParaSituacaoEnum(String situacao) {
+        switch(situacao) {
+            case "Concluída": return SituacaoMatricula.CONCLUIDA;
+            case "Cancelada": return SituacaoMatricula.CANCELADA;
+            default: return SituacaoMatricula.ATIVA;
+        }
     }
 
     @FXML
@@ -65,13 +73,13 @@ public class ListaMatriculasController {
                 return;
             }
 
-            // Verificar se o EntityManager está aberto
             if (!em.isOpen()) {
                 welcomeText.setText("❌ EntityManager está fechado");
                 return;
             }
 
             System.out.println("🔍 Executando busca com filtros...");
+            System.out.println("📊 Situação selecionada: " + comboSituacao.getValue());
 
             // Usando JPQL para maior simplicidade e controle
             StringBuilder jpql = new StringBuilder(
@@ -94,11 +102,12 @@ public class ListaMatriculasController {
                 paramIndex++;
             }
 
-            // FILTRO 2: Situação da matrícula
+            // FILTRO 2: Situação da matrícula - CORRIGIDO
             String situacaoSelecionada = comboSituacao.getValue();
             if (situacaoSelecionada != null && !situacaoSelecionada.equals("Todas")) {
-                jpql.append(" AND m.situacao = ?").append(paramIndex);
-                parametros.add(situacaoSelecionada);
+                SituacaoMatricula situacaoEnum = converterStringParaSituacaoEnum(situacaoSelecionada);
+                jpql.append(" AND m.situacaoMatricula = ?").append(paramIndex);
+                parametros.add(situacaoEnum);
                 paramIndex++;
             }
 
@@ -130,7 +139,7 @@ public class ListaMatriculasController {
             // Aplicar parâmetros
             for (int i = 0; i < parametros.size(); i++) {
                 query.setParameter(i + 1, parametros.get(i));
-                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i));
+                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i) + " (Tipo: " + parametros.get(i).getClass().getSimpleName() + ")");
             }
 
             List<Matricula> matriculas = query.getResultList();
@@ -144,13 +153,9 @@ public class ListaMatriculasController {
             System.err.println(errorMsg);
             e.printStackTrace();
 
-            // Mostrar detalhes do erro
             if (e.getCause() != null) {
                 System.err.println("Causa: " + e.getCause().getMessage());
             }
-        } finally {
-            // ⚠️ IMPORTANTE: NÃO fechar o EntityManager aqui!
-            // Ele será gerenciado pela ThreadLocal na DBConnection
         }
     }
 

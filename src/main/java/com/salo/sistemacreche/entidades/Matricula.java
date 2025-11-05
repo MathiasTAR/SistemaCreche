@@ -39,11 +39,11 @@ public class Matricula {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "SITUACAO_MAT")
-    private SituacaoMatricula situacaoMatricula = SituacaoMatricula.ATIVA;
+    private SituacaoMatricula situacaoMatricula;
 
 
     public enum SituacaoMatricula {
-        ATIVA, TRANSFERIDA, CONCLUIDA, CANCELADA
+        ATIVA, CONCLUIDA, CANCELADA
     }
 
     public Matricula() {
