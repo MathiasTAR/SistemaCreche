@@ -10,48 +10,39 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:controller="com.salo.sistemacreche.controller.RematriculaController" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      spacing="20.0" style="-fx-background-color: #f8fdf8;">
+<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.salo.sistemacreche.controller.RematriculaController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label style="-fx-text-fill: #2e7d32;" text="Realizar Re-matrícula">
+    <Label style="-fx-text-fill: #0f766e;" text="Realizar Re-matrícula">
         <font>
             <Font name="System Bold" size="20.0" />
         </font>
     </Label>
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <TextField fx:id="fieldPesquisarAluno" prefHeight="35.0" prefWidth="400.0"
-                   promptText="Pesquisar aluno para re-matrícula"
-                   style="-fx-background-color: white; -fx-border-color: #c8e6c9; -fx-border-radius: 5; -fx-background-radius: 5;" />
-        <Button fx:id="btnBuscarAluno" mnemonicParsing="false" prefHeight="35.0" prefWidth="80.0"
-                style="-fx-background-color: #4caf50; -fx-text-fill: white; -fx-background-radius: 5;"
-                text="Buscar" onAction="#buscarAlunos"/>
+        <TextField fx:id="fieldPesquisarAluno" prefHeight="35.0" prefWidth="608.0" promptText="Pesquisar aluno para re-matrícula" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+        <Button fx:id="btnBuscarAluno" mnemonicParsing="false" onAction="#buscarAlunos" prefHeight="35.0" prefWidth="106.0" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5;" text="Buscar" />
     </HBox>
 
-    <ScrollPane fitToWidth="true" prefHeight="400.0"
-                style="-fx-background: #f8fdf8; -fx-border-color: #e8f5e8; -fx-border-radius: 5;">
+    <ScrollPane fitToWidth="true" prefHeight="400.0" style="-fx-background: #f8fbfd; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
         <VBox fx:id="containerAlunos" spacing="10.0" style="-fx-background-color: #f8fdf8;">
 
             <!-- Exemplo de card de aluno - será gerado dinamicamente -->
             <VBox style="-fx-background-color: white; -fx-border-color: #e8f5e8; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15;">
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <Label fx:id="labelNomeAluno" prefWidth="400.0" style="-fx-text-fill: #2e7d32;" text="João da Silva">
+                    <Label fx:id="labelNomeAluno" prefWidth="400.0" style="-fx-text-fill: #0f766e;" text="João da Silva">
                         <font>
                             <Font name="System Bold" size="14.0" />
                         </font>
                     </Label>
-                    <Label fx:id="labelVencimento" style="-fx-text-fill: #ff9800; -fx-font-weight: bold;" text="Vence em: 30/06/2024" />
+                    <Label fx:id="labelVencimento" style="-fx-text-fill: #b02e50; -fx-font-weight: bold;" text="Vence em: 30/06/2024" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button fx:id="btnRematricular" mnemonicParsing="false"
-                            style="-fx-background-color: #4caf50; -fx-text-fill: white; -fx-background-radius: 3;"
-                            text="Re-matricular" onAction="#realizarRematricula"/>
+                    <Button fx:id="btnRematricular" mnemonicParsing="false" onAction="#realizarRematricula" prefHeight="29.0" prefWidth="88.0" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 3;" text="Re-matricular" />
                 </HBox>
-                <Label fx:id="labelUltimaMatricula" style="-fx-text-fill: #666; -fx-padding: 5 0 0 0;"
-                       text="Data da última matrícula: 15/03/2024" />
+                <Label fx:id="labelUltimaMatricula" prefHeight="9.0" prefWidth="197.0" style="-fx-text-fill: #666; -fx-padding: 5 0 0 0;" text="Data da última matrícula: 15/03/2024" />
             </VBox>
 
         </VBox>
