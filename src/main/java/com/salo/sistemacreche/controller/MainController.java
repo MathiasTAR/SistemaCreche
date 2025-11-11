@@ -12,9 +12,10 @@ public class MainController {
 
     @FXML private StackPane contentArea;
 
-    // ⚠️ CORRETO: Referência ao CONTROLLER do elemento incluído
+    // Referência ao CONTROLLER do elemento incluído
     @FXML public NavigationController navigationController;
 
+    private Parent telaHome;
     private Parent telaListaMatriculas;
     private Parent telaCadastroMatricula;
     private Parent telaRematricula;
@@ -32,11 +33,17 @@ public class MainController {
         }
 
         carregarTelas();
-        mostrarTelaListaMatriculas();
+        mostrarTelaHome();
     }
 
     private void carregarTelas() {
         try {
+            // Carregar tela Home
+            FXMLLoader loaderHome = new FXMLLoader(
+                    getClass().getResource("/com/salo/sistemacreche/home.fxml")
+            );
+            telaHome = loaderHome.load();
+
             // Carregar tela de lista de matrículas
             FXMLLoader loaderLista = new FXMLLoader(
                     getClass().getResource("/com/salo/sistemacreche/lista-matriculas.fxml")
@@ -73,6 +80,12 @@ public class MainController {
             System.err.println("❌ Erro ao carregar telas: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    // Métodos públicos para navegação
+    public void mostrarTelaHome() {
+        contentArea.getChildren().setAll(telaHome);
+        System.out.println("📋 Mostrando Home");
     }
 
     // Métodos públicos para navegação

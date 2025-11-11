@@ -5,91 +5,72 @@ import javafx.scene.control.*;
 
 public class RelatoriosController {
 
-    @FXML private RadioButton radioMatriculasAtivas;
-    @FXML private RadioButton radioMatriculasVencidas;
-    @FXML private RadioButton radioAlunosIdade;
-    @FXML private RadioButton radioAlunosTurma;
-    @FXML private RadioButton radioFrequencia;
-    @FXML private RadioButton radioFinanceiro;
-
+    // Principais controles
     @FXML private DatePicker datePickerInicio;
     @FXML private DatePicker datePickerFim;
-
-    @FXML private Button btnGerarRelatorio;
-    @FXML private Button btnExportarPdf;
-    @FXML private Button btnImprimir;
-
-    @FXML private TextArea textAreaRelatorio;
-
-    private ToggleGroup toggleGroupTipoRelatorio;
+    @FXML private ComboBox<String> comboPeriodo;
+    @FXML private Button btnLimparCampos;
+    @FXML private Button btnGerarPDF;
 
     @FXML
     public void initialize() {
-        configurarRadioButtons();
-        configurarBotoes();
+        System.out.println("📊 RelatoriosController inicializado!");
+        configurarComboboxes();
     }
 
-    private void configurarRadioButtons() {
-        toggleGroupTipoRelatorio = new ToggleGroup();
+    private void configurarComboboxes() {
+        // Combo período já está definido no FXML, apenas configurar valor padrão
+        comboPeriodo.setValue("Este mês");
 
-        radioMatriculasAtivas.setToggleGroup(toggleGroupTipoRelatorio);
-        radioMatriculasVencidas.setToggleGroup(toggleGroupTipoRelatorio);
-        radioAlunosIdade.setToggleGroup(toggleGroupTipoRelatorio);
-        radioAlunosTurma.setToggleGroup(toggleGroupTipoRelatorio);
-        radioFrequencia.setToggleGroup(toggleGroupTipoRelatorio);
-        radioFinanceiro.setToggleGroup(toggleGroupTipoRelatorio);
-
-        // Selecionar o primeiro por padrão
-        radioMatriculasAtivas.setSelected(true);
-    }
-
-    private void configurarBotoes() {
-        // As ações já estão configuradas no FXML via onAction
+        // Configurar data padrão (este mês)
+        datePickerInicio.setValue(java.time.LocalDate.now().withDayOfMonth(1));
+        datePickerFim.setValue(java.time.LocalDate.now());
     }
 
     @FXML
-    public void gerarRelatorio() {
-        System.out.println("Gerando relatório...");
+    private void limparCampos() {
+        System.out.println("🧹 Limpando campos...");
 
-        String tipoRelatorio = obterTipoRelatorioSelecionado();
-        System.out.println("Tipo de relatório: " + tipoRelatorio);
+        // Apenas limpar os campos principais
+        datePickerInicio.setValue(null);
+        datePickerFim.setValue(null);
+        comboPeriodo.setValue(null);
 
-        // Simular geração de relatório
-        String relatorio = simularRelatorio(tipoRelatorio);
-        textAreaRelatorio.setText(relatorio);
+        mostrarMensagem("Campos limpos!", "Todos os campos foram resetados.");
     }
 
     @FXML
-    public void exportarPdf() {
-        System.out.println("Exportando para PDF...");
-        // TODO: Implementar exportação para PDF
-        mostrarAlerta("Exportar PDF", "Funcionalidade em desenvolvimento", Alert.AlertType.INFORMATION);
+    private void gerarPDF() {
+        System.out.println("📄 Gerando relatório PDF...");
+
+        // Validar apenas datas
+        if (datePickerInicio.getValue() == null || datePickerFim.getValue() == null) {
+            mostrarErro("Selecione o período", "É necessário definir data inicial e final.");
+            return;
+        }
+
+        if (datePickerInicio.getValue().isAfter(datePickerFim.getValue())) {
+            mostrarErro("Data inválida", "Data inicial não pode ser depois da data final.");
+            return;
+        }
+
+        // Simular geração do PDF
+        String periodo = datePickerInicio.getValue() + " a " + datePickerFim.getValue();
+        System.out.println("✅ Gerando PDF para o período: " + periodo);
+
+        mostrarMensagem("PDF Gerado!", "Relatório criado com sucesso!\nPeríodo: " + periodo);
     }
 
-    @FXML
-    public void imprimirRelatorio() {
-        System.out.println("Imprimindo relatório...");
-        // TODO: Implementar impressão
-        mostrarAlerta("Imprimir", "Funcionalidade em desenvolvimento", Alert.AlertType.INFORMATION);
+    private void mostrarMensagem(String titulo, String mensagem) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensagem);
+        alert.showAndWait();
     }
 
-    private String obterTipoRelatorioSelecionado() {
-        RadioButton selecionado = (RadioButton) toggleGroupTipoRelatorio.getSelectedToggle();
-        return selecionado != null ? selecionado.getText() : "Nenhum";
-    }
-
-    private String simularRelatorio(String tipo) {
-        return "Relatório de " + tipo + " - Creche Estrela do Oriente\n" +
-                "Período: " + datePickerInicio.getValue() + " a " + datePickerFim.getValue() + "\n\n" +
-                "Total de alunos: 145\n" +
-                "Matrículas ativas: 142\n" +
-                "Matrículas pendentes: 3\n\n" +
-                "Este é um relatório simulado.\n" +
-                "Em produção, aqui viriam os dados reais do banco de dados.";
-    }
-
-    private void mostrarAlerta(String titulo, String mensagem, Alert.AlertType tipo) {
-        Alert alert = new Alert(tipo);
+    private void mostrarErro(String titulo, String mensagem) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensagem);

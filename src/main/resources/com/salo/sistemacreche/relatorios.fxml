@@ -1,73 +1,266 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:controller="com.salo.sistemacreche.controller.RelatoriosController" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      spacing="20.0" style="-fx-background-color: #f8fdf8;">
+<?import java.lang.String?>
+<?import javafx.scene.control.DatePicker?>
+<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml" fx:controller="com.salo.sistemacreche.controller.RelatoriosController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label style="-fx-text-fill: #2e7d32;" text="Relatórios">
-        <font>
-            <Font name="System Bold" size="20.0" />
-        </font>
-    </Label>
+    <ScrollPane fitToWidth="true" prefHeight="600.0" style="-fx-background: white; -fx-border-color: white; -fx-padding: 5;">
+        <VBox spacing="20.0" style="-fx-background-color: #f8fdf8;">
 
-    <HBox alignment="TOP_LEFT" spacing="20.0">
-        <VBox prefWidth="300.0" spacing="15.0">
-            <Label style="-fx-text-fill: #2e7d32; -fx-font-weight: bold;" text="Selecione o tipo de relatório:" />
+            <!-- Seção: Período -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Período">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
 
-            <VBox spacing="10.0">
-                <RadioButton fx:id="radioMatriculasAtivas" style="-fx-text-fill: #2e7d32;" text="Matrículas ativas" />
-                <RadioButton fx:id="radioMatriculasVencidas" style="-fx-text-fill: #2e7d32;" text="Matrículas vencidas" />
-                <RadioButton fx:id="radioAlunosIdade" style="-fx-text-fill: #2e7d32;" text="Alunos por idade" />
-                <RadioButton fx:id="radioAlunosTurma" style="-fx-text-fill: #2e7d32;" text="Alunos por turma" />
-                <RadioButton fx:id="radioFrequencia" style="-fx-text-fill: #2e7d32;" text="Frequência mensal" />
-                <RadioButton fx:id="radioFinanceiro" style="-fx-text-fill: #2e7d32;" text="Relatório financeiro" />
+                <GridPane hgap="15" vgap="5">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="150" />
+                        <ColumnConstraints prefWidth="150" />
+                        <ColumnConstraints prefWidth="200" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                    </rowConstraints>
+
+                    <children>
+                        <VBox spacing="3">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Data Inicial" />
+                            <DatePicker fx:id="datePickerInicio" prefHeight="35.0" prefWidth="150.0" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                        </VBox>
+                        <VBox spacing="3" GridPane.columnIndex="1">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Data Final" />
+                            <DatePicker fx:id="datePickerFim" prefHeight="35.0" prefWidth="150.0" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                        </VBox>
+                        <VBox spacing="3" GridPane.columnIndex="2">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Período Pré-definido" />
+                            <ComboBox fx:id="comboPeriodo" prefHeight="35.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Últimos 7 dias" />
+                                        <String fx:value="Últimos 30 dias" />
+                                        <String fx:value="Este mês" />
+                                        <String fx:value="Mês anterior" />
+                                        <String fx:value="Este ano" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+                    </children>
+                </GridPane>
             </VBox>
 
-            <VBox spacing="10.0" style="-fx-padding: 15 0 0 0;">
-                <Label style="-fx-text-fill: #2e7d32; -fx-font-weight: bold;" text="Período:" />
-                <DatePicker fx:id="datePickerInicio" promptText="Data inicial"
-                            style="-fx-background-color: white; -fx-border-color: #c8e6c9;" />
-                <DatePicker fx:id="datePickerFim" promptText="Data final"
-                            style="-fx-background-color: white; -fx-border-color: #c8e6c9;" />
+            <!-- Seção 1: Identificação da Criança -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Identificação da Criança">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
+
+                <GridPane hgap="15" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="180" />
+                        <ColumnConstraints prefWidth="180" />
+                        <ColumnConstraints prefWidth="180" />
+                        <ColumnConstraints prefWidth="180" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
+
+                    <children>
+                        <!-- Linha 1 -->
+                        <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Idade (anos)" />
+                            <HBox spacing="5">
+                                <TextField fx:id="txtIdadeDe" prefHeight="35.0" prefWidth="80.0" promptText="De" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                <TextField fx:id="txtIdadeAte" prefHeight="35.0" prefWidth="80.0" promptText="Até" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Sexo" />
+                            <ComboBox fx:id="comboSexo" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todos" />
+                                        <String fx:value="Masculino" />
+                                        <String fx:value="Feminino" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Restrição Alimentar" />
+                            <ComboBox fx:id="comboRestricaoAlimentar" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todas as situações" />
+                                        <String fx:value="Com restrição" />
+                                        <String fx:value="Sem restrição" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Alergia" />
+                            <ComboBox fx:id="comboAlergia" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todas as situações" />
+                                        <String fx:value="Com alergia" />
+                                        <String fx:value="Sem alergia" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+
+                        <!-- Linha 2 -->
+                        <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Cor/Raça" />
+                            <ComboBox fx:id="comboRaca" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todas" />
+                                        <String fx:value="Branca" />
+                                        <String fx:value="Preta" />
+                                        <String fx:value="Parda" />
+                                        <String fx:value="Amarela" />
+                                        <String fx:value="Indígena" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Mobilidade Reduzida" />
+                            <ComboBox fx:id="comboMobilidade" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todas as situações" />
+                                        <String fx:value="Com mobilidade reduzida" />
+                                        <String fx:value="Sem mobilidade reduzida" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+                    </children>
+                </GridPane>
             </VBox>
 
-            <Button fx:id="btnGerarRelatorio" mnemonicParsing="false"
-                    style="-fx-background-color: #4caf50; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 200; -fx-pref-height: 40; -fx-padding: 20 0 0 0;"
-                    text="Gerar Relatório" onAction="#gerarRelatorio"/>
-        </VBox>
+            <!-- Seção 2: Classificação/Deficiências -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Classificação/Deficiências">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
 
-        <VBox prefWidth="600.0" spacing="15.0" style="-fx-background-color: white; -fx-border-color: #e8f5e8; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-            <Label style="-fx-text-fill: #2e7d32; -fx-font-weight: bold;" text="Pré-visualização do Relatório">
-                <font>
-                    <Font size="16.0" />
-                </font>
-            </Label>
+                <GridPane hgap="15" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="250" />
+                        <ColumnConstraints prefWidth="250" />
+                        <ColumnConstraints prefWidth="250" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                    </rowConstraints>
 
-            <TextArea fx:id="textAreaRelatorio" editable="false" prefHeight="350.0" prefWidth="550.0"
-                      style="-fx-background-color: #f9f9f9; -fx-border-color: #e8f5e8;" wrapText="true" />
+                    <children>
+                        <CheckBox text="Altas Habilidades (Superdotação)" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <CheckBox text="Cegueira" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <CheckBox text="TDAH" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                    </children>
+                </GridPane>
+            </VBox>
 
-            <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 10 0 0 0;">
-                <Button fx:id="btnExportarPdf" mnemonicParsing="false"
-                        style="-fx-background-color: #4caf50; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120; -fx-pref-height: 35;"
-                        text="Exportar PDF" onAction="#exportarPdf"/>
-                <Button fx:id="btnImprimir" mnemonicParsing="false"
-                        style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 100; -fx-pref-height: 35;"
-                        text="Imprimir" onAction="#imprimirRelatorio"/>
+            <!-- Seção 3: Situação Habitacional e Familiar -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Situação Habitacional e Familiar">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
+
+                <GridPane hgap="15" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="200" />
+                        <ColumnConstraints prefWidth="200" />
+                        <ColumnConstraints prefWidth="200" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                    </rowConstraints>
+
+                    <children>
+                        <VBox spacing="3">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Tipo de Moradia" />
+                            <ComboBox fx:id="comboMoradia" prefHeight="35.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todos" />
+                                        <String fx:value="Casa Própria" />
+                                        <String fx:value="Casa Cedida" />
+                                        <String fx:value="Casa Alugada" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="2">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Renda Familiar" />
+                            <HBox spacing="5">
+                                <TextField fx:id="txtRendaMinima" prefHeight="35.0" prefWidth="95.0" promptText="Mínima R$" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                <TextField fx:id="txtRendaMaxima" prefHeight="35.0" prefWidth="95.0" promptText="Máxima R$" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="1">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Benefício Social" />
+                            <ComboBox fx:id="comboBeneficioSocial" prefHeight="35.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Todas as situações" />
+                                        <String fx:value="Com benefício" />
+                                        <String fx:value="Sem benefício" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </VBox>
+
+            <!-- Botões de ação -->
+            <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 10 10 0 10;">
+                <Button fx:id="btnLimparCampos" mnemonicParsing="false" onAction="#limparCampos" style="-fx-background-color: #b02e50; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120; -fx-pref-height: 35;" text="Limpar Campos" />
+                <Button fx:id="btnGerarPDF" mnemonicParsing="false" onAction="#gerarPDF" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120; -fx-pref-height: 35;" text="Gerar PDF" />
             </HBox>
         </VBox>
-    </HBox>
+    </ScrollPane>
 </VBox>

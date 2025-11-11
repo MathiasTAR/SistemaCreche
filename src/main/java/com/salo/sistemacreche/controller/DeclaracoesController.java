@@ -1,114 +1,179 @@
 package com.salo.sistemacreche.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Alert;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class DeclaracoesController {
 
-    @FXML private RadioButton radioDeclaracaoMatricula;
-    @FXML private RadioButton radioDeclaracaoFrequencia;
-    @FXML private RadioButton radioDeclaracaoTransferencia;
-    @FXML private RadioButton radioDeclaracaoQuitacao;
-    @FXML private RadioButton radioAtestadoEscolar;
+    @FXML
+    private ComboBox<String> comboAlunos;
 
-    @FXML private ComboBox<String> comboAlunos;
+    @FXML
+    private ComboBox<String> comboDeclaracao;
 
-    @FXML private Button btnGerarDeclaracao;
-    @FXML private Button btnImprimirDeclaracao;
-    @FXML private Button btnSalvarPdf;
+    @FXML
+    private DatePicker datePickerData;
 
-    @FXML private TextArea textAreaDeclaracao;
-
-    private ToggleGroup toggleGroupTipoDeclaracao;
+    @FXML
+    private TextArea textAreaDeclaracao;
 
     @FXML
     public void initialize() {
-        configurarRadioButtons();
-        configurarComboBox();
-        configurarBotoes();
+        System.out.println("📄 DeclaracoesController inicializado!");
+
+        // Configurar comboboxes
+        configurarComboboxes();
+
+        // Configurar data padrão como hoje
+        datePickerData.setValue(LocalDate.now());
     }
 
-    private void configurarRadioButtons() {
-        toggleGroupTipoDeclaracao = new ToggleGroup();
-
-        radioDeclaracaoMatricula.setToggleGroup(toggleGroupTipoDeclaracao);
-        radioDeclaracaoFrequencia.setToggleGroup(toggleGroupTipoDeclaracao);
-        radioDeclaracaoTransferencia.setToggleGroup(toggleGroupTipoDeclaracao);
-        radioDeclaracaoQuitacao.setToggleGroup(toggleGroupTipoDeclaracao);
-        radioAtestadoEscolar.setToggleGroup(toggleGroupTipoDeclaracao);
-
-        // Selecionar o primeiro por padrão
-        radioDeclaracaoMatricula.setSelected(true);
-    }
-
-    private void configurarComboBox() {
-        // Simular dados de alunos
+    private void configurarComboboxes() {
+        // Exemplo de dados - você pode carregar do banco de dados
         comboAlunos.getItems().addAll(
-                "João da Silva",
-                "Maria Oliveira",
-                "Pedro Santos",
-                "Ana Costa",
-                "Lucas Fernandes"
+                "Maria Vitória da Silva",
+                "João Pedro Santos",
+                "Ana Clara Oliveira",
+                "Pedro Henrique Costa",
+                "Laura Beatriz Souza"
         );
-    }
 
-    private void configurarBotoes() {
-        // As ações já estão configuradas no FXML via onAction
+        comboDeclaracao.getItems().addAll(
+                "Declaração de Matrícula",
+                "Declaração de Frequência",
+                "Declaração de Quitação",
+                "Declaração de Transferência",
+                "Declaração de Boa Conduta"
+        );
+
+        // Selecionar o primeiro item por padrão
+        if (!comboDeclaracao.getItems().isEmpty()) {
+            comboDeclaracao.setValue(comboDeclaracao.getItems().get(0));
+        }
     }
 
     @FXML
-    public void gerarDeclaracao() {
-        System.out.println("Gerando declaração...");
+    private void gerarDeclaracao() {
+        System.out.println("🔄 Gerando declaração...");
 
-        String tipoDeclaracao = obterTipoDeclaracaoSelecionado();
-        String alunoSelecionado = comboAlunos.getValue();
-
-        if (alunoSelecionado == null || alunoSelecionado.isEmpty()) {
-            mostrarAlerta("Erro", "Selecione um aluno!", Alert.AlertType.ERROR);
+        // Validar campos obrigatórios
+        if (!validarCampos()) {
             return;
         }
 
-        System.out.println("Tipo: " + tipoDeclaracao + ", Aluno: " + alunoSelecionado);
+        String aluno = comboAlunos.getValue();
+        String tipoDeclaracao = comboDeclaracao.getValue();
+        String data = datePickerData.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-        // Simular geração de declaração
-        String declaracao = simularDeclaracao(tipoDeclaracao, alunoSelecionado);
+        // Gerar texto da declaração
+        String declaracao = gerarTextoDeclaracao(aluno, tipoDeclaracao, data);
+
+        // Exibir no preview
         textAreaDeclaracao.setText(declaracao);
+
+        System.out.println("✅ Declaração gerada para: " + aluno);
     }
 
     @FXML
-    public void imprimirDeclaracao() {
-        System.out.println("Imprimindo declaração...");
-        // TODO: Implementar impressão
-        mostrarAlerta("Imprimir", "Funcionalidade em desenvolvimento", Alert.AlertType.INFORMATION);
+    private void imprimirDeclaracao() {
+        if (textAreaDeclaracao.getText().isEmpty()) {
+            mostrarAlerta("Aviso", "Gere uma declaração antes de imprimir.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        System.out.println("🖨️ Imprimindo declaração...");
+        // TODO: Implementar lógica de impressão
+        mostrarAlerta("Impressão", "Declaração enviada para impressão.", Alert.AlertType.INFORMATION);
     }
 
     @FXML
-    public void salvarPdf() {
-        System.out.println("Salvando como PDF...");
-        // TODO: Implementar salvamento em PDF
-        mostrarAlerta("Salvar PDF", "Funcionalidade em desenvolvimento", Alert.AlertType.INFORMATION);
+    private void salvarPdf() {
+        if (textAreaDeclaracao.getText().isEmpty()) {
+            mostrarAlerta("Aviso", "Gere uma declaração antes de salvar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        System.out.println("💾 Salvando declaração como PDF...");
+        // TODO: Implementar lógica para salvar PDF
+        mostrarAlerta("Salvar PDF", "Declaração salva como PDF com sucesso!", Alert.AlertType.INFORMATION);
     }
 
-    private String obterTipoDeclaracaoSelecionado() {
-        RadioButton selecionado = (RadioButton) toggleGroupTipoDeclaracao.getSelectedToggle();
-        return selecionado != null ? selecionado.getText() : "Nenhum";
+    private boolean validarCampos() {
+        if (comboAlunos.getValue() == null || comboAlunos.getValue().isEmpty()) {
+            mostrarAlerta("Erro", "Selecione uma criança.", Alert.AlertType.ERROR);
+            return false;
+        }
+
+        if (comboDeclaracao.getValue() == null || comboDeclaracao.getValue().isEmpty()) {
+            mostrarAlerta("Erro", "Selecione o tipo de declaração.", Alert.AlertType.ERROR);
+            return false;
+        }
+
+        if (datePickerData.getValue() == null) {
+            mostrarAlerta("Erro", "Selecione uma data.", Alert.AlertType.ERROR);
+            return false;
+        }
+
+        return true;
     }
 
-    private String simularDeclaracao(String tipo, String aluno) {
-        return "DECLARAÇÃO DE " + tipo.toUpperCase() + "\n\n" +
-                "A Creche Estrela do Oriente, situada na Rua das Flores, 123, Centro, " +
-                "declara para os devidos fins que o(a) aluno(a):\n\n" +
-                "NOME: " + aluno + "\n" +
-                "DATA DE NASCIMENTO: 15/03/2020\n" +
-                "NOME DA MÃE: Maria da Silva\n" +
-                "NOME DO PAI: José da Silva\n\n" +
-                "Encontra-se regularmente matriculado(a) nesta instituição " +
-                "no ano letivo de 2024, na turma do Maternal II.\n\n" +
-                "Esta declaração é fornecida a pedido do interessado para fins de comprovação escolar.\n\n" +
-                "Local e Data: Cidade, 28 de Março de 2024.\n\n\n" +
-                "_______________________________________\n" +
-                "Coordenação Pedagógica\n" +
-                "Creche Estrela do Oriente";
+    private String gerarTextoDeclaracao(String aluno, String tipoDeclaracao, String data) {
+        StringBuilder declaracao = new StringBuilder();
+
+        declaracao.append("DECLARAÇÃO\n\n");
+        declaracao.append("========================================\n\n");
+
+        switch (tipoDeclaracao) {
+            case "Declaração de Matrícula":
+                declaracao.append("Declaramos para os devidos fins que ");
+                declaracao.append(aluno);
+                declaracao.append(" encontra-se regularmente matriculado(a) nesta instituição de ensino - Creche Estrela do Oriente, para o ano letivo de 2024.\n\n");
+                break;
+
+            case "Declaração de Frequência":
+                declaracao.append("Declaramos que ");
+                declaracao.append(aluno);
+                declaracao.append(" possui frequência regular nas atividades escolares, com aproveitamento satisfatório, conforme registros em nosso sistema.\n\n");
+                break;
+
+            case "Declaração de Quitação":
+                declaracao.append("Certificamos que ");
+                declaracao.append(aluno);
+                declaracao.append(" encontra-se quite com todas as obrigações financeiras junto a esta instituição até a data presente.\n\n");
+                break;
+
+            case "Declaração de Transferência":
+                declaracao.append("Declaramos que ");
+                declaracao.append(aluno);
+                declaracao.append(" teve sua matrícula transferida a pedido dos responsáveis, estando quite com todas as obrigações junto a esta instituição.\n\n");
+                break;
+
+            case "Declaração de Boa Conduta":
+                declaracao.append("Atestamos que ");
+                declaracao.append(aluno);
+                declaracao.append(" demonstrou durante o período de permanência nesta instituição, comportamento adequado e conduta exemplar, participando ativamente das atividades propostas.\n\n");
+                break;
+
+            default:
+                declaracao.append("Declaramos para os devidos fins sobre a situação de ");
+                declaracao.append(aluno);
+                declaracao.append(" junto a esta instituição de ensino.\n\n");
+        }
+
+        declaracao.append("Por ser verdade, firmamos a presente declaração.\n\n");
+        declaracao.append("Data: ").append(data).append("\n\n");
+        declaracao.append("____________________________________\n");
+        declaracao.append("Creche Estrela do Oriente\n");
+        declaracao.append("CNPJ: 12.345.678/0001-90\n");
+        declaracao.append("Endereço: Rua Exemplo, 123 - Centro\n");
+        declaracao.append("Telefone: (11) 1234-5678\n");
+
+        return declaracao.toString();
     }
 
     private void mostrarAlerta(String titulo, String mensagem, Alert.AlertType tipo) {

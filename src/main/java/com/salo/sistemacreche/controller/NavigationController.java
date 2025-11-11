@@ -5,11 +5,13 @@ import javafx.scene.control.Button;
 
 public class NavigationController {
 
+
     @FXML private Button btnListaMatriculas;
     @FXML private Button btnCadastrarMatricula;
     @FXML private Button btnRematricula;
     @FXML private Button btnRelatorios;
     @FXML private Button btnDeclaracoes;
+    @FXML private Button btnHome;
 
     private MainController mainController;
 
@@ -24,11 +26,18 @@ public class NavigationController {
     }
 
     private void configurarBotoesMenu() {
+        btnHome.setOnAction(e -> navegarParaHome());
         btnListaMatriculas.setOnAction(e -> navegarParaListaMatriculas());
         btnCadastrarMatricula.setOnAction(e -> navegarParaCadastroMatricula());
         btnRematricula.setOnAction(e -> navegarParaRematricula());
         btnRelatorios.setOnAction(e -> navegarParaRelatorios());
         btnDeclaracoes.setOnAction(e -> navegarParaDeclaracoes());
+    }
+
+    private void navegarParaHome() {
+        if (mainController != null) {
+            mainController.mostrarTelaHome();
+        }
     }
 
     private void navegarParaListaMatriculas() {
@@ -65,6 +74,7 @@ public class NavigationController {
     // Método para atualizar o estilo do botão ativo
     public void atualizarBotaoAtivo(Button botaoAtivo) {
         // Remove estilo ativo de todos os botões
+        btnHome.getStyleClass().remove("botao-ativo");
         btnListaMatriculas.getStyleClass().remove("botao-ativo");
         btnCadastrarMatricula.getStyleClass().remove("botao-ativo");
         btnRematricula.getStyleClass().remove("botao-ativo");
