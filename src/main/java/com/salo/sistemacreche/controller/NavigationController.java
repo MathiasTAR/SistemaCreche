@@ -26,6 +26,7 @@ public class NavigationController {
 
 
     @FXML private Button btnListaMatriculas;
+    @FXML private Button btnListaPreMatriculas;
     @FXML private Button btnCadastrarMatricula;
     @FXML private Button btnRematricula;
     @FXML private Button btnRelatorios;
@@ -48,6 +49,7 @@ public class NavigationController {
     private void configurarBotoesMenu() {
         btnHome.setOnAction(e -> navegarParaHome());
         btnListaMatriculas.setOnAction(e -> navegarParaListaMatriculas());
+        btnListaPreMatriculas.setOnAction(e -> navegarParaListaPreMatriculas());
         btnCadastrarMatricula.setOnAction(e -> navegarParaCadastroMatricula());
         btnRematricula.setOnAction(e -> navegarParaRematricula());
         btnRelatorios.setOnAction(e -> navegarParaRelatorios());
@@ -65,6 +67,13 @@ public class NavigationController {
         if (mainController != null) {
             mainController.mostrarTelaListaMatriculas();
             atualizarBotaoAtivo(btnListaMatriculas);
+        }
+    }
+
+    private void navegarParaListaPreMatriculas() {
+        if (mainController != null) {
+            mainController.mostrarTelaListaPreMatriculas();
+            atualizarBotaoAtivo(btnListaPreMatriculas);
         }
     }
 
@@ -104,6 +113,7 @@ public class NavigationController {
         btnRematricula.setStyle(EstiloNormal);
         btnRelatorios.setStyle(EstiloNormal);
         btnDeclaracoes.setStyle(EstiloNormal);
+        btnListaPreMatriculas.setStyle(EstiloNormal);
 
         btnHome.setStyle(EstiloAtivo);
     }
@@ -115,6 +125,7 @@ public class NavigationController {
         btnRematricula.setStyle(EstiloNormal);
         btnRelatorios.setStyle(EstiloNormal);
         btnDeclaracoes.setStyle(EstiloNormal);
+        btnListaPreMatriculas.setStyle(EstiloNormal);
 
         // Adiciona estilo ativo ao botão clicado
         botaoAtivo.setStyle(EstiloAtivo);

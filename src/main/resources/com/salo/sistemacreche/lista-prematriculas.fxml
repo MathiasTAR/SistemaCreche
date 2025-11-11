@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.salo.sistemacreche.controller.ListaMatriculasController">
+<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.salo.sistemacreche.controller.ListaPreMatriculasController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -12,13 +12,13 @@
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <!-- Campo de pesquisa por texto livre -->
-        <TextField fx:id="fieldPesquisarMatricula" prefHeight="35.0" prefWidth="414.0" promptText="Nome da criança" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+        <TextField fx:id="fieldPesquisarPreMatricula" prefHeight="35.0" prefWidth="414.0" promptText="Nome da criança" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
 
         <!-- Filtro por situação -->
         <ComboBox fx:id="comboSituacao" prefHeight="35.0" prefWidth="150.0" promptText="Situação" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
 
         <!-- Botão de busca -->
-        <Button mnemonicParsing="false" onAction="#buscarMatriculas" prefHeight="35.0" prefWidth="96.0" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5;" text="Buscar" />
+        <Button mnemonicParsing="false" onAction="#buscarPreMatriculas" prefHeight="35.0" prefWidth="96.0" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5;" text="Buscar" />
 
         <!-- Botão limpar filtros -->
         <Button mnemonicParsing="false" onAction="#limparFiltros" prefHeight="35.0" prefWidth="61.0" style="-fx-background-color: #b02e50; -fx-text-fill: white; -fx-background-radius: 5;" text="Limpar" />

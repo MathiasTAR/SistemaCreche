@@ -17,6 +17,7 @@ public class MainController {
 
     private Parent telaHome;
     private Parent telaListaMatriculas;
+    private Parent telaListaPreMatriculas;
     private Parent telaCadastroMatricula;
     private Parent telaRematricula;
     private Parent telaRelatorios;
@@ -49,6 +50,12 @@ public class MainController {
                     getClass().getResource("/com/salo/sistemacreche/lista-matriculas.fxml")
             );
             telaListaMatriculas = loaderLista.load();
+
+            // Carregar tela de lista de prematrículas
+            FXMLLoader loaderListaPre = new FXMLLoader(
+                    getClass().getResource("/com/salo/sistemacreche/lista-prematriculas.fxml")
+            );
+            telaListaPreMatriculas = loaderListaPre.load();
 
             // Carregar tela de cadastro de matrícula
             FXMLLoader loaderCadastro = new FXMLLoader(
@@ -91,6 +98,12 @@ public class MainController {
     // Métodos públicos para navegação
     public void mostrarTelaListaMatriculas() {
         contentArea.getChildren().setAll(telaListaMatriculas);
+        System.out.println("📋 Mostrando lista de matrículas");
+    }
+
+    // Métodos públicos para navegação
+    public void mostrarTelaListaPreMatriculas() {
+        contentArea.getChildren().setAll(telaListaPreMatriculas);
         System.out.println("📋 Mostrando lista de matrículas");
     }
 
