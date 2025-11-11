@@ -68,6 +68,7 @@ public class NavigationController {
     private void navegarParaDeclaracoes() {
         if (mainController != null) {
             mainController.mostrarTelaDeclaracoes();
+
         }
     }
 

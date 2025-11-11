@@ -8,40 +8,52 @@ import com.salo.sistemacreche.entidades.Matricula.SituacaoMatricula;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import java.time.LocalDate;
-import java.time.ZoneId;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ListaMatriculasController {
 
-    @FXML private Label welcomeText;
     @FXML private TextField fieldPesquisarMatricula;
     @FXML private ComboBox<String> comboSituacao;
-    @FXML private DatePicker datePickerInicio;
-    @FXML private DatePicker datePickerFim;
+    @FXML private Button buscarButton;
+    @FXML private Button limparButton;
+    @FXML private ScrollPane scrollPane;
     @FXML private VBox cardsContainer;
+    @FXML private HBox filtrosHBox;
 
     @FXML
     public void initialize() {
         configurarComboBox();
         carregarMatriculas();
+        configurarListeners();
     }
 
     private void configurarComboBox() {
-        // CORREÇÃO: Use os valores exatos que correspondem ao Enum
         comboSituacao.getItems().addAll("Todas", "Matriculado", "Concluída", "Cancelada");
         comboSituacao.setValue("Todas");
+    }
+
+    private void configurarListeners() {
+        // Buscar automaticamente ao pressionar Enter no campo de pesquisa
+        fieldPesquisarMatricula.setOnAction(event -> buscarMatriculas());
+
+        // Buscar automaticamente ao alterar a situação
+        comboSituacao.setOnAction(event -> buscarMatriculas());
     }
 
     private SituacaoMatricula converterStringParaSituacaoEnum(String situacao) {
         switch(situacao) {
             case "Concluída": return SituacaoMatricula.CONCLUIDA;
             case "Cancelada": return SituacaoMatricula.CANCELADA;
-            default: return SituacaoMatricula.ATIVA;
+            case "Matriculado": return SituacaoMatricula.ATIVA;
+            default: return null; // Para "Todas"
         }
     }
 
@@ -54,8 +66,6 @@ public class ListaMatriculasController {
     public void limparFiltros() {
         fieldPesquisarMatricula.clear();
         comboSituacao.setValue("Todas");
-        datePickerInicio.setValue(null);
-        datePickerFim.setValue(null);
         carregarMatriculas();
     }
 
@@ -69,12 +79,14 @@ public class ListaMatriculasController {
             em = DBConnection.getEntityManager();
 
             if (em == null) {
-                welcomeText.setText("❌ Erro de conexão com o banco");
+                System.err.println("❌ Erro de conexão com o banco");
+                mostrarMensagemErro("Erro de conexão com o banco de dados");
                 return;
             }
 
             if (!em.isOpen()) {
-                welcomeText.setText("❌ EntityManager está fechado");
+                System.err.println("❌ EntityManager está fechado");
+                mostrarMensagemErro("Conexão com o banco de dados está fechada");
                 return;
             }
 
@@ -91,7 +103,7 @@ public class ListaMatriculasController {
             List<Object> parametros = new ArrayList<>();
             int paramIndex = 1;
 
-            // FILTRO 1: Pesquisa por texto
+            // FILTRO 1: Pesquisa por texto (nome da criança)
             String termoPesquisa = fieldPesquisarMatricula.getText();
             if (termoPesquisa != null && !termoPesquisa.trim().isEmpty()) {
                 jpql.append(" AND (LOWER(c.nome) LIKE ?").append(paramIndex);
@@ -102,33 +114,18 @@ public class ListaMatriculasController {
                 paramIndex++;
             }
 
-            // FILTRO 2: Situação da matrícula - CORRIGIDO
+            // FILTRO 2: Situação da matrícula
             String situacaoSelecionada = comboSituacao.getValue();
             if (situacaoSelecionada != null && !situacaoSelecionada.equals("Todas")) {
                 SituacaoMatricula situacaoEnum = converterStringParaSituacaoEnum(situacaoSelecionada);
-                jpql.append(" AND m.situacaoMatricula = ?").append(paramIndex);
-                parametros.add(situacaoEnum);
-                paramIndex++;
+                if (situacaoEnum != null) {
+                    jpql.append(" AND m.situacaoMatricula = ?").append(paramIndex);
+                    parametros.add(situacaoEnum);
+                    paramIndex++;
+                }
             }
 
-            // FILTRO 3: Data de início
-            if (datePickerInicio.getValue() != null) {
-                Date dataInicio = Date.from(datePickerInicio.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                jpql.append(" AND m.dataMatricula >= ?").append(paramIndex);
-                parametros.add(dataInicio);
-                paramIndex++;
-            }
-
-            // FILTRO 4: Data de fim
-            if (datePickerFim.getValue() != null) {
-                LocalDate dataFimLocal = datePickerFim.getValue().plusDays(1);
-                Date dataFim = Date.from(dataFimLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                jpql.append(" AND m.dataMatricula < ?").append(paramIndex);
-                parametros.add(dataFim);
-                paramIndex++;
-            }
-
-            // Ordenação
+            // Ordenação por data mais recente primeiro
             jpql.append(" ORDER BY m.dataMatricula DESC");
 
             System.out.println("📝 JPQL: " + jpql.toString());
@@ -139,7 +136,7 @@ public class ListaMatriculasController {
             // Aplicar parâmetros
             for (int i = 0; i < parametros.size(); i++) {
                 query.setParameter(i + 1, parametros.get(i));
-                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i) + " (Tipo: " + parametros.get(i).getClass().getSimpleName() + ")");
+                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i));
             }
 
             List<Matricula> matriculas = query.getResultList();
@@ -149,12 +146,16 @@ public class ListaMatriculasController {
 
         } catch (Exception e) {
             String errorMsg = "💥 Erro ao buscar matrículas: " + e.getMessage();
-            welcomeText.setText(errorMsg);
             System.err.println(errorMsg);
             e.printStackTrace();
+            mostrarMensagemErro("Erro ao buscar matrículas: " + e.getMessage());
 
             if (e.getCause() != null) {
                 System.err.println("Causa: " + e.getCause().getMessage());
+            }
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
             }
         }
     }
@@ -163,12 +164,9 @@ public class ListaMatriculasController {
         cardsContainer.getChildren().clear();
 
         if (matriculas.isEmpty()) {
-            welcomeText.setText("Nenhuma matrícula encontrada com os filtros aplicados");
             EmptyCard cardVazio = new EmptyCard("Nenhuma matrícula encontrada");
             cardsContainer.getChildren().add(cardVazio);
         } else {
-            welcomeText.setText("✅ " + matriculas.size() + " matrícula(s) encontrada(s)");
-
             for (Matricula matricula : matriculas) {
                 MatriculaCard card = new MatriculaCard(matricula);
                 card.setOnEditAction(() -> editarMatricula(matricula));
@@ -177,9 +175,21 @@ public class ListaMatriculasController {
         }
     }
 
+    private void mostrarMensagemErro(String mensagem) {
+        cardsContainer.getChildren().clear();
+        EmptyCard cardErro = new EmptyCard(mensagem);
+        cardsContainer.getChildren().add(cardErro);
+    }
+
     private void editarMatricula(Matricula matricula) {
         System.out.println("📝 Editando matrícula: " + matricula.getId());
-        welcomeText.setText("Editando matrícula: " +
-                (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : matricula.getId()));
+        // Aqui você pode implementar a lógica para abrir a tela de edição
+        // Por exemplo:
+        // MainApplication.abrirTelaEdicaoMatricula(matricula);
+
+        // Mensagem temporária
+        String nomeCrianca = matricula.getCrianca() != null ?
+                matricula.getCrianca().getNome() : "Matrícula " + matricula.getId();
+        System.out.println("Editando matrícula: " + nomeCrianca);
     }
 }
