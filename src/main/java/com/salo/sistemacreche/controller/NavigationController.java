@@ -5,6 +5,25 @@ import javafx.scene.control.Button;
 
 public class NavigationController {
 
+    // Constantes de estilo
+    private static final String EstiloNormal =
+            "-fx-background-color: transparent; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-background-radius: 5px; " +
+                    "-fx-border-radius: 5px; " +
+                    "-fx-cursor: hand;" +
+                    "-fx-alignment: start;";
+
+    private static final String EstiloAtivo =
+            "-fx-background-color: #0f766e; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-border-color: #0c5a55; " +
+                    "-fx-border-width: 2px; " +
+                    "-fx-background-radius: 5px; " +
+                    "-fx-border-radius: 5px; " +
+                    "-fx-cursor: hand;" +
+                    "-fx-alignment: start;";
+
 
     @FXML private Button btnListaMatriculas;
     @FXML private Button btnCadastrarMatricula;
@@ -23,6 +42,7 @@ public class NavigationController {
     @FXML
     public void initialize() {
         configurarBotoesMenu();
+        aplicarEstiloInicial();
     }
 
     private void configurarBotoesMenu() {
@@ -37,52 +57,67 @@ public class NavigationController {
     private void navegarParaHome() {
         if (mainController != null) {
             mainController.mostrarTelaHome();
+            atualizarBotaoAtivo(btnHome);
         }
     }
 
     private void navegarParaListaMatriculas() {
         if (mainController != null) {
             mainController.mostrarTelaListaMatriculas();
+            atualizarBotaoAtivo(btnListaMatriculas);
         }
     }
 
     private void navegarParaCadastroMatricula() {
         if (mainController != null) {
             mainController.mostrarTelaCadastroMatricula();
-            System.out.println("cadastrar matricula");
+            atualizarBotaoAtivo(btnCadastrarMatricula);
         }
     }
 
     private void navegarParaRematricula() {
         if (mainController != null) {
             mainController.mostrarTelaRematricula();
+            atualizarBotaoAtivo(btnRematricula);
         }
     }
 
     private void navegarParaRelatorios() {
         if (mainController != null) {
             mainController.mostrarTelaRelatorios();
+            atualizarBotaoAtivo(btnRelatorios);
         }
     }
 
     private void navegarParaDeclaracoes() {
         if (mainController != null) {
             mainController.mostrarTelaDeclaracoes();
-
+            atualizarBotaoAtivo(btnDeclaracoes);
         }
     }
 
-    // Método para atualizar o estilo do botão ativo
+    private void aplicarEstiloInicial() {
+        // Aplica estilo normal a todos os botões inicialmente
+        btnHome.setStyle(EstiloNormal);
+        btnListaMatriculas.setStyle(EstiloNormal);
+        btnCadastrarMatricula.setStyle(EstiloNormal);
+        btnRematricula.setStyle(EstiloNormal);
+        btnRelatorios.setStyle(EstiloNormal);
+        btnDeclaracoes.setStyle(EstiloNormal);
+
+        btnHome.setStyle(EstiloAtivo);
+    }
+
     public void atualizarBotaoAtivo(Button botaoAtivo) {
-        // Remove estilo ativo de todos os botões
-        btnHome.getStyleClass().remove("botao-ativo");
-        btnListaMatriculas.getStyleClass().remove("botao-ativo");
-        btnCadastrarMatricula.getStyleClass().remove("botao-ativo");
-        btnRematricula.getStyleClass().remove("botao-ativo");
-        btnRelatorios.getStyleClass().remove("botao-ativo");
-        btnDeclaracoes.getStyleClass().remove("botao-ativo");
+        btnHome.setStyle(EstiloNormal);
+        btnListaMatriculas.setStyle(EstiloNormal);
+        btnCadastrarMatricula.setStyle(EstiloNormal);
+        btnRematricula.setStyle(EstiloNormal);
+        btnRelatorios.setStyle(EstiloNormal);
+        btnDeclaracoes.setStyle(EstiloNormal);
 
         // Adiciona estilo ativo ao botão clicado
-        botaoAtivo.getStyleClass().add("botao-ativo");
+        botaoAtivo.setStyle(EstiloAtivo);
     }
 }
+
