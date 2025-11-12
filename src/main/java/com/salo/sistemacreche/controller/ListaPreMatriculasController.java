@@ -22,11 +22,7 @@ public class ListaPreMatriculasController {
 
     @FXML private TextField fieldPesquisarPreMatricula;
     @FXML private ComboBox<String> comboSituacao;
-    @FXML private Button buscarButton;
-    @FXML private Button limparButton;
-    @FXML private ScrollPane scrollPane;
     @FXML private VBox cardsContainer;
-    @FXML private HBox filtrosHBox;
 
     @FXML
     public void initialize() {
@@ -172,7 +168,6 @@ public class ListaPreMatriculasController {
             for (PreMatricula preMatricula : preMatriculas) {
                 // Usar PreMatriculaCard específico para pré-matrículas
                 PreMatriculaCard card = new PreMatriculaCard(preMatricula);
-                card.setOnEditAction(() -> editarPreMatricula(preMatricula));
                 card.setOnAprovarAction(() -> aprovarPreMatricula(preMatricula));
                 card.setOnReprovarAction(() -> reprovarPreMatricula(preMatricula));
                 card.setOnCancelarAction(() -> cancelarPreMatricula(preMatricula));

@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefWidth="220.0" spacing="8.0" style="-fx-background-color: #115e59; -fx-padding: 10 10 20 10;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml" fx:controller="com.salo.sistemacreche.controller.NavigationController">
+<VBox prefWidth="220.0" spacing="8.0" style="-fx-background-color: #115e59; -fx-padding: 10 10 20 10;" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml" fx:controller="com.salo.sistemacreche.controller.NavigationController">
     <HBox alignment="CENTER" prefHeight="64.0" prefWidth="199.0">
         <children>
             <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">

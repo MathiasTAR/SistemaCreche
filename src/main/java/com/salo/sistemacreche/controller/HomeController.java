@@ -1,107 +1,115 @@
 package com.salo.sistemacreche.controller;
 
+import com.salo.sistemacreche.components.EmptyCard;
+import com.salo.sistemacreche.components.MatriculaCard;
+import com.salo.sistemacreche.components.PreMatriculaCard;
+import com.salo.sistemacreche.dao.DBConnection;
+import com.salo.sistemacreche.entidades.Matricula;
+import com.salo.sistemacreche.entidades.PreMatricula;
+import jakarta.persistence.EntityManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
+import java.util.List;
 
 public class HomeController {
 
-    @FXML
-    private Label labelPreMatriculas;
+    @FXML private Label labelPreMatriculas;
+    @FXML private Label labelMatriculas;
 
-    @FXML
-    private Label labelMatriculasAtivas;
-
-    @FXML
-    private Label labelRelatoriosFeitos;
+    @FXML private VBox cardsContainerMatriculas;
+    @FXML private VBox cardsContainerPreMatriculas;
 
     @FXML
     public void initialize() {
-        System.out.println("🏠 HomeController inicializado!");
-
-        // Você pode inicializar dados aqui se necessário
-        // Por exemplo, carregar dados do banco de dados
-        inicializarDados();
+        carregarIndicadores();
+        carregarListasRecentes();
     }
 
-    private void inicializarDados() {
-        // Aqui você pode carregar dados reais do banco de dados
-        // Por enquanto, vamos usar os valores fixos do FXML
+    // === 📊 INDICADORES ===
+    private void carregarIndicadores() {
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
 
-        System.out.println("📊 Inicializando dados da home...");
+            Long totalPreMatriculas = em.createQuery(
+                    "SELECT COUNT(p) FROM PreMatricula p", Long.class
+            ).getSingleResult();
 
-        // Exemplo: se você quiser atualizar os valores dinamicamente
-        // labelPreMatriculas.setText("75");
-        // labelMatriculasAtivas.setText("135");
-        // labelRelatoriosFeitos.setText("42");
-    }
+            Long totalMatriculas = em.createQuery(
+                    "SELECT COUNT(m) FROM Matricula m", Long.class
+            ).getSingleResult();
 
-    // Métodos para os botões "Editar" das pré-matrículas
-    @FXML
-    private void editarPreMatricula1() {
-        System.out.println("✏️ Editando pré-matrícula: Maria Vitória da Silva");
-        // TODO: Implementar lógica para editar pré-matrícula
-    }
+            labelPreMatriculas.setText(String.valueOf(totalPreMatriculas));
+            labelMatriculas.setText(String.valueOf(totalMatriculas));
 
-    @FXML
-    private void editarPreMatricula2() {
-        System.out.println("✏️ Editando pré-matrícula: Jorge Augusto Barros");
-        // TODO: Implementar lógica para editar pré-matrícula
-    }
-
-    @FXML
-    private void editarPreMatricula3() {
-        System.out.println("✏️ Editando pré-matrícula: Evesson Ribeiro da Cunha");
-        // TODO: Implementar lógica para editar pré-matrícula
-    }
-
-    // Métodos para os botões "Editar" das matrículas
-    @FXML
-    private void editarMatricula1() {
-        System.out.println("✏️ Editando matrícula: Edimilson Soares Costa");
-        // TODO: Implementar lógica para editar matrícula
-    }
-
-    @FXML
-    private void editarMatricula2() {
-        System.out.println("✏️ Editando matrícula: Edson Costa da Silva");
-        // TODO: Implementar lógica para editar matrícula
-    }
-
-    @FXML
-    private void editarMatricula3() {
-        System.out.println("✏️ Editando matrícula: Anne Gabriele Alves");
-        // TODO: Implementar lógica para editar matrícula
-    }
-
-    // Métodos para os botões do relatório
-    @FXML
-    private void verRelatorio() {
-        System.out.println("👁️ Visualizando relatório: Crianças com Deficiência Auditiva");
-        // TODO: Implementar visualização do relatório
-    }
-
-    @FXML
-    private void imprimirRelatorio() {
-        System.out.println("🖨️ Imprimindo relatório: Crianças com Deficiência Auditiva");
-        // TODO: Implementar impressão do relatório
-    }
-
-    // Método para atualizar os dados da home (pode ser chamado externamente)
-    public void atualizarDados(int preMatriculas, int matriculasAtivas, int relatoriosFeitos) {
-        if (labelPreMatriculas != null) {
-            labelPreMatriculas.setText(String.valueOf(preMatriculas));
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar indicadores: " + e.getMessage());
+        } finally {
+            if (em != null && em.isOpen()) em.close();
         }
-        if (labelMatriculasAtivas != null) {
-            labelMatriculasAtivas.setText(String.valueOf(matriculasAtivas));
-        }
-        if (labelRelatoriosFeitos != null) {
-            labelRelatoriosFeitos.setText(String.valueOf(relatoriosFeitos));
-        }
+    }
 
-        System.out.println("🔄 Dados da home atualizados: " +
-                "Pré-matrículas=" + preMatriculas +
-                ", Matrículas Ativas=" + matriculasAtivas +
-                ", Relatórios=" + relatoriosFeitos);
+    // === 🧾 LISTAS RECENTES ===
+    private void carregarListasRecentes() {
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
+
+            // Últimas 5 pré-matrículas
+            List<PreMatricula> ultimasPreMatriculas = em.createQuery(
+                    "SELECT p FROM PreMatricula p ORDER BY p.id DESC", PreMatricula.class
+            ).setMaxResults(5).getResultList();
+
+            // Últimas 5 matrículas
+            List<Matricula> ultimasMatriculas = em.createQuery(
+                    "SELECT m FROM Matricula m ORDER BY m.id DESC", Matricula.class
+            ).setMaxResults(5).getResultList();
+
+            atualizarCardsMatriculas(ultimasMatriculas);
+            atualizarCardsPreMatriculas(ultimasPreMatriculas);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar listas recentes: " + e.getMessage());
+        } finally {
+            if (em != null && em.isOpen()) em.close();
+        }
+    }
+
+    // === Atualiza a matrículas ===
+    private void atualizarCardsMatriculas(List<Matricula> matriculas) {
+        cardsContainerMatriculas.getChildren().clear();
+
+        if (matriculas.isEmpty()) {
+            EmptyCard vazio = new EmptyCard("Nenhuma matrícula recente");
+            cardsContainerMatriculas.getChildren().add(vazio);
+        } else {
+            for (Matricula m : matriculas) {
+                MatriculaCard card = new MatriculaCard(m);
+                card.setOnEditAction(() -> editarMatricula(m));
+                cardsContainerMatriculas.getChildren().add(card);
+            }
+        }
+    }
+
+    // === Atualiza a pré-matrículas ===
+    private void atualizarCardsPreMatriculas(List<PreMatricula> preMatriculas) {
+        cardsContainerPreMatriculas.getChildren().clear();
+
+        if (preMatriculas.isEmpty()) {
+            EmptyCard vazio = new EmptyCard("Nenhuma pré-matrícula recente");
+            cardsContainerPreMatriculas.getChildren().add(vazio);
+        } else {
+            for (PreMatricula pm : preMatriculas) {
+                PreMatriculaCard card = new PreMatriculaCard(pm);
+                cardsContainerPreMatriculas.getChildren().add(card);
+            }
+        }
+    }
+
+    private void editarMatricula(Matricula matricula) {
+        System.out.println("📝 Editar clicado na matrícula: " + matricula.getId());
+        // Aqui você pode abrir a tela de edição
     }
 }
