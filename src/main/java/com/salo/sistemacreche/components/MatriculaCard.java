@@ -106,6 +106,8 @@ public class MatriculaCard extends VBox {
                 return "Concluído";
             case "CANCELADA":
                 return "Cancelado";
+            case "VENCIDA":
+                return "Vencida";
             default:
                 return situacao;
         }

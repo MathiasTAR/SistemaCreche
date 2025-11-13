@@ -32,7 +32,7 @@
         }
 
         private void configurarComboBox() {
-            comboSituacao.getItems().addAll("Todas", "Matriculado", "Concluída", "Cancelada");
+            comboSituacao.getItems().addAll("Todas", "Matriculado", "Concluída", "Cancelada", "Vencida");
             comboSituacao.setValue("Todas");
         }
 
@@ -48,6 +48,7 @@
             switch(situacao) {
                 case "Concluída": return SituacaoMatricula.CONCLUIDA;
                 case "Cancelada": return SituacaoMatricula.CANCELADA;
+                case "Vencida": return  SituacaoMatricula.VENCIDA;
                 case "Matriculado": return SituacaoMatricula.ATIVA;
                 default: return null; // Para "Todas"
             }

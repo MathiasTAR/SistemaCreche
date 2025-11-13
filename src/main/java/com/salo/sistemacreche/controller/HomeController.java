@@ -51,7 +51,7 @@ public class HomeController {
         }
     }
 
-    // === 🧾 LISTAS RECENTES ===
+    // === LISTAS RECENTES ===
     private void carregarListasRecentes() {
         EntityManager em = null;
         try {

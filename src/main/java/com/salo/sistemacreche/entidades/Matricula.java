@@ -41,9 +41,12 @@ public class Matricula {
     @Column(name = "SITUACAO_MAT")
     private SituacaoMatricula situacaoMatricula;
 
+    @Column(name= "DATA_VENCIMENTO", nullable = false)
+    private Date dataVencimento;
+
 
     public enum SituacaoMatricula {
-        ATIVA, CONCLUIDA, CANCELADA
+        ATIVA, CONCLUIDA, CANCELADA, VENCIDA
     }
 
     public Matricula() {
@@ -121,5 +124,13 @@ public class Matricula {
 
     public void setSituacaoMatricula(SituacaoMatricula situacaoMatricula) {
         this.situacaoMatricula = situacaoMatricula;
+    }
+
+    public Date getDataVencimento() {
+        return dataVencimento;
+    }
+
+    public void setDataVencimento(Date dataVencimento) {
+        this.dataVencimento = dataVencimento;
     }
 }
