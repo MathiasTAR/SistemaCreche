@@ -47,6 +47,7 @@
                         <RowConstraints />
                         <RowConstraints />
                         <RowConstraints maxHeight="56.0" minHeight="56.0" prefHeight="56.0" />
+                        <RowConstraints /> <!-- NOVA LINHA para combos do banco -->
                     </rowConstraints>
 
                     <children>
@@ -115,11 +116,27 @@
                             <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Educação especial?" />
                             <ComboBox fx:id="comboEducacaoEspecial" prefHeight="35.0" prefWidth="410.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
+
+                        <!-- LINHA 8 - COMBOS DO BANCO DE DADOS -->
+                        <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Classificação Especial" />
+                            <ComboBox fx:id="comboClassificacaoEspecial" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Tipo de Alergia" />
+                            <ComboBox fx:id="comboAlergias" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                        </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Tipo de Auxílio" />
+                            <ComboBox fx:id="comboTipoAuxilio" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                        </VBox>
                     </children>
                 </GridPane>
             </VBox>
 
-	<!-- Seção 2: Filiação/Responsáveis -->
+            <!-- Seção 2: Filiação/Responsáveis -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
                 <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="2. Filiação/Responsáveis">
                     <font>
@@ -128,81 +145,79 @@
                 </Label>
 
                 <!-- Mãe -->
-<VBox spacing="10">
-    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Mãe" />
-    
-    <!-- Barra de pesquisa -->
-    <HBox alignment="CENTER_LEFT" spacing="10">
-        <TextField fx:id="fieldPesquisaMae" promptText="Pesquisar mãe..." style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-pref-width: 300; -fx-pref-height: 35;" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 80;" text="Buscar" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120;" text="+ Adicionar Novo" />
-    </HBox>
-    
-    <!-- Lista de resultados -->
-    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
-        <VBox spacing="5" style="-fx-padding: 10;">
-            <!-- Item de exemplo -->
-            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
-                <VBox>
-                    <Label prefHeight="18.0" prefWidth="766.0" style="-fx-font-weight: bold;" text="Maria Silva Santos" />
-                    <Label style="-fx-text-fill: #666;" text="CPF: 123.456.789-00" />
+                <VBox spacing="10">
+                    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Mãe" />
+
+                    <!-- Barra de pesquisa -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <TextField fx:id="fieldPesquisaMae" promptText="Pesquisar mãe..." style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-pref-width: 300; -fx-pref-height: 35;" />
+                        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 80;" text="Buscar" />
+                        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120;" text="+ Adicionar Novo" />
+                    </HBox>
+
+                    <!-- Lista de resultados -->
+                    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
+                        <VBox spacing="5" style="-fx-padding: 10;">
+                            <!-- Item de exemplo -->
+                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                                <VBox>
+                                    <Label prefHeight="18.0" prefWidth="766.0" style="-fx-font-weight: bold;" text="Maria Silva Santos" />
+                                    <Label style="-fx-text-fill: #666;" text="CPF: 123.456.789-00" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </ScrollPane>
                 </VBox>
-            </HBox>
-        </VBox>
-    </ScrollPane>
-</VBox>
 
                 <!-- Pai -->
                 <VBox spacing="10">
-    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Pai" />
-    
-    <!-- Barra de pesquisa -->
-    <HBox alignment="CENTER_LEFT" spacing="10">
-        <TextField fx:id="fieldPesquisaPai" promptText="Pesquisar pai..." style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-pref-width: 300; -fx-pref-height: 35;" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 80;" text="Buscar" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120;" text="+ Adicionar Novo" />
-    </HBox>
-    
-    <!-- Lista de resultados -->
-    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
-        <VBox spacing="5" style="-fx-padding: 10;">
-            <!-- Item de exemplo -->
-            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
-                <VBox>
-                    <Label prefHeight="18.0" prefWidth="766.0" style="-fx-font-weight: bold;" text="Nilson Isaias Papinho" />
-                    <Label style="-fx-text-fill: #666;" text="CPF: 143.256.849-09" />
-                </VBox>
-            </HBox>
-        </VBox>
-    </ScrollPane>
-</VBox>
+                    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Pai" />
 
+                    <!-- Barra de pesquisa -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <TextField fx:id="fieldPesquisaPai" promptText="Pesquisar pai..." style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-pref-width: 300; -fx-pref-height: 35;" />
+                        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 80;" text="Buscar" />
+                        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120;" text="+ Adicionar Novo" />
+                    </HBox>
+
+                    <!-- Lista de resultados -->
+                    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
+                        <VBox spacing="5" style="-fx-padding: 10;">
+                            <!-- Item de exemplo -->
+                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                                <VBox>
+                                    <Label prefHeight="18.0" prefWidth="766.0" style="-fx-font-weight: bold;" text="Nilson Isaias Papinho" />
+                                    <Label style="-fx-text-fill: #666;" text="CPF: 143.256.849-09" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </ScrollPane>
+                </VBox>
 
                 <!-- Responsável -->
                 <VBox spacing="10">
-    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Responsável" />
-    
-    <!-- Barra de pesquisa -->
-    <HBox alignment="CENTER_LEFT" spacing="10">
-        <TextField fx:id="fieldPesquisaResponsavel" promptText="Pesquisar responsável..." style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-pref-width: 300; -fx-pref-height: 35;" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 80;" text="Buscar" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120;" text="+ Adicionar Novo" />
-    </HBox>
-    
-    <!-- Lista de resultados -->
-    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
-        <VBox spacing="5" style="-fx-padding: 10;">
-            <!-- Item de exemplo -->
-            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
-                <VBox>
-                    <Label prefHeight="18.0" prefWidth="766.0" style="-fx-font-weight: bold;" text="Jorge algusto ramos" />
-                    <Label style="-fx-text-fill: #666;" text="CPF: 121.834.949-30" />
-                </VBox>
-            </HBox>
-        </VBox>
-    </ScrollPane>
-</VBox>
+                    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Responsável" />
 
+                    <!-- Barra de pesquisa -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <TextField fx:id="fieldPesquisaResponsavel" promptText="Pesquisar responsável..." style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-pref-width: 300; -fx-pref-height: 35;" />
+                        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 80;" text="Buscar" />
+                        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120;" text="+ Adicionar Novo" />
+                    </HBox>
+
+                    <!-- Lista de resultados -->
+                    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
+                        <VBox spacing="5" style="-fx-padding: 10;">
+                            <!-- Item de exemplo -->
+                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                                <VBox>
+                                    <Label prefHeight="18.0" prefWidth="766.0" style="-fx-font-weight: bold;" text="Jorge algusto ramos" />
+                                    <Label style="-fx-text-fill: #666;" text="CPF: 121.834.949-30" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </ScrollPane>
+                </VBox>
             </VBox>
 
             <!-- Seção 3: Endereço da Criança -->
@@ -314,14 +329,13 @@
                             <TextField fx:id="fieldOrgaoEmissor" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
                     </children>
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
                 </GridPane>
             </VBox>
-
 
             <!-- Seção 5: Situação Habitacional e Sanitária -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
@@ -398,10 +412,10 @@
                         <CheckBox fx:id="checkCarro" text="Carro" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                         <CheckBox fx:id="checkMoto" text="Moto" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                     </children>
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
                 </GridPane>
             </VBox>
 
@@ -418,7 +432,7 @@
                         <Label style="-fx-text-fill: #0f766e;" text="Lista de moradores da casa:" />
                         <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5;" text="+ Adicionar Morador" />
                     </HBox>
-                    
+
                     <!-- Tabela de composição familiar -->
                     <TableView fx:id="tableComposicaoFamiliar" prefHeight="200">
                         <columns>
@@ -493,7 +507,7 @@
                         <Label style="-fx-text-fill: #0f766e;" text="Lista de pessoas autorizadas:" />
                         <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5;" text="+ Adicionar Pessoa" />
                     </HBox>
-                    
+
                     <!-- Tabela de pessoas autorizadas -->
                     <TableView fx:id="tablePessoasAutorizadas" prefHeight="150">
                         <columns>
@@ -523,39 +537,39 @@
             </VBox>
 
             <!-- Seção 10: Declaração -->
-<VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="10. Declaração">
-        <font>
-            <Font size="16.0" />
-        </font>
-    </Label>
-    
-    <VBox spacing="10">
-        <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Anexar Declaração de Matrícula" />
-        <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 150;" text="Importar Anexo" />
-    </VBox>
-</VBox>
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="10. Declaração">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
 
-<!-- Seção 11: Tem Irmão Gêmeo? -->
-<VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-    <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="11. Tem Irmão Gêmeo?">
-        <font>
-            <Font size="16.0" />
-        </font>
-    </Label>
-
-    <VBox spacing="10">
-        
-        <!-- Exemplo de item -->
-        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
-            <CheckBox fx:id="checkIrmaoGemeo" text="É gêmeo?" />
-            <VBox>
-                <Label style="-fx-font-weight: bold;" text="João Silva Santos" />
-                <Label style="-fx-text-fill: #666;" text="Irmão - 3 anos" />
+                <VBox spacing="10">
+                    <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Anexar Declaração de Matrícula" />
+                    <Button style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 150;" text="Importar Anexo" />
+                </VBox>
             </VBox>
-        </HBox>
-    </VBox>
-</VBox>
+
+            <!-- Seção 11: Tem Irmão Gêmeo? -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="11. Tem Irmão Gêmeo?">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
+
+                <VBox spacing="10">
+
+                    <!-- Exemplo de item -->
+                    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                        <CheckBox fx:id="checkIrmaoGemeo" text="É gêmeo?" />
+                        <VBox>
+                            <Label style="-fx-font-weight: bold;" text="João Silva Santos" />
+                            <Label style="-fx-text-fill: #666;" text="Irmão - 3 anos" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
 
             <!-- Botões de ação -->
             <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 10 10 0 10;">

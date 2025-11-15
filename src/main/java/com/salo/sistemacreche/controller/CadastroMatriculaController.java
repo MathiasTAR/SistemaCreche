@@ -1,7 +1,16 @@
 package com.salo.sistemacreche.controller;
 
+import com.salo.sistemacreche.dao.DBConnection;
+import com.salo.sistemacreche.entidades.Alergia;
+import com.salo.sistemacreche.entidades.ClassificacaoEspecial;
+import com.salo.sistemacreche.entidades.TipoAuxilio;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+
+import java.util.List;
 
 public class CadastroMatriculaController {
 
@@ -18,6 +27,11 @@ public class CadastroMatriculaController {
     @FXML private ComboBox<String> comboMobilidadeReduzida;
     @FXML private ComboBox<String> comboDeficienciasMultiplas;
     @FXML private ComboBox<String> comboEducacaoEspecial;
+
+    // Combos que virão do banco
+    @FXML private ComboBox<String> comboClassificacaoEspecial;
+    @FXML private ComboBox<String> comboAlergias;
+    @FXML private ComboBox<String> comboTipoAuxilio;
 
     // Seção 2: Filiação/Responsáveis
     @FXML private TextField fieldPesquisaMae;
@@ -79,9 +93,6 @@ public class CadastroMatriculaController {
     // Seção 9: Pessoas Autorizadas
     @FXML private TableView<?> tablePessoasAutorizadas;
 
-    // Seção 10: Declaração
-    // (Sem campos específicos)
-
     // Seção 11: Irmão Gêmeo
     @FXML private CheckBox checkIrmaoGemeo;
 
@@ -91,20 +102,178 @@ public class CadastroMatriculaController {
 
     @FXML
     public void initialize() {
-        configurarComboBox();
+        configurarComboBoxFixos();
+        carregarDadosDoBanco();
     }
 
-    private void configurarComboBox() {
-        comboSexo.getItems().addAll("Masculino", "Feminino", "Outro");
-        comboCorRaca.getItems().addAll("Branca", "Preta", "Parda", "Amarela", "Indigena");
-        comboRestricaoAlimentar.getItems().addAll("Masculino", "Feminino", "Outro");
-        comboAlergia.getItems().addAll("Mosquito", "Poeira", "Abelha");
-        comboMobilidadeReduzida.getItems().addAll("Temporaria", "Permanente", "Outro");
-        comboDeficienciasMultiplas.getItems().addAll("Cegueira", "Surdo", "TDHA", "Autismo");
-        comboEducacaoEspecial.getItems().addAll("Atenção Extra", "Hiberfoco", "Austista");
+    private void configurarComboBoxFixos() {
+        comboSexo.setItems(FXCollections.observableArrayList(
+                "Masculino", "Feminino"
+        ));
 
+        comboCorRaca.setItems(FXCollections.observableArrayList(
+                "Branca", "Preta", "Parda", "Amarela", "Indígena"
+        ));
 
-        //comboSexo.getItems().addAll("Masculino", "Feminino", "Outro");
+        comboRestricaoAlimentar.setItems(FXCollections.observableArrayList(
+                "Não", "Sim"
+        ));
+
+        comboAlergia.setItems(FXCollections.observableArrayList(
+                "Não", "Sim"
+        ));
+
+        comboMobilidadeReduzida.setItems(FXCollections.observableArrayList(
+                "Não", "Sim, temporária", "Sim, permanente"
+        ));
+
+        comboDeficienciasMultiplas.setItems(FXCollections.observableArrayList(
+                "Não", "Sim"
+        ));
+
+        comboEducacaoEspecial.setItems(FXCollections.observableArrayList(
+                "Não", "Sim"
+        ));
+
+        comboUF.setItems(FXCollections.observableArrayList(
+                "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+                "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+                "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+        ));
+
+        comboTipoMoradia.setItems(FXCollections.observableArrayList(
+                "Casa própria", "Casa cedida", "Casa alugada"
+        ));
+
+        comboTipoPiso.setItems(FXCollections.observableArrayList(
+                "Cimento", "Lajota", "Chão batido", "Outro"
+        ));
+
+        comboMaterialParede.setItems(FXCollections.observableArrayList(
+                "Tijolo", "Taipa", "Madeira", "Outro"
+        ));
+
+        comboTipoCobertura.setItems(FXCollections.observableArrayList(
+                "Telha", "Zinco", "Palha", "Outro"
+        ));
+
+        comboSerie.setItems(FXCollections.observableArrayList(
+                "Berçário I", "Berçário II", "Maternal I", "Maternal II", "Pré I", "Pré II"
+        ));
+    }
+
+    private void carregarDadosDoBanco() {
+        carregarClassificacoesEspeciais();
+        carregarAlergias();
+        carregarTiposAuxilio();
+    }
+
+    private void carregarClassificacoesEspeciais() {
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
+
+            TypedQuery<ClassificacaoEspecial> query = em.createQuery(
+                    "SELECT c FROM ClassificacaoEspecial c WHERE c.statusClassificacaoEspecial = true ORDER BY c.classificacaoEspecial",
+                    ClassificacaoEspecial.class
+            );
+
+            List<ClassificacaoEspecial> classificacoes = query.getResultList();
+
+            // Converter para lista de strings para o ComboBox
+            List<String> nomesClassificacoes = classificacoes.stream()
+                    .map(ClassificacaoEspecial::getClassificacaoEspecial)
+                    .toList();
+
+            comboClassificacaoEspecial.setItems(FXCollections.observableArrayList(nomesClassificacoes));
+
+            System.out.println("✅ " + classificacoes.size() + " classificação(ões) especial(is) carregada(s)");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao carregar classificações especiais: " + e.getMessage());
+            e.printStackTrace();
+
+            // Opção fallback caso haja erro
+            comboClassificacaoEspecial.setItems(FXCollections.observableArrayList(
+                    "Altas Habilidades", "Deficiência Física", "Deficiência Visual"
+            ));
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+    }
+
+    private void carregarAlergias() {
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
+
+            TypedQuery<Alergia> query = em.createQuery(
+                    "SELECT a FROM Alergia a ORDER BY a.nome_Alergia",
+                    Alergia.class
+            );
+
+            List<Alergia> alergias = query.getResultList();
+
+            // Converter para lista de strings para o ComboBox
+            List<String> nomesAlergias = alergias.stream()
+                    .map(Alergia::getNomeAlergia)
+                    .toList();
+
+            comboAlergias.setItems(FXCollections.observableArrayList(nomesAlergias));
+
+            System.out.println("✅ " + alergias.size() + " alergia(s) carregada(s)");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao carregar alergias: " + e.getMessage());
+            e.printStackTrace();
+
+            // Opção fallback caso haja erro
+            comboAlergias.setItems(FXCollections.observableArrayList(
+                    "Leite", "Ovo", "Amendoim", "Glúten"
+            ));
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+    }
+
+    private void carregarTiposAuxilio() {
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
+
+            TypedQuery<TipoAuxilio> query = em.createQuery(
+                    "SELECT t FROM TipoAuxilio t ORDER BY t.nomeAuxilio",
+                    TipoAuxilio.class
+            );
+
+            List<TipoAuxilio> tiposAuxilio = query.getResultList();
+
+            // Converter para lista de strings para o ComboBox
+            List<String> nomesAuxilios = tiposAuxilio.stream()
+                    .map(TipoAuxilio::getNomeAuxilio)
+                    .toList();
+
+            comboTipoAuxilio.setItems(FXCollections.observableArrayList(nomesAuxilios));
+
+            System.out.println("✅ " + tiposAuxilio.size() + " tipo(s) de auxílio carregado(s)");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao carregar tipos de auxílio: " + e.getMessage());
+            e.printStackTrace();
+
+            // Opção fallback caso haja erro
+            comboTipoAuxilio.setItems(FXCollections.observableArrayList(
+                    "Bolsa Família", "Auxílio Brasil", "BPC - LOAS"
+            ));
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
     }
 
     @FXML
@@ -117,11 +286,19 @@ public class CadastroMatriculaController {
             String sexo = comboSexo.getValue();
             String serie = comboSerie.getValue();
 
+            // Capturar dados dos combos do banco
+            String classificacaoSelecionada = comboClassificacaoEspecial.getValue();
+            String alergiaSelecionada = comboAlergias.getValue();
+            String auxilioSelecionado = comboTipoAuxilio.getValue();
+
             System.out.println("Criança: " + nomeCrianca);
             System.out.println("Sexo: " + sexo);
             System.out.println("Série: " + serie);
+            System.out.println("Classificação: " + classificacaoSelecionada);
+            System.out.println("Alergia: " + alergiaSelecionada);
+            System.out.println("Auxílio: " + auxilioSelecionado);
 
-            // TODO: Implementar lógica de salvamento no banco
+            // TODO: Implementar lógica completa de salvamento no banco
 
             mostrarMensagem("Sucesso", "Matrícula cadastrada com sucesso!");
             limparFormulario();
@@ -173,6 +350,11 @@ public class CadastroMatriculaController {
         comboCorRaca.setValue(null);
         fieldSus.clear();
         fieldUnidadeSaude.clear();
+
+        // Limpar combos do banco
+        comboClassificacaoEspecial.setValue(null);
+        comboAlergias.setValue(null);
+        comboTipoAuxilio.setValue(null);
 
         // Limpar endereço
         fieldEndereco.clear();
