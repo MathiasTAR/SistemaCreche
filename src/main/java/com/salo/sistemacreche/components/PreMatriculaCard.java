@@ -10,7 +10,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
-
 import java.text.SimpleDateFormat;
 
 public class PreMatriculaCard extends VBox {
@@ -146,7 +145,6 @@ public class PreMatriculaCard extends VBox {
         }
     }
 
-
     private void applyStyles() {
         // Card
         this.setStyle("-fx-background-color: white; -fx-border-color: #e8f5e8; "
@@ -160,14 +158,14 @@ public class PreMatriculaCard extends VBox {
         aplicarEstiloSituacao();
 
         // Botões principais
-        btnEditar.setStyle("-fx-background-color: #1976d2; -fx-text-fill: white; "
+        btnEditar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
                 + "-fx-background-radius: 5; -fx-padding: 5 10;");
 
-        btnAprovar.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; "
+        btnAprovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
                 + "-fx-background-radius: 5; -fx-padding: 6 12;");
-        btnReprovar.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; "
+        btnReprovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
                 + "-fx-background-radius: 5; -fx-padding: 6 12;");
-        btnCancelar.setStyle("-fx-background-color: #F44336; -fx-text-fill: white; "
+        btnCancelar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
                 + "-fx-background-radius: 5; -fx-padding: 6 12;");
     }
 

@@ -120,7 +120,7 @@
                 </Label>
 
                 <!-- Mãe -->
-                <VBox spacing="10">
+                <VBox prefWidth="815.0" spacing="10">
                     <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Mãe" />
 
                     <!-- Barra de pesquisa -->
@@ -131,9 +131,9 @@
                     </HBox>
 
                     <!-- Lista de resultados -->
-                    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
+                    <ScrollPane prefHeight="200.0" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
                         <VBox spacing="5" style="-fx-padding: 10;">
-                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                            <HBox alignment="CENTER_LEFT" prefWidth="2000.0" spacing="10">
                                 <VBox fx:id="cardsContainerMaes" spacing="10.0" style="-fx-background-color: #f8fdf8;" />
                             </HBox>
                         </VBox>
@@ -152,9 +152,9 @@
                     </HBox>
 
                     <!-- Lista de resultados -->
-                    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
+                    <ScrollPane prefHeight="200.0" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
                         <VBox spacing="5" style="-fx-padding: 10;">
-                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
                                 <VBox fx:id="cardsContainerPais" spacing="10.0" style="-fx-background-color: #f8fdf8;" />
                             </HBox>
                         </VBox>
@@ -173,10 +173,10 @@
                     </HBox>
 
                     <!-- Lista de resultados -->
-                    <ScrollPane prefHeight="120" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
+                    <ScrollPane prefHeight="200.0" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
                         <VBox spacing="5" style="-fx-padding: 10;">
                             <!-- Item de exemplo -->
-                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
                                 <VBox fx:id="cardsContainerResponsaveis" spacing="10.0" style="-fx-background-color: #f8fdf8;" />
                             </HBox>
                         </VBox>

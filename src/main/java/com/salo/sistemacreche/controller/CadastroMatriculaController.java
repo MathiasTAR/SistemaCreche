@@ -523,13 +523,21 @@ public class CadastroMatriculaController {
 
             dialogStage.showAndWait();
 
-            // Se salvou, você pode adicionar à lista ou fazer algo com os dados
+            // Se salvou, recarrega as listas apropriadas
             if (controller.isSalvo()) {
-                // Recarregar a lista de responsáveis após salvar
-                carregarMaes();
-                carregarPais();
-                carregarResponsaveis();
-                System.out.println("✅ Responsável salvo com sucesso!");
+                Responsavel responsavelSalvo = controller.getResponsavelSalvo();
+                if (responsavelSalvo != null) {
+                    // Recarrega a lista correspondente ao tipo do responsável
+                    Long tipoId = responsavelSalvo.getTipoResponsavel().getId();
+                    if (tipoId == 2L) { // Mãe
+                        carregarMaes();
+                    } else if (tipoId == 1L) { // Pai
+                        carregarPais();
+                    } else { // Responsável
+                        carregarResponsaveis();
+                    }
+                    System.out.println("✅ Responsável salvo com sucesso! Tipo: " + responsavelSalvo.getTipoResponsavel().getTipoResponsavel());
+                }
             }
 
         } catch (IOException e) {

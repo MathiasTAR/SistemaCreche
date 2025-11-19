@@ -73,27 +73,46 @@ public class MatriculaCard extends VBox {
         Region region = new Region();
         HBox.setHgrow(region, Priority.ALWAYS);
 
-        linhaSuperior.getChildren().addAll(labelNome, labelSituacao, region, btnEditar);
+        linhaSuperior.getChildren().addAll(labelNome, region, labelSituacao, btnEditar);
 
         // Adiciona ao card
         this.getChildren().addAll(linhaSuperior, labelData);
-        this.setSpacing(5.0);
+        this.setSpacing(10.0);
     }
 
     private void applyStyles() {
         // Estilo do card principal
-        this.setStyle("-fx-background-color: white; -fx-border-color: #e8f5e8; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15;");
+        this.setStyle("-fx-background-color: white; -fx-border-color: #e8f5e8; "
+                + "-fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15;");
 
         // Estilo dos labels
         labelNome.setStyle("-fx-text-fill: #2e7d32;");
         labelNome.setFont(Font.font("System Bold", 14.0));
 
-        labelSituacao.setStyle("-fx-text-fill: #4caf50; -fx-font-weight: bold;");
+        labelData.setStyle("-fx-text-fill: #666;");
 
-        labelData.setStyle("-fx-text-fill: #666; -fx-padding: 5 0 0 0;");
+        aplicarEstiloSituacao();
 
         // Estilo do botão
-        btnEditar.setStyle("-fx-background-color: #4caf50; -fx-text-fill: white; -fx-background-radius: 3;");
+        btnEditar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
+                + "-fx-background-radius: 5; -fx-padding: 5 10;");
+    }
+
+    private void aplicarEstiloSituacao() {
+        String situacao = matricula.getSituacaoMatricula().toString();
+        switch (situacao) {
+            case "ATIVA" -> labelSituacao.setStyle("-fx-text-fill: #4caf50; -fx-font-weight: bold; "
+                    + "-fx-background-color: #e8f5e8; -fx-padding: 2 8; -fx-background-radius: 10;");
+            case "TRANSFERIDA" -> labelSituacao.setStyle("-fx-text-fill: #ff9800; -fx-font-weight: bold; "
+                    + "-fx-background-color: #fff3e0; -fx-padding: 2 8; -fx-background-radius: 10;");
+            case "CONCLUIDA" -> labelSituacao.setStyle("-fx-text-fill: #2196f3; -fx-font-weight: bold; "
+                    + "-fx-background-color: #e3f2fd; -fx-padding: 2 8; -fx-background-radius: 10;");
+            case "CANCELADA" -> labelSituacao.setStyle("-fx-text-fill: #f44336; -fx-font-weight: bold; "
+                    + "-fx-background-color: #ffebee; -fx-padding: 2 8; -fx-background-radius: 10;");
+            case "VENCIDA" -> labelSituacao.setStyle("-fx-text-fill: #9e9e9e; -fx-font-weight: bold; "
+                    + "-fx-background-color: #f5f5f5; -fx-padding: 2 8; -fx-background-radius: 10;");
+            default -> labelSituacao.setStyle("-fx-text-fill: #666; -fx-font-weight: bold;");
+        }
     }
 
     private String traduzirSituacao(String situacao) {
@@ -145,5 +164,7 @@ public class MatriculaCard extends VBox {
         } else {
             labelData.setText("Data do registro: Não informada");
         }
+
+        aplicarEstiloSituacao();
     }
 }

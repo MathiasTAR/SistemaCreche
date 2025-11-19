@@ -7,6 +7,7 @@ import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.layout.Priority;
 
 public class ResponsavelCard extends VBox {
 
@@ -40,14 +41,14 @@ public class ResponsavelCard extends VBox {
 
     private void updateCardStyle() {
         if (selecionado) {
-            this.setStyle("-fx-background-color: #d4edda; " +
+            this.setStyle("-fx-background-color: transparent; " +
                     "-fx-border-color: #28a745; " +
                     "-fx-border-width: 2; " +
                     "-fx-border-radius: 8; " +
                     "-fx-padding: 15; " +
                     "-fx-effect: dropshadow(three-pass-box, rgba(40,167,69,0.3), 5, 0, 0, 2);");
         } else {
-            this.setStyle("-fx-background-color: #e8f5e8; " +
+            this.setStyle("-fx-background-color: transparent; " +
                     "-fx-border-color: #c8e1e6; " +
                     "-fx-border-width: 1; " +
                     "-fx-border-radius: 8; " +
@@ -79,13 +80,7 @@ public class ResponsavelCard extends VBox {
         labelCpf.setStyle("-fx-text-fill: #666666; " +
                 "-fx-font-size: 14;");
 
-        // Telefone
-//        Label labelTelefone = new Label("Tel: " +
-//                (responsavel.getPessoa().getTelefone() != null ?
-//                        responsavel.getPessoa().getTelefone() : "Não informado"));
-//        labelTelefone.setStyle("-fx-text-fill: #666666; -fx-font-size: 14;");
-
-        // Container principal para as informações
+        // Container para as informações (nome e CPF)
         VBox infoContainer = new VBox(5);
         infoContainer.setAlignment(Pos.CENTER_LEFT);
         infoContainer.getChildren().addAll(labelNome, labelCpf);
@@ -104,16 +99,19 @@ public class ResponsavelCard extends VBox {
             }
         });
 
-        // Container horizontal para checkbox + informações
-        HBox selectionContainer = new HBox(10);
-        selectionContainer.setAlignment(Pos.CENTER_LEFT);
-        selectionContainer.getChildren().addAll(checkSelecionar, infoContainer);
-
         // Container horizontal principal
-        HBox mainContainer = new HBox();
-        mainContainer.setSpacing(15);
+        HBox mainContainer = new HBox(165);
         mainContainer.setAlignment(Pos.CENTER_LEFT);
-        mainContainer.getChildren().addAll(selectionContainer, btnEditar);
+
+        // Adiciona os elementos ao container principal
+        mainContainer.getChildren().addAll(checkSelecionar, infoContainer, btnEditar);
+
+        // Faz o infoContainer expandir para ocupar o espaço disponível
+        HBox.setHgrow(infoContainer, Priority.ALWAYS);
+
+        // Configura o card para expandir horizontalmente
+        this.setMaxWidth(Double.MAX_VALUE);
+        mainContainer.setMaxWidth(Double.MAX_VALUE);
 
         this.getChildren().add(mainContainer);
     }
@@ -133,7 +131,7 @@ public class ResponsavelCard extends VBox {
         return cpf.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
     }
 
-    // 🔥 MÉTODOS DE SELEÇÃO
+    // MÉTODOS DE SELEÇÃO
     public void setSelecionado(boolean selecionado) {
         this.selecionado = selecionado;
         checkSelecionar.setSelected(selecionado);
@@ -154,7 +152,7 @@ public class ResponsavelCard extends VBox {
         return responsavel;
     }
 
-    // 🔥 MÉTODOS PARA AÇÕES
+    // MÉTODOS PARA AÇÕES
     public void setOnEditAction(Runnable onEditAction) {
         this.onEditAction = onEditAction;
     }

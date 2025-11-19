@@ -50,7 +50,7 @@
                 case "Cancelada": return SituacaoMatricula.CANCELADA;
                 case "Vencida": return  SituacaoMatricula.VENCIDA;
                 case "Matriculado": return SituacaoMatricula.ATIVA;
-                default: return null; // Para "Todas"
+                default: return null;
             }
         }
 
@@ -94,7 +94,7 @@
                 StringBuilder jpql = new StringBuilder(
                         "SELECT DISTINCT m FROM Matricula m " +
                                 "LEFT JOIN FETCH m.crianca c " +
-                                "WHERE 1 = 1"
+                                "WHERE m.situacaoMatricula != com.salo.sistemacreche.entidades.Matricula$SituacaoMatricula.VENCIDA"
                 );
 
                 List<Object> parametros = new ArrayList<>();

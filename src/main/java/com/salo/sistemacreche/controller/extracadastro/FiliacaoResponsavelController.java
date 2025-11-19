@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -22,15 +23,24 @@ public class FiliacaoResponsavelController {
     @FXML private TextField fieldCelular;
     @FXML private TextField fieldOutroContato;
     @FXML private TextField fieldTrabalho;
+    @FXML private ComboBox<String> comboTipoResponsavel;
 
     private Stage dialogStage;
     private boolean salvo = false;
+    private Responsavel responsavelSalvo;
 
     @FXML
     public void initialize() {
         aplicarMascaraTelefone();
         aplicarMascaraCPF();
         aplicarMascaraNome();
+        carregarTiposResponsavel();
+    }
+
+    private void carregarTiposResponsavel() {
+        comboTipoResponsavel.setItems(javafx.collections.FXCollections.observableArrayList(
+                "Mãe", "Pai", "Responsável"
+        ));
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -39,6 +49,10 @@ public class FiliacaoResponsavelController {
 
     public boolean isSalvo() {
         return salvo;
+    }
+
+    public Responsavel getResponsavelSalvo() {
+        return responsavelSalvo;
     }
 
     @FXML
@@ -52,33 +66,63 @@ public class FiliacaoResponsavelController {
                 transaction = em.getTransaction();
                 transaction.begin();
 
-                // 1. Criar e salvar a Pessoa
-                Pessoa pessoa = new Pessoa();
-                pessoa.setNome(getNomeFormatadoParaBanco());
-                pessoa.setCpf(getCpfFormatadoParaBanco().replaceAll("[^0-9]", "")); // Remove formatação
-                pessoa.setRg(getRgFormatadoParaBanco());
-                pessoa.setTelefone(getCelularFormatadoParaBanco());
-                pessoa.setOutroContato(getOutroContatoFormatadoParaBanco());
-                pessoa.setDataNascimento(Date.valueOf(LocalDate.now().minusYears(30))); // Data padrão
-                pessoa.setEmail(""); // Email vazio por padrão
+                // 1. Verificar se já existe uma pessoa com este CPF
+                Pessoa pessoaExistente = encontrarPessoaPorCPF(em, getCpfFormatadoParaBanco());
 
-                em.persist(pessoa);
+                Pessoa pessoa;
+                if (pessoaExistente != null) {
+                    // Usa a pessoa existente
+                    pessoa = pessoaExistente;
+                    System.out.println("✅ Usando pessoa existente: " + pessoa.getNome());
+                } else {
+                    // Cria nova pessoa
+                    pessoa = new Pessoa();
+                    pessoa.setNome(getNomeFormatadoParaBanco());
+                    pessoa.setCpf(getCpfFormatadoParaBanco().replaceAll("[^0-9]", ""));
+                    pessoa.setRg(getRgFormatadoParaBanco());
+                    pessoa.setTelefone(getCelularFormatadoParaBanco());
+                    pessoa.setOutroContato(getOutroContatoFormatadoParaBanco());
+                    pessoa.setDataNascimento(Date.valueOf(LocalDate.now().minusYears(30)));
+                    pessoa.setEmail("");
 
-                // 2. Criar e salvar o Responsável
-                Responsavel responsavel = new Responsavel();
-                responsavel.setPessoa(pessoa);
-                responsavel.setTelefone(getCelularFormatadoParaBanco());
-                responsavel.setLocalTrabalho(fieldTrabalho.getText().trim());
-                responsavel.setAuxilioGov(false); // Valor padrão
-                responsavel.setNumeroNis(""); // NIS vazio por padrão
-
-                // Buscar TipoResponsavel (assumindo que existe um tipo com ID 3 para "Responsável")
-                TipoResponsavel tipoResponsavel = em.find(TipoResponsavel.class, 3L);
-                if (tipoResponsavel != null) {
-                    responsavel.setTipoResponsavel(tipoResponsavel);
+                    em.persist(pessoa);
+                    System.out.println("✅ Nova pessoa criada: " + pessoa.getNome());
                 }
 
-                em.persist(responsavel);
+                // 2. Verificar se já existe um responsável com este tipo para esta pessoa
+                Long tipoId = getTipoResponsavelId();
+                Responsavel responsavelExistente = encontrarResponsavelPorPessoaETipo(em, pessoa.getId(), tipoId);
+
+                if (responsavelExistente != null) {
+                    // Atualiza o responsável existente
+                    responsavelExistente.setTelefone(getCelularFormatadoParaBanco());
+                    responsavelExistente.setLocalTrabalho(fieldTrabalho.getText().trim());
+                    responsavelExistente.setAuxilioGov(false);
+                    responsavelExistente.setNumeroNis("");
+
+                    responsavelSalvo = em.merge(responsavelExistente);
+                    System.out.println("✅ Responsável existente atualizado");
+                } else {
+                    // Cria novo responsável
+                    Responsavel responsavel = new Responsavel();
+                    responsavel.setPessoa(pessoa);
+                    responsavel.setTelefone(getCelularFormatadoParaBanco());
+                    responsavel.setLocalTrabalho(fieldTrabalho.getText().trim());
+                    responsavel.setAuxilioGov(false);
+                    responsavel.setNumeroNis("");
+
+                    // Buscar TipoResponsavel baseado na seleção
+                    TipoResponsavel tipoResponsavel = em.find(TipoResponsavel.class, tipoId);
+                    if (tipoResponsavel != null) {
+                        responsavel.setTipoResponsavel(tipoResponsavel);
+                    } else {
+                        throw new RuntimeException("Tipo de responsável não encontrado para ID: " + tipoId);
+                    }
+
+                    em.persist(responsavel);
+                    responsavelSalvo = responsavel;
+                    System.out.println("✅ Novo responsável criado");
+                }
 
                 transaction.commit();
 
@@ -89,7 +133,10 @@ public class FiliacaoResponsavelController {
                 System.out.println("CPF: " + pessoa.getCpf());
                 System.out.println("RG: " + pessoa.getRg());
                 System.out.println("Telefone: " + pessoa.getTelefone());
-                System.out.println("Responsável ID: " + responsavel.getId());
+                if (responsavelSalvo != null) {
+                    System.out.println("Responsável ID: " + responsavelSalvo.getId());
+                    System.out.println("Tipo Responsável: " + responsavelSalvo.getTipoResponsavel().getTipoResponsavel());
+                }
 
                 this.salvo = true;
                 fecharDialog();
@@ -108,9 +155,61 @@ public class FiliacaoResponsavelController {
         }
     }
 
+    // Método para encontrar pessoa por CPF
+    private Pessoa encontrarPessoaPorCPF(EntityManager em, String cpf) {
+        try {
+            String cpfLimpo = cpf.replaceAll("[^0-9]", "");
+            return em.createQuery(
+                            "SELECT p FROM Pessoa p WHERE p.cpf = :cpf", Pessoa.class)
+                    .setParameter("cpf", cpfLimpo)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar pessoa por CPF: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // Método para encontrar responsável por pessoa e tipo
+    private Responsavel encontrarResponsavelPorPessoaETipo(EntityManager em, Long pessoaId, Long tipoId) {
+        try {
+            return em.createQuery(
+                            "SELECT r FROM Responsavel r WHERE r.pessoa.id = :pessoaId AND r.tipoResponsavel.id = :tipoId",
+                            Responsavel.class)
+                    .setParameter("pessoaId", pessoaId)
+                    .setParameter("tipoId", tipoId)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar responsável existente: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // Método para obter ID do tipo de responsável baseado na seleção
+    private Long getTipoResponsavelId() {
+        String tipoSelecionado = comboTipoResponsavel.getValue();
+        if (tipoSelecionado == null) {
+            return 3L; // Default para "Responsável"
+        }
+
+        switch (tipoSelecionado) {
+            case "Mãe":
+                return 2L;
+            case "Pai":
+                return 1L;
+            case "Responsável":
+            default:
+                return 3L;
+        }
+    }
+
     @FXML
     private void btnCancelarResponsavel() {
         this.salvo = false;
+        this.responsavelSalvo = null;
         fecharDialog();
     }
 
@@ -167,6 +266,13 @@ public class FiliacaoResponsavelController {
         if (!validarTelefone(fieldCelular.getText())) {
             mostrarErro("Celular inválido!\nFormato: (11) 99999-9999");
             fieldCelular.requestFocus();
+            return false;
+        }
+
+        // === TIPO RESPONSÁVEL ===
+        if (comboTipoResponsavel.getValue() == null) {
+            mostrarErro("Tipo de responsável é obrigatório!");
+            comboTipoResponsavel.requestFocus();
             return false;
         }
 
@@ -414,15 +520,16 @@ public class FiliacaoResponsavelController {
         alert.showAndWait();
     }
 
-    // Getters para os dados
+    // Getters para os dados (opcionais - mantidos para compatibilidade)
     public String getNome() { return fieldNome.getText(); }
     public String getCpf() { return fieldCpf.getText(); }
     public String getRg() { return fieldRg.getText(); }
     public String getCelular() { return fieldCelular.getText(); }
     public String getOutroContato() { return fieldOutroContato.getText(); }
     public String getTrabalho() { return fieldTrabalho.getText(); }
+    public String getTipoResponsavel() { return comboTipoResponsavel.getValue(); }
 
-    // Método para obter todos os dados como objeto
+    // Método para obter todos os dados como objeto (opcional - mantido para compatibilidade)
     public DadosResponsavel getDadosResponsavel() {
         return new DadosResponsavel(
                 getNome(),
@@ -430,11 +537,12 @@ public class FiliacaoResponsavelController {
                 getRg(),
                 getCelular(),
                 getOutroContato(),
-                getTrabalho()
+                getTrabalho(),
+                getTipoResponsavel()
         );
     }
 
-    // Classe interna para transportar dados
+    // Classe interna para transportar dados (opcional - mantida para compatibilidade)
     public static class DadosResponsavel {
         private String nome;
         private String cpf;
@@ -442,15 +550,17 @@ public class FiliacaoResponsavelController {
         private String celular;
         private String outroContato;
         private String trabalho;
+        private String tipoResponsavel;
 
         public DadosResponsavel(String nome, String cpf, String rg, String celular,
-                                String outroContato, String trabalho) {
+                                String outroContato, String trabalho, String tipoResponsavel) {
             this.nome = nome;
             this.cpf = cpf;
             this.rg = rg;
             this.celular = celular;
             this.outroContato = outroContato;
             this.trabalho = trabalho;
+            this.tipoResponsavel = tipoResponsavel;
         }
 
         // Getters
@@ -460,5 +570,6 @@ public class FiliacaoResponsavelController {
         public String getCelular() { return celular; }
         public String getOutroContato() { return outroContato; }
         public String getTrabalho() { return trabalho; }
+        public String getTipoResponsavel() { return tipoResponsavel; }
     }
 }
