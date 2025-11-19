@@ -2,7 +2,7 @@ package com.salo.sistemacreche.entidades;
 
 import jakarta.persistence.*;
 
-import java.util.*;
+import java.sql.Date;
 
 @Entity
 @Table(name = "CRIANCA")
@@ -12,20 +12,13 @@ public class Crianca {
     @Column(name = "ID_CRIANCA")
     private Long id;
 
-    @Column(name = "FOTO", length = 255)
+    @Column(name = "FOTO")
     private String foto;
 
-    @Column(name = "NOME", length = 255)
+    @Column(name = "NOME")
     private String nome;
 
-    @Column(name = "nome_mae", length = 100)
-    private String nomeMae;
-
-    @Column(name = "nome_pai", length = 100)
-    private String nomePai;
-
     @Column(name = "DATA_NASCIMENTO", nullable = false)
-    @Temporal(TemporalType.DATE)
     private Date dataNascimento;
 
     @Enumerated(EnumType.STRING)
@@ -36,41 +29,40 @@ public class Crianca {
     @Column(name = "COR_RACA")
     private CorRaca corRaca;
 
-    @Column(name = "POSSUI_IRMAO_CRECHE", nullable = false)
+    @Column(name = "POSSUI_IRMAO_CRECHE")
     private Boolean possuiIrmaoCreche;
 
-    @Column(name = "POSSUI_IRMAO_GEMEO", nullable = false)
+    @Column(name = "POSSUI_IRMAO_GEMEO")
     private Boolean possuiIrmaoGemeo;
 
-    @Column(name = "CARTSUS", unique = true, nullable = false, length = 15)
+    @Column(name = "CARTSUS", unique = true, length = 15)
     private String cartSus;
 
-    @Column(name = "UNIDADE_SAUDE", length = 100)
+    @Column(name = "UNIDADE_SAUDE")
     private String unidadeSaude;
 
-    @Column(name = "MUNICIPIO_NASCIMENTO", length = 255)
+    @Column(name = "MUNICIPIO_NASCIMENTO")
     private String municipioNascimento;
 
-    @Column(name = "CARTORIO_REGISTRO", length = 255)
+    @Column(name = "CARTORIO_REGISTRO")
     private String cartorioRegistro;
 
-    @Column(name = "CERTIDAO_NASCIMENTO_NUM", length = 255)
+    @Column(name = "CERTIDAO_NASCIMENTO_NUM")
     private String certidaoNascimentoNum;
 
     @Column(name = "DATA_EMISSAO_CERTIDAO")
-    @Temporal(TemporalType.DATE)
     private Date dataEmissaoCertidao;
 
     @Column(name = "ORG_EMISSOR_CERTIDAO", length = 10)
     private String orgEmissorCertidao;
 
-    @Column(name = "RESTRICAO_ALIMENTAR", nullable = false)
+    @Column(name = "RESTRICAO_ALIMENTAR")
     private Boolean restricaoAlimentar;
 
-    @Column(name = "DESCRICAO_RESTRICOES_ALIMENTARES", length = 255)
+    @Column(name = "DESCRICAO_RESTRICOES_ALIMENTARES")
     private String descricaoRestricoesAlimentares;
 
-    @Column(name = "ALERGIA", nullable = false)
+    @Column(name = "ALERGIA")
     private Boolean alergia;
 
     @Column(name = "PROBLEMA_SAUDE", columnDefinition = "TEXT")
@@ -83,13 +75,13 @@ public class Crianca {
     @Column(name = "MOB_RED")
     private MobRed mobRed;
 
-    @Column(name = "DEF_MULTI", nullable = false)
+    @Column(name = "DEF_MULTI")
     private Boolean defMulti;
 
-    @Column(name = "EDUC_ESPECIAL", nullable = false)
+    @Column(name = "EDUC_ESPECIAL")
     private Boolean educEspecial;
 
-    @Column(name = "RESPONSAVEL_BENEFICIARIO_AUXILIO_GOV", nullable = false)
+    @Column(name = "RESPONSAVEL_BENEFICIARIO_AUXILIO_GOV")
     private Boolean responsavelBeneficiarioAuxilioGov;
 
     @ManyToOne
@@ -104,11 +96,20 @@ public class Crianca {
     @JoinColumn(name = "ID_CLASSIFICACAO_ESPECIAL")
     private ClassificacaoEspecial classificacaoEspecial;
 
-    @Column(name = "STATUS_CLASSIFICACAO_ESPECIAL", nullable = false)
-    private Boolean statusClassificacaoEspecial = false;
+    @Column(name = "STATUS_CLASSIFICACAO_ESPECIAL")
+    private Boolean statusClassificacaoEspecial;
 
-    @OneToMany(mappedBy = "crianca", cascade = CascadeType.ALL)
-    private List<CriancaAlergia> alergias;
+    @ManyToOne
+    @JoinColumn(name = "ID_MAE")
+    private Pessoa mae;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_PAI")
+    private Pessoa pai;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_IRMAO_GEMEO")
+    private Crianca irmaoGemeo;
 
     // Enums
     public enum Sexo {
@@ -123,254 +124,98 @@ public class Crianca {
         TEMPORARIA, PERMANENTE, NENHUMA
     }
 
-    // Getters e Setters
+    // Getters e Setters (mantenha os que já existem e adicione os novos)
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getNomeMae() {
-        return nomeMae;
-    }
+    public String getFoto() { return foto; }
+    public void setFoto(String foto) { this.foto = foto; }
 
-    public void setNomeMae(String nomeMae) {
-        this.nomeMae = nomeMae;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getNomePai() {
-        return nomePai;
-    }
+    public Date getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(Date dataNascimento) { this.dataNascimento = dataNascimento; }
 
-    public void setNomePai(String nomePai) {
-        this.nomePai = nomePai;
-    }
+    public Sexo getSexo() { return sexo; }
+    public void setSexo(Sexo sexo) { this.sexo = sexo; }
 
-    public Date getDataNascimento() {
-        return dataNascimento;
-    }
+    public CorRaca getCorRaca() { return corRaca; }
+    public void setCorRaca(CorRaca corRaca) { this.corRaca = corRaca; }
 
-    public void setDataNascimento(Date dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
+    public Boolean getPossuiIrmaoCreche() { return possuiIrmaoCreche; }
+    public void setPossuiIrmaoCreche(Boolean possuiIrmaoCreche) { this.possuiIrmaoCreche = possuiIrmaoCreche; }
 
-    public Long getId() {
-        return id;
-    }
+    public Boolean getPossuiIrmaoGemeo() { return possuiIrmaoGemeo; }
+    public void setPossuiIrmaoGemeo(Boolean possuiIrmaoGemeo) { this.possuiIrmaoGemeo = possuiIrmaoGemeo; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getCartSus() { return cartSus; }
+    public void setCartSus(String cartSus) { this.cartSus = cartSus; }
 
-    public String getFoto() {
-        return foto;
-    }
+    public String getUnidadeSaude() { return unidadeSaude; }
+    public void setUnidadeSaude(String unidadeSaude) { this.unidadeSaude = unidadeSaude; }
 
-    public void setFoto(String foto) {
-        this.foto = foto;
-    }
+    public String getMunicipioNascimento() { return municipioNascimento; }
+    public void setMunicipioNascimento(String municipioNascimento) { this.municipioNascimento = municipioNascimento; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getCartorioRegistro() { return cartorioRegistro; }
+    public void setCartorioRegistro(String cartorioRegistro) { this.cartorioRegistro = cartorioRegistro; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getCertidaoNascimentoNum() { return certidaoNascimentoNum; }
+    public void setCertidaoNascimentoNum(String certidaoNascimentoNum) { this.certidaoNascimentoNum = certidaoNascimentoNum; }
 
-    public Sexo getSexo() {
-        return sexo;
-    }
+    public Date getDataEmissaoCertidao() { return dataEmissaoCertidao; }
+    public void setDataEmissaoCertidao(Date dataEmissaoCertidao) { this.dataEmissaoCertidao = dataEmissaoCertidao; }
 
-    public void setSexo(Sexo sexo) {
-        this.sexo = sexo;
-    }
+    public String getOrgEmissorCertidao() { return orgEmissorCertidao; }
+    public void setOrgEmissorCertidao(String orgEmissorCertidao) { this.orgEmissorCertidao = orgEmissorCertidao; }
 
-    public CorRaca getCorRaca() {
-        return corRaca;
-    }
+    public Boolean getRestricaoAlimentar() { return restricaoAlimentar; }
+    public void setRestricaoAlimentar(Boolean restricaoAlimentar) { this.restricaoAlimentar = restricaoAlimentar; }
 
-    public void setCorRaca(CorRaca corRaca) {
-        this.corRaca = corRaca;
-    }
+    public String getDescricaoRestricoesAlimentares() { return descricaoRestricoesAlimentares; }
+    public void setDescricaoRestricoesAlimentares(String descricaoRestricoesAlimentares) { this.descricaoRestricoesAlimentares = descricaoRestricoesAlimentares; }
 
-    public Boolean getPossuiIrmaoCreche() {
-        return possuiIrmaoCreche;
-    }
+    public Boolean getAlergia() { return alergia; }
+    public void setAlergia(Boolean alergia) { this.alergia = alergia; }
 
-    public void setPossuiIrmaoCreche(Boolean possuiIrmaoCreche) {
-        this.possuiIrmaoCreche = possuiIrmaoCreche;
-    }
+    public String getProblemaSaude() { return problemaSaude; }
+    public void setProblemaSaude(String problemaSaude) { this.problemaSaude = problemaSaude; }
 
-    public Boolean getPossuiIrmaoGemeo() {
-        return possuiIrmaoGemeo;
-    }
+    public String getRestriAlimentar() { return restriAlimentar; }
+    public void setRestriAlimentar(String restriAlimentar) { this.restriAlimentar = restriAlimentar; }
 
-    public void setPossuiIrmaoGemeo(Boolean possuiIrmaoGemeo) {
-        this.possuiIrmaoGemeo = possuiIrmaoGemeo;
-    }
+    public MobRed getMobRed() { return mobRed; }
+    public void setMobRed(MobRed mobRed) { this.mobRed = mobRed; }
 
-    public String getCartSus() {
-        return cartSus;
-    }
+    public Boolean getDefMulti() { return defMulti; }
+    public void setDefMulti(Boolean defMulti) { this.defMulti = defMulti; }
 
-    public void setCartSus(String cartSus) {
-        this.cartSus = cartSus;
-    }
+    public Boolean getEducEspecial() { return educEspecial; }
+    public void setEducEspecial(Boolean educEspecial) { this.educEspecial = educEspecial; }
 
-    public String getUnidadeSaude() {
-        return unidadeSaude;
-    }
+    public Boolean getResponsavelBeneficiarioAuxilioGov() { return responsavelBeneficiarioAuxilioGov; }
+    public void setResponsavelBeneficiarioAuxilioGov(Boolean responsavelBeneficiarioAuxilioGov) { this.responsavelBeneficiarioAuxilioGov = responsavelBeneficiarioAuxilioGov; }
 
-    public void setUnidadeSaude(String unidadeSaude) {
-        this.unidadeSaude = unidadeSaude;
-    }
+    public Responsavel getResponsavel() { return responsavel; }
+    public void setResponsavel(Responsavel responsavel) { this.responsavel = responsavel; }
 
-    public String getMunicipioNascimento() {
-        return municipioNascimento;
-    }
+    public TipoAuxilio getTipoAuxilio() { return tipoAuxilio; }
+    public void setTipoAuxilio(TipoAuxilio tipoAuxilio) { this.tipoAuxilio = tipoAuxilio; }
 
-    public void setMunicipioNascimento(String municipioNascimento) {
-        this.municipioNascimento = municipioNascimento;
-    }
+    public ClassificacaoEspecial getClassificacaoEspecial() { return classificacaoEspecial; }
+    public void setClassificacaoEspecial(ClassificacaoEspecial classificacaoEspecial) { this.classificacaoEspecial = classificacaoEspecial; }
 
-    public String getCartorioRegistro() {
-        return cartorioRegistro;
-    }
+    public Boolean getStatusClassificacaoEspecial() { return statusClassificacaoEspecial; }
+    public void setStatusClassificacaoEspecial(Boolean statusClassificacaoEspecial) { this.statusClassificacaoEspecial = statusClassificacaoEspecial; }
 
-    public void setCartorioRegistro(String cartorioRegistro) {
-        this.cartorioRegistro = cartorioRegistro;
-    }
+    public Pessoa getMae() { return mae; }
+    public void setMae(Pessoa mae) { this.mae = mae; }
 
-    public String getCertidaoNascimentoNum() {
-        return certidaoNascimentoNum;
-    }
+    public Pessoa getPai() { return pai; }
+    public void setPai(Pessoa pai) { this.pai = pai; }
 
-    public void setCertidaoNascimentoNum(String certidaoNascimentoNum) {
-        this.certidaoNascimentoNum = certidaoNascimentoNum;
-    }
-
-    public Date getDataEmissaoCertidao() {
-        return dataEmissaoCertidao;
-    }
-
-    public void setDataEmissaoCertidao(Date dataEmissaoCertidao) {
-        this.dataEmissaoCertidao = dataEmissaoCertidao;
-    }
-
-    public String getOrgEmissorCertidao() {
-        return orgEmissorCertidao;
-    }
-
-    public void setOrgEmissorCertidao(String orgEmissorCertidao) {
-        this.orgEmissorCertidao = orgEmissorCertidao;
-    }
-
-    public Boolean getRestricaoAlimentar() {
-        return restricaoAlimentar;
-    }
-
-    public void setRestricaoAlimentar(Boolean restricaoAlimentar) {
-        this.restricaoAlimentar = restricaoAlimentar;
-    }
-
-    public String getDescricaoRestricoesAlimentares() {
-        return descricaoRestricoesAlimentares;
-    }
-
-    public void setDescricaoRestricoesAlimentares(String descricaoRestricoesAlimentares) {
-        this.descricaoRestricoesAlimentares = descricaoRestricoesAlimentares;
-    }
-
-    public Boolean getAlergia() {
-        return alergia;
-    }
-
-    public void setAlergia(Boolean alergia) {
-        this.alergia = alergia;
-    }
-
-    public String getProblemaSaude() {
-        return problemaSaude;
-    }
-
-    public void setProblemaSaude(String problemaSaude) {
-        this.problemaSaude = problemaSaude;
-    }
-
-    public String getRestriAlimentar() {
-        return restriAlimentar;
-    }
-
-    public void setRestriAlimentar(String restriAlimentar) {
-        this.restriAlimentar = restriAlimentar;
-    }
-
-    public MobRed getMobRed() {
-        return mobRed;
-    }
-
-    public void setMobRed(MobRed mobRed) {
-        this.mobRed = mobRed;
-    }
-
-    public Boolean getDefMulti() {
-        return defMulti;
-    }
-
-    public void setDefMulti(Boolean defMulti) {
-        this.defMulti = defMulti;
-    }
-
-    public Boolean getEducEspecial() {
-        return educEspecial;
-    }
-
-    public void setEducEspecial(Boolean educEspecial) {
-        this.educEspecial = educEspecial;
-    }
-
-    public Boolean getResponsavelBeneficiarioAuxilioGov() {
-        return responsavelBeneficiarioAuxilioGov;
-    }
-
-    public void setResponsavelBeneficiarioAuxilioGov(Boolean responsavelBeneficiarioAuxilioGov) {
-        this.responsavelBeneficiarioAuxilioGov = responsavelBeneficiarioAuxilioGov;
-    }
-
-    public Responsavel getResponsavel() {
-        return responsavel;
-    }
-
-    public void setResponsavel(Responsavel responsavel) {
-        this.responsavel = responsavel;
-    }
-
-    public TipoAuxilio getTipoAuxilio() {
-        return tipoAuxilio;
-    }
-
-    public void setTipoAuxilio(TipoAuxilio tipoAuxilio) {
-        this.tipoAuxilio = tipoAuxilio;
-    }
-
-    public ClassificacaoEspecial getClassificacaoEspecial() {
-        return classificacaoEspecial;
-    }
-
-    public void setClassificacaoEspecial(ClassificacaoEspecial classificacaoEspecial) {
-        this.classificacaoEspecial = classificacaoEspecial;
-    }
-
-    public Boolean getStatusClassificacaoEspecial() {
-        return statusClassificacaoEspecial;
-    }
-
-    public void setStatusClassificacaoEspecial(Boolean statusClassificacaoEspecial) {
-        this.statusClassificacaoEspecial = statusClassificacaoEspecial;
-    }
-
-    public List<CriancaAlergia> getAlergias() {
-        return alergias;
-    }
-
-    public void setAlergias(List<CriancaAlergia> alergias) {
-        this.alergias = alergias;
-    }
+    public Crianca getIrmaoGemeo() { return irmaoGemeo; }
+    public void setIrmaoGemeo(Crianca irmaoGemeo) { this.irmaoGemeo = irmaoGemeo; }
 }

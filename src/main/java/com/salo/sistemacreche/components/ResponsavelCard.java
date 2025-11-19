@@ -6,11 +6,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 
 public class ResponsavelCard extends VBox {
 
     private Responsavel responsavel;
     private Runnable onEditAction;
+    private Runnable onSelectAction;
+    private Runnable onDeselectAction;
+    private CheckBox checkSelecionar;
+    private boolean selecionado = false;
 
     public ResponsavelCard(Responsavel responsavel) {
         this.responsavel = responsavel;
@@ -21,7 +26,7 @@ public class ResponsavelCard extends VBox {
     }
 
     private void initializeComponents() {
-        // Componentes serão criados no loadResponsavelData()
+        checkSelecionar = new CheckBox();
     }
 
     private void setupLayout() {
@@ -30,16 +35,38 @@ public class ResponsavelCard extends VBox {
     }
 
     private void applyStyles() {
-        this.setStyle("-fx-background-color: #e8f5e8; " +
-                "-fx-border-color: #c8e1e6; " +
-                "-fx-border-width: 1; " +
-                "-fx-border-radius: 8; " +
-                "-fx-padding: 15; " +
-                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+        updateCardStyle();
+    }
+
+    private void updateCardStyle() {
+        if (selecionado) {
+            this.setStyle("-fx-background-color: #d4edda; " +
+                    "-fx-border-color: #28a745; " +
+                    "-fx-border-width: 2; " +
+                    "-fx-border-radius: 8; " +
+                    "-fx-padding: 15; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(40,167,69,0.3), 5, 0, 0, 2);");
+        } else {
+            this.setStyle("-fx-background-color: #e8f5e8; " +
+                    "-fx-border-color: #c8e1e6; " +
+                    "-fx-border-width: 1; " +
+                    "-fx-border-radius: 8; " +
+                    "-fx-padding: 15; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+        }
     }
 
     private void loadResponsavelData() {
         this.getChildren().clear();
+
+        // Checkbox de seleção
+        checkSelecionar.setText("Selecionar");
+        checkSelecionar.setSelected(selecionado);
+        checkSelecionar.setStyle("-fx-text-fill: #0f766e; -fx-font-weight: bold;");
+
+        checkSelecionar.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            setSelecionado(newValue);
+        });
 
         // Nome do Responsável
         Label labelNome = new Label(responsavel.getPessoa().getNome());
@@ -51,6 +78,12 @@ public class ResponsavelCard extends VBox {
         Label labelCpf = new Label("CPF: " + formatarCPF(responsavel.getPessoa().getCpf()));
         labelCpf.setStyle("-fx-text-fill: #666666; " +
                 "-fx-font-size: 14;");
+
+        // Telefone
+//        Label labelTelefone = new Label("Tel: " +
+//                (responsavel.getPessoa().getTelefone() != null ?
+//                        responsavel.getPessoa().getTelefone() : "Não informado"));
+//        labelTelefone.setStyle("-fx-text-fill: #666666; -fx-font-size: 14;");
 
         // Container principal para as informações
         VBox infoContainer = new VBox(5);
@@ -71,13 +104,25 @@ public class ResponsavelCard extends VBox {
             }
         });
 
-        // Container horizontal para informações + botão
+        // Container horizontal para checkbox + informações
+        HBox selectionContainer = new HBox(10);
+        selectionContainer.setAlignment(Pos.CENTER_LEFT);
+        selectionContainer.getChildren().addAll(checkSelecionar, infoContainer);
+
+        // Container horizontal principal
         HBox mainContainer = new HBox();
         mainContainer.setSpacing(15);
         mainContainer.setAlignment(Pos.CENTER_LEFT);
-        mainContainer.getChildren().addAll(infoContainer, btnEditar);
+        mainContainer.getChildren().addAll(selectionContainer, btnEditar);
 
         this.getChildren().add(mainContainer);
+    }
+
+    private String getTipoResponsavel() {
+        if (responsavel.getTipoResponsavel() != null) {
+            return responsavel.getTipoResponsavel().getTipoResponsavel();
+        }
+        return "Responsável";
     }
 
     private String formatarCPF(String cpf) {
@@ -88,14 +133,38 @@ public class ResponsavelCard extends VBox {
         return cpf.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
     }
 
-    // Método para definir a ação de editar
+    // 🔥 MÉTODOS DE SELEÇÃO
+    public void setSelecionado(boolean selecionado) {
+        this.selecionado = selecionado;
+        checkSelecionar.setSelected(selecionado);
+        updateCardStyle();
+
+        if (selecionado && onSelectAction != null) {
+            onSelectAction.run();
+        } else if (!selecionado && onDeselectAction != null) {
+            onDeselectAction.run();
+        }
+    }
+
+    public boolean isSelecionado() {
+        return selecionado;
+    }
+
+    public Responsavel getResponsavel() {
+        return responsavel;
+    }
+
+    // 🔥 MÉTODOS PARA AÇÕES
     public void setOnEditAction(Runnable onEditAction) {
         this.onEditAction = onEditAction;
     }
 
-    // Getter para o responsável
-    public Responsavel getResponsavel() {
-        return responsavel;
+    public void setOnSelectAction(Runnable onSelectAction) {
+        this.onSelectAction = onSelectAction;
+    }
+
+    public void setOnDeselectAction(Runnable onDeselectAction) {
+        this.onDeselectAction = onDeselectAction;
     }
 
     // Método para atualizar os dados do card

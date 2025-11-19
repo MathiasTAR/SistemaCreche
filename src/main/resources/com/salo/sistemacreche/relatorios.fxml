@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml" fx:controller="com.salo.sistemacreche.controller.RelatoriosController">
+<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.salo.sistemacreche.controller.RelatoriosController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -18,7 +18,7 @@
 
             <!-- Seção: Período -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Período">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="Período">
                     <font>
                         <Font size="16.0" />
                     </font>
@@ -63,7 +63,7 @@
 
             <!-- Seção 1: Identificação da Criança -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Identificação da Criança">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="Identificação da Criança">
                     <font>
                         <Font size="16.0" />
                     </font>
@@ -165,7 +165,7 @@
 
             <!-- Seção 2: Classificação/Deficiências -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Classificação/Deficiências">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="Classificação/Deficiências">
                     <font>
                         <Font size="16.0" />
                     </font>
@@ -191,7 +191,7 @@
 
             <!-- Seção 3: Situação Habitacional e Familiar -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Situação Habitacional e Familiar">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="Situação Habitacional e Familiar">
                     <font>
                         <Font size="16.0" />
                     </font>

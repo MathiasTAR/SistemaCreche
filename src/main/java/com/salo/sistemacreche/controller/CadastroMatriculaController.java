@@ -1,6 +1,7 @@
 package com.salo.sistemacreche.controller;
 
 import com.salo.sistemacreche.components.EmptyCard;
+import com.salo.sistemacreche.components.IrmaoCard;
 import com.salo.sistemacreche.components.ResponsavelCard;
 import com.salo.sistemacreche.controller.extracadastro.FiliacaoResponsavelController;
 import com.salo.sistemacreche.controller.extracadastro.MembroFamiliarController;
@@ -10,6 +11,7 @@ import com.salo.sistemacreche.entidades.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -109,7 +111,9 @@ public class CadastroMatriculaController {
     private ObservableList<PessoaAutorizada> pessoaAutorizadas = FXCollections.observableArrayList();
 
     // Seção 11: Irmão Gêmeo
+    @FXML private VBox containerIrmaos;
     @FXML private CheckBox checkIrmaoGemeo;
+    private ObservableList<Crianca> irmaosEncontrados = FXCollections.observableArrayList();
 
     // Botões
     @FXML private Button btnSalvar;
@@ -128,6 +132,8 @@ public class CadastroMatriculaController {
         pesquisarResponsavel();
         configurarPesquisaPorEnter();
         configurarTableViews();
+        limparDetecaoIrmaos();
+        configurarSelecaoResponsaveis();
     }
 
     private void configurarComboBoxFixos() {
@@ -372,6 +378,9 @@ public class CadastroMatriculaController {
             atualizarCardsContainer(cardsContainerMaes, maes, "Nenhuma mãe cadastrada");
             System.out.println("✅ " + maes.size() + " mãe(s) carregada(s)");
 
+            // 🔥 CONFIGURAR SELEÇÃO APÓS CARREGAR
+            atualizarSelecaoAposCarregar(cardsContainerMaes);
+
         } catch (Exception e) {
             System.err.println("❌ Erro ao carregar mães: " + e.getMessage());
             limparContainerComMensagem(cardsContainerMaes, "Erro ao carregar mães");
@@ -398,6 +407,9 @@ public class CadastroMatriculaController {
             atualizarCardsContainer(cardsContainerPais, pais, "Nenhum pai cadastrado");
             System.out.println("✅ " + pais.size() + " pai(s) carregado(s)");
 
+            // 🔥 CONFIGURAR SELEÇÃO APÓS CARREGAR
+            atualizarSelecaoAposCarregar(cardsContainerPais);
+
         } catch (Exception e) {
             System.err.println("❌ Erro ao carregar pais: " + e.getMessage());
             limparContainerComMensagem(cardsContainerPais, "Erro ao carregar pais");
@@ -423,6 +435,9 @@ public class CadastroMatriculaController {
 
             atualizarCardsContainer(cardsContainerResponsaveis, responsaveis, "Nenhum responsável cadastrado");
             System.out.println("✅ " + responsaveis.size() + " responsável(eis) carregado(s)");
+
+            // 🔥 CONFIGURAR SELEÇÃO APÓS CARREGAR
+            atualizarSelecaoAposCarregar(cardsContainerResponsaveis);
 
         } catch (Exception e) {
             System.err.println("❌ Erro ao carregar responsáveis: " + e.getMessage());
@@ -591,6 +606,69 @@ public class CadastroMatriculaController {
         }
     }
 
+    // 🔥 MÉTODOS PARA GERENCIAR SELEÇÃO DE RESPONSÁVEIS
+    private void configurarSelecaoResponsaveis() {
+        configurarSelecaoUnica(cardsContainerMaes);
+        configurarSelecaoUnica(cardsContainerPais);
+        configurarSelecaoUnica(cardsContainerResponsaveis);
+    }
+
+    // 🔥 CONFIGURAR SELEÇÃO ÚNICA POR CONTAINER
+    private void configurarSelecaoUnica(VBox container) {
+        // Para cada card no container, configura a seleção única
+        for (javafx.scene.Node node : container.getChildren()) {
+            if (node instanceof ResponsavelCard) {
+                ResponsavelCard card = (ResponsavelCard) node;
+
+                card.setOnSelectAction(() -> {
+                    // Desmarca todos os outros cards no mesmo container
+                    for (javafx.scene.Node outroNode : container.getChildren()) {
+                        if (outroNode instanceof ResponsavelCard && outroNode != node) {
+                            ((ResponsavelCard) outroNode).setSelecionado(false);
+                        }
+                    }
+                    // Detecta irmãos automaticamente após seleção
+                    detectarIrmaosAutomaticamente();
+                });
+
+                card.setOnDeselectAction(() -> {
+                    // Limpa a detecção de irmãos se desmarcar
+                    limparDetecaoIrmaos();
+                });
+            }
+        }
+    }
+
+    // OBTER RESPONSÁVEL SELECIONADO DE UM CONTAINER
+    private Responsavel getResponsavelSelecionado(VBox container) {
+        for (javafx.scene.Node node : container.getChildren()) {
+            if (node instanceof ResponsavelCard) {
+                ResponsavelCard card = (ResponsavelCard) node;
+                if (card.isSelecionado()) {
+                    return card.getResponsavel();
+                }
+            }
+        }
+        return null;
+    }
+
+    // LIMPAR DETECÇÃO DE IRMÃOS
+    private void limparDetecaoIrmaos() {
+        irmaosEncontrados.clear();
+        containerIrmaos.getChildren().clear();
+
+        // Adiciona mensagem vazia
+        EmptyCard emptyCard = new EmptyCard("Selecione uma mãe ou pai para detectar irmãos automaticamente.");
+        containerIrmaos.getChildren().add(emptyCard);
+    }
+
+    // ATUALIZAR DETECÇÃO DE IRMÃOS QUANDO CARDS SÃO ADICIONADOS
+    private void atualizarSelecaoAposCarregar(VBox container) {
+        Platform.runLater(() -> {
+            configurarSelecaoUnica(container);
+        });
+    }
+
     private void configurarTableViews() {
         configurarTableViewComposicaoFamiliar();
         configurarTableViewPessoasAutorizadas();
@@ -757,7 +835,7 @@ public class CadastroMatriculaController {
         }
 
         // Saúde
-        crianca.setCartSus(fieldSus.getText().trim());
+        crianca.setCartSus(fieldSus.getText() != null ? fieldSus.getText().trim() : null);
         crianca.setUnidadeSaude(fieldUnidadeSaude.getText().trim());
 
         // Restrição alimentar
@@ -927,7 +1005,7 @@ public class CadastroMatriculaController {
         try {
             MembroFamilia membro = new MembroFamilia();
 
-            // 🔥 AGORA TEMOS NOME E IDADE
+            // NOME
             membro.setNome(dados.getNome());
 
             // Converte idade de String para Integer
@@ -990,7 +1068,7 @@ public class CadastroMatriculaController {
         }
     }
 
-    // Método para converter string para enum SituacaoEscolar (CORRIGIDO)
+    // Método para converter string para enum SituacaoEscolar
     private MembroFamilia.SituacaoEscolar converterParaSituacaoEscolar(String escolaridade) {
         if (escolaridade == null) return MembroFamilia.SituacaoEscolar.NAO_INFORMADO;
 
@@ -1040,6 +1118,143 @@ public class CadastroMatriculaController {
         }
     }
 
+    // MÉTODO PARA EXIBIR IRMÃOS ENCONTRADOS
+    private void exibirIrmaosEncontrados() {
+        containerIrmaos.getChildren().clear();
+
+        if (irmaosEncontrados.isEmpty()) {
+            EmptyCard emptyCard = new EmptyCard("Nenhum irmão encontrado com os mesmos pais.");
+            containerIrmaos.getChildren().add(emptyCard);
+            return;
+        }
+
+        Label titulo = new Label("Irmãos encontrados (mesmos pais):");
+        titulo.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f766e; -fx-font-size: 14;");
+        containerIrmaos.getChildren().add(titulo);
+
+        for (Crianca irmao : irmaosEncontrados) {
+            IrmaoCard cardIrmao = criarIrmaoCard(irmao);
+            containerIrmaos.getChildren().add(cardIrmao);
+        }
+    }
+
+    // MÉTODO PARA CRIAR CARD DE IRMÃO
+    private IrmaoCard criarIrmaoCard(Crianca irmao) {
+        IrmaoCard card = new IrmaoCard(irmao);
+
+        // Configura os eventos
+        card.setOnGemeoSelected(() -> {
+            // Marca o checkbox principal
+            System.out.println("✅ " + irmao.getNome() + " marcado(a) como gêmeo(a)");
+        });
+
+        card.setOnGemeoDeselected(() -> {
+            System.out.println("❌ " + irmao.getNome() + " desmarcado(a) como gêmeo(a)");
+        });
+
+        return card;
+    }
+
+    // 🔥 MÉTODO PARA OBTER IRMÃO GÊMEO SELECIONADO
+    private Crianca getIrmaoGemeoSelecionado() {
+        for (javafx.scene.Node node : containerIrmaos.getChildren()) {
+            if (node instanceof IrmaoCard) {
+                IrmaoCard card = (IrmaoCard) node;
+                if (card.isSelecionado()) {
+                    return card.getIrmao();
+                }
+            }
+        }
+        return null;
+    }
+
+    // 🔥 MÉTODO PARA LIMPAR SELEÇÃO DE GÊMEOS
+    public void limparSelecaoGemeos() {
+        checkIrmaoGemeo.setSelected(false);
+        for (javafx.scene.Node node : containerIrmaos.getChildren()) {
+            if (node instanceof IrmaoCard) {
+                IrmaoCard card = (IrmaoCard) node;
+                card.setSelecionado(false);
+            }
+        }
+    }
+
+    // 🔥 MÉTODO PARA DETECTAR IRMÃOS AUTOMATICAMENTE
+    private void detectarIrmaosAutomaticamente() {
+        irmaosEncontrados.clear();
+        containerIrmaos.getChildren().clear();
+
+        // Só funciona se já tiver mãe ou pai selecionados
+        Responsavel maeSelecionada = getResponsavelSelecionado(cardsContainerMaes);
+        Responsavel paiSelecionado = getResponsavelSelecionado(cardsContainerPais);
+
+        if (maeSelecionada == null && paiSelecionado == null) {
+            EmptyCard emptyCard = new EmptyCard("Selecione uma mãe ou pai para detectar irmãos automaticamente.");
+            containerIrmaos.getChildren().add(emptyCard);
+            return;
+        }
+
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
+
+            // Construir query dinamicamente baseado nos pais selecionados
+            StringBuilder queryBuilder = new StringBuilder(
+                    "SELECT c FROM Crianca c WHERE 1=1 "
+            );
+
+            // Adiciona condições baseadas nos pais selecionados
+            if (maeSelecionada != null) {
+                queryBuilder.append("AND c.mae.id = :idMae ");
+            }
+            if (paiSelecionado != null) {
+                queryBuilder.append("AND c.pai.id = :idPai ");
+            }
+
+            queryBuilder.append("ORDER BY c.dataNascimento DESC");
+
+            TypedQuery<Crianca> query = em.createQuery(queryBuilder.toString(), Crianca.class);
+
+            // Define os parâmetros
+            if (maeSelecionada != null) {
+                query.setParameter("idMae", maeSelecionada.getPessoa().getId());
+            }
+            if (paiSelecionado != null) {
+                query.setParameter("idPai", paiSelecionado.getPessoa().getId());
+            }
+
+            List<Crianca> irmaos = query.getResultList();
+
+            if (!irmaos.isEmpty()) {
+                irmaosEncontrados.addAll(irmaos);
+                exibirIrmaosEncontrados();
+
+                System.out.println("🔍 " + irmaos.size() + " irmão(s) encontrado(s) com os mesmos pais");
+
+                // Log dos pais selecionados para debug
+                if (maeSelecionada != null) {
+                    System.out.println("👩 Mãe selecionada: " + maeSelecionada.getPessoa().getNome());
+                }
+                if (paiSelecionado != null) {
+                    System.out.println("👨 Pai selecionado: " + paiSelecionado.getPessoa().getNome());
+                }
+            } else {
+                EmptyCard emptyCard = new EmptyCard("Nenhum irmão encontrado com os pais selecionados.");
+                containerIrmaos.getChildren().add(emptyCard);
+                System.out.println("ℹ️ Nenhum irmão encontrado com os pais selecionados");
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao detectar irmãos: " + e.getMessage());
+            e.printStackTrace();
+            EmptyCard erroCard = new EmptyCard("Erro ao buscar irmãos: " + e.getMessage());
+            containerIrmaos.getChildren().add(erroCard);
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+    }
 
     @FXML
     public void cancelarCadastro() {

@@ -514,24 +514,19 @@
                 </VBox>
             </VBox>
 
-            <!-- Seção 11: Tem Irmão Gêmeo? -->
+            <!-- Seção 11: Irmãos e Gêmeos -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="11. Tem Irmão Gêmeo?">
+                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-font-size: 16;" text="11. Irmãos e Gêmeos">
                     <font>
                         <Font size="16.0" />
                     </font>
                 </Label>
 
                 <VBox spacing="10">
+                    <Label style="-fx-text-fill: #666; -fx-font-size: 12;" text="O sistema detecta automaticamente irmãos quando os pais são os mesmos." />
 
-                    <!-- Exemplo de item -->
-                    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-padding: 10;">
-                        <CheckBox fx:id="checkIrmaoGemeo" text="É gêmeo?" />
-                        <VBox>
-                            <Label style="-fx-font-weight: bold;" text="João Silva Santos" />
-                            <Label style="-fx-text-fill: #666;" text="Irmão - 3 anos" />
-                        </VBox>
-                    </HBox>
+                    <!-- Container para irmãos encontrados -->
+                    <VBox fx:id="containerIrmaos" spacing="8" />
                 </VBox>
             </VBox>
 
