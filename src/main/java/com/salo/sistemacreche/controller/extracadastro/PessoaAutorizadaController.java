@@ -31,12 +31,10 @@ public class PessoaAutorizadaController {
         aplicarMascaraRG();
         aplicarMascaraNome();
 
-        // 🔥 REMOVIDO: aplicarMascaraParentesco();
-        // 🔥 ADICIONADO:
         carregarParentescos();
     }
 
-    // 🔥 NOVO MÉTODO: Carregar parentescos no ComboBox
+    // Carregar parentescos no ComboBox
     private void carregarParentescos() {
         comboParentesco.getItems().addAll(
                 "MAE",
@@ -81,9 +79,7 @@ public class PessoaAutorizadaController {
                 pessoa.setNome(getNomeFormatadoParaBanco());
                 pessoa.setRg(getRgFormatadoParaBanco());
                 pessoa.setTelefone(getTelefoneFormatadoParaBanco());
-                pessoa.setDataNascimento(Date.valueOf(LocalDate.now().minusYears(25))); // Data padrão
                 pessoa.setCpf(gerarCpfTemporario()); // CPF temporário único
-                pessoa.setEmail(""); // Email vazio
                 pessoa.setOutroContato(""); // Outro contato vazio
 
                 em.persist(pessoa);

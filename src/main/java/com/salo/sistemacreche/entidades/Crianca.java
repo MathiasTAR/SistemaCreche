@@ -18,6 +18,12 @@ public class Crianca {
     @Column(name = "NOME")
     private String nome;
 
+    @Column(name = "RG")
+    private String RG;
+
+    @Column(name = "CPF")
+    private String CPF;
+
     @Column(name = "DATA_NASCIMENTO", nullable = false)
     private Date dataNascimento;
 
@@ -43,6 +49,9 @@ public class Crianca {
 
     @Column(name = "MUNICIPIO_NASCIMENTO")
     private String municipioNascimento;
+
+    @Column(name = "MUNICIPIORESGISTRO")
+    private String MunicipioRegistro;
 
     @Column(name = "CARTORIO_REGISTRO")
     private String cartorioRegistro;
@@ -117,14 +126,30 @@ public class Crianca {
     }
 
     public enum CorRaca {
-        BRANCA, PRETA, PARDA, AMARELA, INDIGENA
+        BRANCA, PRETA, PARDA, AMARELA, INDIGENA, OUTRO
     }
 
     public enum MobRed {
         TEMPORARIA, PERMANENTE, NENHUMA
     }
 
-    // Getters e Setters (mantenha os que já existem e adicione os novos)
+    // Getters e Setters
+
+    public String getRG() {
+        return RG;
+    }
+
+    public void setRG(String RG) {
+        this.RG = RG;
+    }
+
+    public String getCPF() {
+        return CPF;
+    }
+
+    public void setCPF(String CPF) {
+        this.CPF = CPF;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -158,6 +183,14 @@ public class Crianca {
 
     public String getMunicipioNascimento() { return municipioNascimento; }
     public void setMunicipioNascimento(String municipioNascimento) { this.municipioNascimento = municipioNascimento; }
+
+    public String getMunicipioRegistro() {
+        return MunicipioRegistro;
+    }
+
+    public void setMunicipioRegistro(String municipioRegistro) {
+        MunicipioRegistro = municipioRegistro;
+    }
 
     public String getCartorioRegistro() { return cartorioRegistro; }
     public void setCartorioRegistro(String cartorioRegistro) { this.cartorioRegistro = cartorioRegistro; }

@@ -15,10 +15,6 @@ public class Pessoa {
     @Column(name = "NOME", nullable = false, length = 150)
     private String nome;
 
-    @Column(name = "DATA_NASCIMENTO_PESSOA", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dataNascimento;
-
     @Column(name = "CPF", unique = true, nullable = false, length = 11)
     private String cpf;
 
@@ -30,9 +26,6 @@ public class Pessoa {
 
     @Column(name = "OUTRO_CONTATO", length = 20)
     private String outroContato;
-
-    @Column(name = "EMAIL", length = 250)
-    private String email;
 
 
 
@@ -61,13 +54,6 @@ public class Pessoa {
         this.nome = nome;
     }
 
-    public Date getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public void setDataNascimento(Date dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
 
     public String getCpf() {
         return cpf;
@@ -93,11 +79,4 @@ public class Pessoa {
         this.telefone = telefone;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }

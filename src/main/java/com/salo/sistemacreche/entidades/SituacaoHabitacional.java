@@ -12,6 +12,11 @@ public class SituacaoHabitacional {
     @Column(name = "ID_SITUACAO_HAB")
     private Long id;
 
+    // 🔥 ADICIONAR: Relação com Criança
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_CRIANCA")
+    private Crianca crianca;
+
     @Column(name = "CASA_PROPRIA")
     private Boolean casaPropria;
 
@@ -102,6 +107,15 @@ public class SituacaoHabitacional {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    // 🔥 ADICIONAR: Getter e Setter para Crianca
+    public Crianca getCrianca() {
+        return crianca;
+    }
+
+    public void setCrianca(Crianca crianca) {
+        this.crianca = crianca;
     }
 
     public Boolean getCasaPropria() {

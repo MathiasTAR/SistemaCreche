@@ -27,6 +27,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public class CadastroMatriculaController {
@@ -39,7 +41,7 @@ public class CadastroMatriculaController {
     @FXML private ComboBox<String> comboCorRaca;
     @FXML private TextField fieldSus;
     @FXML private TextField fieldUnidadeSaude;
-    @FXML private ComboBox<String> comboRestricaoAlimentar;
+    @FXML private TextField fieldNis;
     @FXML private ComboBox<String> comboMobilidadeReduzida;
     @FXML private ComboBox<String> comboEducacaoEspecial;
 
@@ -100,7 +102,7 @@ public class CadastroMatriculaController {
 
     // Seção 7: Composição Familiar
     @FXML private TableView<MembroFamilia> tableComposicaoFamiliar;
-    private ObservableList<MembroFamilia> membrosFamiliares = FXCollections.observableArrayList();
+    private final ObservableList<MembroFamilia> membrosFamiliares = FXCollections.observableArrayList();
 
     // Seção 8: Série
     @FXML private ComboBox<String> comboSerie;
@@ -108,12 +110,11 @@ public class CadastroMatriculaController {
 
     // Seção 9: Pessoas Autorizadas
     @FXML private TableView<PessoaAutorizada> tablePessoasAutorizadas;
-    private ObservableList<PessoaAutorizada> pessoaAutorizadas = FXCollections.observableArrayList();
+    private final ObservableList<PessoaAutorizada> pessoaAutorizadas = FXCollections.observableArrayList();
 
     // Seção 11: Irmão Gêmeo
     @FXML private VBox containerIrmaos;
-    @FXML private CheckBox checkIrmaoGemeo;
-    private ObservableList<Crianca> irmaosEncontrados = FXCollections.observableArrayList();
+    private final ObservableList<Crianca> irmaosEncontrados = FXCollections.observableArrayList();
 
     // Botões
     @FXML private Button btnSalvar;
@@ -122,6 +123,11 @@ public class CadastroMatriculaController {
     @FXML private VBox cardsContainerMaes;
     @FXML private VBox cardsContainerPais;
     @FXML private VBox cardsContainerResponsaveis;
+
+    // Responsáveis selecionados
+    private Responsavel maeSelecionada;
+    private Responsavel paiSelecionado;
+    private Responsavel responsavelSelecionado;
 
     @FXML
     public void initialize() {
@@ -134,6 +140,9 @@ public class CadastroMatriculaController {
         configurarTableViews();
         limparDetecaoIrmaos();
         configurarSelecaoResponsaveis();
+        aplicarMascaraNis();
+        aplicarMascaras();
+        configurarValidacoes();
     }
 
     private void configurarComboBoxFixos() {
@@ -141,12 +150,12 @@ public class CadastroMatriculaController {
                 "Masculino", "Feminino", "Outro"
         ));
 
+        comboTipoAuxilio.valueProperty().addListener((observable, oldValue, newValue) -> {
+            validarNis();
+        });
+
         comboCorRaca.setItems(FXCollections.observableArrayList(
                 "Branca", "Preta", "Parda", "Amarela", "Indígena"
-        ));
-
-        comboRestricaoAlimentar.setItems(FXCollections.observableArrayList(
-                "Não", "Sim"
         ));
 
         comboMobilidadeReduzida.setItems(FXCollections.observableArrayList(
@@ -195,7 +204,6 @@ public class CadastroMatriculaController {
         try {
             em = DBConnection.getEntityManager();
 
-            // Query com ordenação personalizada para "Nenhum" ficar primeiro
             TypedQuery<ClassificacaoEspecial> query = em.createQuery(
                     "SELECT c FROM ClassificacaoEspecial c WHERE c.statusClassificacaoEspecial = true " +
                             "ORDER BY CASE WHEN c.classificacaoEspecial = 'Nenhum' THEN 0 ELSE 1 END, c.classificacaoEspecial",
@@ -295,7 +303,6 @@ public class CadastroMatriculaController {
         if (termoPesquisa.isEmpty()) {
             carregarMaes();
         } else {
-            // Pesquisa mães pelo nome
             pesquisarResponsaveisPorTipoENome(2L, termoPesquisa, cardsContainerMaes, "Nenhuma mãe encontrada");
         }
     }
@@ -306,10 +313,8 @@ public class CadastroMatriculaController {
         String termoPesquisa = fieldPesquisaPai.getText().trim();
 
         if (termoPesquisa.isEmpty()) {
-            // Se campo vazio, carrega todos os pais
             carregarPais();
         } else {
-            // Pesquisa pais pelo nome
             pesquisarResponsaveisPorTipoENome(1L, termoPesquisa, cardsContainerPais, "Nenhum pai encontrado");
         }
     }
@@ -370,7 +375,7 @@ public class CadastroMatriculaController {
                     "SELECT r FROM Responsavel r " +
                             "JOIN FETCH r.pessoa p " +
                             "JOIN r.tipoResponsavel tr " +
-                            "WHERE tr.id = 2 " + // Mãe
+                            "WHERE tr.id = 2 " +
                             "ORDER BY r.id DESC",
                     Responsavel.class
             ).setMaxResults(5).getResultList();
@@ -378,7 +383,6 @@ public class CadastroMatriculaController {
             atualizarCardsContainer(cardsContainerMaes, maes, "Nenhuma mãe cadastrada");
             System.out.println("✅ " + maes.size() + " mãe(s) carregada(s)");
 
-            // 🔥 CONFIGURAR SELEÇÃO APÓS CARREGAR
             atualizarSelecaoAposCarregar(cardsContainerMaes);
 
         } catch (Exception e) {
@@ -399,7 +403,7 @@ public class CadastroMatriculaController {
                     "SELECT r FROM Responsavel r " +
                             "JOIN FETCH r.pessoa p " +
                             "JOIN r.tipoResponsavel tr " +
-                            "WHERE tr.id = 1 " + // Pai
+                            "WHERE tr.id = 1 " +
                             "ORDER BY r.id DESC",
                     Responsavel.class
             ).setMaxResults(5).getResultList();
@@ -407,7 +411,6 @@ public class CadastroMatriculaController {
             atualizarCardsContainer(cardsContainerPais, pais, "Nenhum pai cadastrado");
             System.out.println("✅ " + pais.size() + " pai(s) carregado(s)");
 
-            // 🔥 CONFIGURAR SELEÇÃO APÓS CARREGAR
             atualizarSelecaoAposCarregar(cardsContainerPais);
 
         } catch (Exception e) {
@@ -428,7 +431,7 @@ public class CadastroMatriculaController {
                     "SELECT r FROM Responsavel r " +
                             "JOIN FETCH r.pessoa p " +
                             "JOIN r.tipoResponsavel tr " +
-                            "WHERE tr.id = 3 " + // Responsável
+                            "WHERE tr.id = 3 " +
                             "ORDER BY r.id DESC",
                     Responsavel.class
             ).setMaxResults(5).getResultList();
@@ -436,7 +439,6 @@ public class CadastroMatriculaController {
             atualizarCardsContainer(cardsContainerResponsaveis, responsaveis, "Nenhum responsável cadastrado");
             System.out.println("✅ " + responsaveis.size() + " responsável(eis) carregado(s)");
 
-            // 🔥 CONFIGURAR SELEÇÃO APÓS CARREGAR
             atualizarSelecaoAposCarregar(cardsContainerResponsaveis);
 
         } catch (Exception e) {
@@ -447,7 +449,7 @@ public class CadastroMatriculaController {
         }
     }
 
-    // === MÉTODO GENÉRICO PARA ATUALIZAR CONTAINER ===
+    // === MÉTODO GENÉRICO PARA ATUALIZAR CONTAINER - VERSÃO CORRIGIDA ===
     private void atualizarCardsContainer(VBox container, List<Responsavel> responsaveis, String mensagemVazio) {
         container.getChildren().clear();
 
@@ -457,9 +459,15 @@ public class CadastroMatriculaController {
         } else {
             for (Responsavel responsavel : responsaveis) {
                 try {
-                    ResponsavelCard card = new ResponsavelCard(responsavel);
-                    //card.setOnEditAction(() -> editarResponsavel(responsavel));
+                    // ✅ CORREÇÃO: Usar variável final para o lambda
+                    final Responsavel responsavelFinal = responsavel;
+                    ResponsavelCard card = new ResponsavelCard(responsavelFinal);
+
+                    // ✅ CORREÇÃO: Configurar ações ANTES de adicionar ao container
+                    configurarAcoesDoCard(card, container, responsavelFinal);
+
                     container.getChildren().add(card);
+
                 } catch (Exception e) {
                     System.err.println("❌ Erro ao criar card: " + e.getMessage());
                     Label erroCard = new Label("Erro ao carregar");
@@ -471,23 +479,78 @@ public class CadastroMatriculaController {
         }
     }
 
+    // ✅ NOVO MÉTODO: Configurar ações do card de forma centralizada
+    private void configurarAcoesDoCard(ResponsavelCard card, VBox container, Responsavel responsavel) {
+        // 🔥 CORREÇÃO CRÍTICA: Usar onSelectAction (não onEditAction)
+        card.setOnEditAction(() -> {
+            System.out.println("🎯 SELECT ACTION - Selecionado: " + responsavel.getPessoa().getNome());
+
+            // Desmarca outros cards no mesmo container
+            for (javafx.scene.Node outroNode : container.getChildren()) {
+                if (outroNode instanceof ResponsavelCard && outroNode != card) {
+                    ResponsavelCard outroCard = (ResponsavelCard) outroNode;
+                    if (outroCard.isSelecionado()) {
+                        System.out.println("➖ Desmarcando: " + outroCard.getResponsavel().getPessoa().getNome());
+                        outroCard.setSelecionado(false);
+                    }
+                }
+            }
+
+            // Atualiza a seleção baseada no container
+            if (container == cardsContainerMaes) {
+                maeSelecionada = responsavel;
+                System.out.println("👩 Mãe selecionada: " + responsavel.getPessoa().getNome());
+            } else if (container == cardsContainerPais) {
+                paiSelecionado = responsavel;
+                System.out.println("👨 Pai selecionado: " + responsavel.getPessoa().getNome());
+            } else if (container == cardsContainerResponsaveis) {
+                responsavelSelecionado = responsavel;
+                System.out.println("👤 Responsável selecionado: " + responsavel.getPessoa().getNome());
+            }
+
+            // 🔥 DETECTA IRMÃOS AUTOMATICAMENTE
+            detectarIrmaosAutomaticamente();
+        });
+
+        card.setOnDeselectAction(() -> {
+            System.out.println("❌ DESELECT ACTION - Deselecionado: " + responsavel.getPessoa().getNome());
+
+            // Remove a seleção
+            if (container == cardsContainerMaes) {
+                maeSelecionada = null;
+                System.out.println("👩 Mãe deselecionada");
+            } else if (container == cardsContainerPais) {
+                paiSelecionado = null;
+                System.out.println("👨 Pai deselecionado");
+            } else if (container == cardsContainerResponsaveis) {
+                responsavelSelecionado = null;
+                System.out.println("👤 Responsável deselecionado");
+            }
+
+            limparDetecaoIrmaos();
+        });
+
+        // ✅ Configurar ação de edição também (se necessário)
+//        card.setOnEditAction(() -> {
+//            System.out.println("✏️ EDIT ACTION - Editando: " + responsavel.getPessoa().getNome());
+//            // Aqui você pode adicionar lógica de edição se quiser
+//        });
+    }
+
     // === CONFIGURAR PESQUISA POR ENTER ===
     private void configurarPesquisaPorEnter() {
-        // Mãe
         fieldPesquisaMae.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 pesquisarMae();
             }
         });
 
-        // Pai
         fieldPesquisaPai.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 pesquisarPai();
             }
         });
 
-        // Responsável
         fieldPesquisaResponsavel.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 pesquisarResponsavel();
@@ -523,17 +586,15 @@ public class CadastroMatriculaController {
 
             dialogStage.showAndWait();
 
-            // Se salvou, recarrega as listas apropriadas
             if (controller.isSalvo()) {
                 Responsavel responsavelSalvo = controller.getResponsavelSalvo();
                 if (responsavelSalvo != null) {
-                    // Recarrega a lista correspondente ao tipo do responsável
                     Long tipoId = responsavelSalvo.getTipoResponsavel().getId();
-                    if (tipoId == 2L) { // Mãe
+                    if (tipoId == 2L) {
                         carregarMaes();
-                    } else if (tipoId == 1L) { // Pai
+                    } else if (tipoId == 1L) {
                         carregarPais();
-                    } else { // Responsável
+                    } else {
                         carregarResponsaveis();
                     }
                     System.out.println("✅ Responsável salvo com sucesso! Tipo: " + responsavelSalvo.getTipoResponsavel().getTipoResponsavel());
@@ -598,13 +659,11 @@ public class CadastroMatriculaController {
 
             dialogStage.showAndWait();
 
-            // Se salvou, adiciona à tabela
             if (controller.isSalvo()) {
                 PessoaAutorizada pessoaSalva = controller.getPessoaAutorizadaSalva();
                 if (pessoaSalva != null) {
                     adicionarPessoaAutorizada(pessoaSalva);
-                    System.out.println("✅ Pessoa autorizada adicionada: " +
-                            pessoaSalva.getPessoa().getNome());
+                    System.out.println("✅ Pessoa autorizada adicionada: " + pessoaSalva.getPessoa().getNome());
                 }
             }
 
@@ -614,33 +673,29 @@ public class CadastroMatriculaController {
         }
     }
 
-    // 🔥 MÉTODOS PARA GERENCIAR SELEÇÃO DE RESPONSÁVEIS
+    // MÉTODOS PARA GERENCIAR SELEÇÃO DE RESPONSÁVEIS
     private void configurarSelecaoResponsaveis() {
         configurarSelecaoUnica(cardsContainerMaes);
         configurarSelecaoUnica(cardsContainerPais);
         configurarSelecaoUnica(cardsContainerResponsaveis);
     }
 
-    // 🔥 CONFIGURAR SELEÇÃO ÚNICA POR CONTAINER
+    // CONFIGURAR SELEÇÃO ÚNICA POR CONTAINER
     private void configurarSelecaoUnica(VBox container) {
-        // Para cada card no container, configura a seleção única
         for (javafx.scene.Node node : container.getChildren()) {
             if (node instanceof ResponsavelCard) {
                 ResponsavelCard card = (ResponsavelCard) node;
 
                 card.setOnSelectAction(() -> {
-                    // Desmarca todos os outros cards no mesmo container
                     for (javafx.scene.Node outroNode : container.getChildren()) {
                         if (outroNode instanceof ResponsavelCard && outroNode != node) {
                             ((ResponsavelCard) outroNode).setSelecionado(false);
                         }
                     }
-                    // Detecta irmãos automaticamente após seleção
                     detectarIrmaosAutomaticamente();
                 });
 
                 card.setOnDeselectAction(() -> {
-                    // Limpa a detecção de irmãos se desmarcar
                     limparDetecaoIrmaos();
                 });
             }
@@ -664,8 +719,6 @@ public class CadastroMatriculaController {
     private void limparDetecaoIrmaos() {
         irmaosEncontrados.clear();
         containerIrmaos.getChildren().clear();
-
-        // Adiciona mensagem vazia
         EmptyCard emptyCard = new EmptyCard("Selecione uma mãe ou pai para detectar irmãos automaticamente.");
         containerIrmaos.getChildren().add(emptyCard);
     }
@@ -683,10 +736,8 @@ public class CadastroMatriculaController {
     }
 
     private void configurarTableViewComposicaoFamiliar() {
-        // Limpa colunas existentes
         tableComposicaoFamiliar.getColumns().clear();
 
-        // Cria as colunas
         TableColumn<MembroFamilia, String> colNome = new TableColumn<>("Nome");
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colNome.setPrefWidth(150);
@@ -699,7 +750,6 @@ public class CadastroMatriculaController {
         colParentesco.setCellValueFactory(new PropertyValueFactory<>("parentesco"));
         colParentesco.setPrefWidth(100);
 
-        // 🔥 CORREÇÃO AQUI: Use os nomes corretos das propriedades
         TableColumn<MembroFamilia, String> colEscolaridade = new TableColumn<>("Escolaridade");
         colEscolaridade.setCellValueFactory(new PropertyValueFactory<>("situacaoEscolar"));
         colEscolaridade.setPrefWidth(120);
@@ -712,18 +762,13 @@ public class CadastroMatriculaController {
         colRenda.setCellValueFactory(new PropertyValueFactory<>("renda"));
         colRenda.setPrefWidth(100);
 
-        // Adiciona as colunas à tabela
         tableComposicaoFamiliar.getColumns().addAll(colNome, colIdade, colParentesco, colEscolaridade, colEmprego, colRenda);
-
-        // Conecta a ObservableList com a TableView
         tableComposicaoFamiliar.setItems(membrosFamiliares);
     }
 
     private void configurarTableViewPessoasAutorizadas() {
-        // Limpa colunas existentes
         tablePessoasAutorizadas.getColumns().clear();
 
-        // Cria as colunas para pessoas autorizadas
         TableColumn<PessoaAutorizada, String> colNome = new TableColumn<>("Nome");
         colNome.setCellValueFactory(cellData -> {
             PessoaAutorizada pessoaAut = cellData.getValue();
@@ -760,10 +805,7 @@ public class CadastroMatriculaController {
         });
         colTelefone.setPrefWidth(120);
 
-        // Adiciona as colunas à tabela
         tablePessoasAutorizadas.getColumns().addAll(colNome, colParentesco, colRg, colTelefone);
-
-        // Conecta a ObservableList com a TableView
         tablePessoasAutorizadas.setItems(pessoaAutorizadas);
     }
 
@@ -777,6 +819,10 @@ public class CadastroMatriculaController {
                 return;
             }
 
+            if (!validarAuxilioComNIS()) {
+                return;
+            }
+
             em = DBConnection.getEntityManager();
             transaction = em.getTransaction();
             transaction.begin();
@@ -785,21 +831,28 @@ public class CadastroMatriculaController {
             Crianca crianca = criarCrianca(em);
             em.persist(crianca);
 
-            // 2. Criar e salvar Endereço
+            // 2. Associar responsáveis à criança
+            associarResponsaveisACrianca(em, crianca);
+
+            // 3. Criar e salvar Endereço
             Endereco endereco = criarEndereco();
             em.persist(endereco);
 
-            // 3. Criar e salvar Matrícula
+            // 4. Criar e salvar Matrícula
             Matricula matricula = criarMatricula(crianca);
             em.persist(matricula);
 
-            // 4. Salvar Membros da Família
+            // 5. Salvar Situação Habitacional (AGORA INCLUI OS BENS)
+            SituacaoHabitacional situacaoHabitacional = criarSituacaoHabitacional(crianca);
+            em.persist(situacaoHabitacional);
+
+            // 6. Salvar Membros da Família
             salvarMembrosFamilia(em, crianca);
 
-            // 5. Salvar Pessoas Autorizadas
+            // 7. Salvar Pessoas Autorizadas
             salvarPessoasAutorizadas(em, crianca);
 
-            // 6. Salvar Composição Familiar
+            // 8. Salvar Composição Familiar
             salvarComposicaoFamiliar(em, crianca);
 
             transaction.commit();
@@ -823,6 +876,47 @@ public class CadastroMatriculaController {
         }
     }
 
+    // NOVO MÉTODO: Associar responsáveis à criança
+    private void associarResponsaveisACrianca(EntityManager em, Crianca crianca) {
+        if (maeSelecionada != null) {
+            crianca.setMae(maeSelecionada.getPessoa());
+            System.out.println("👩 Mãe associada: " + maeSelecionada.getPessoa().getNome());
+        }
+
+        if (paiSelecionado != null) {
+            crianca.setPai(paiSelecionado.getPessoa());
+            System.out.println("👨 Pai associado: " + paiSelecionado.getPessoa().getNome());
+        }
+
+        if (responsavelSelecionado != null) {
+            crianca.setResponsavel(responsavelSelecionado);
+            System.out.println("👤 Responsável associado: " + responsavelSelecionado.getPessoa().getNome());
+        }
+    }
+
+    // 🔥 NOVO MÉTODO: Validar se auxílio obrigatório tem NIS
+    private boolean validarAuxilioComNIS() {
+        String tipoAuxilio = comboTipoAuxilio.getValue();
+        String nis = fieldNis.getText().trim();
+
+        List<String> auxiliosQueExigemNIS = List.of(
+                "Bolsa Família", "BPC", "Auxílio Brasil", "Auxílio Emergencial"
+        );
+
+        boolean temAuxilio = tipoAuxilio != null && !tipoAuxilio.equals("Nenhum");
+        boolean auxilioExigeNIS = temAuxilio && auxiliosQueExigemNIS.contains(tipoAuxilio);
+
+        if (auxilioExigeNIS && (nis.isEmpty() || nis.length() != 11)) {
+            mostrarMensagem("Validação",
+                    "O auxílio " + tipoAuxilio + " exige o preenchimento do NIS (11 dígitos)!");
+            fieldNis.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    // 🔥 MÉTODO CRIAR CRIANÇA COMPLETO
     private Crianca criarCrianca(EntityManager em) {
         Crianca crianca = new Crianca();
 
@@ -830,27 +924,38 @@ public class CadastroMatriculaController {
         crianca.setNome(fieldNomeCrianca.getText().trim());
         crianca.setDataNascimento(java.sql.Date.valueOf(datePickerNascimento.getValue()));
 
+        // RG e documentos
+        crianca.setRG(fieldRgCrianca.getText().trim());
+        crianca.setCPF(fieldCpfCrianca.getText().trim());
+
         // Sexo
         String sexoValue = comboSexo.getValue();
         if (sexoValue != null) {
-            crianca.setSexo(Crianca.Sexo.valueOf(sexoValue.toUpperCase()));
+            try {
+                crianca.setSexo(Crianca.Sexo.valueOf(sexoValue.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                crianca.setSexo(Crianca.Sexo.OUTRO);
+            }
         }
 
         // Cor/Raça
         String corRacaValue = comboCorRaca.getValue();
         if (corRacaValue != null) {
-            crianca.setCorRaca(Crianca.CorRaca.valueOf(corRacaValue.toUpperCase()));
+            try {
+                crianca.setCorRaca(Crianca.CorRaca.valueOf(corRacaValue.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                crianca.setCorRaca(Crianca.CorRaca.OUTRO);
+            }
         }
 
         // Saúde
         crianca.setCartSus(fieldSus.getText() != null ? fieldSus.getText().trim() : null);
         crianca.setUnidadeSaude(fieldUnidadeSaude.getText().trim());
 
-        // Restrição alimentar
-        String restricaoValue = comboRestricaoAlimentar.getValue();
-        crianca.setRestricaoAlimentar("Sim".equals(restricaoValue));
-        if ("Sim".equals(restricaoValue)) {
-            crianca.setDescricaoRestricoesAlimentares("Restrição alimentar informada");
+        // NIS - Salvar no responsável
+        String nisValue = fieldNis.getText().trim();
+        if (!nisValue.isEmpty() && crianca.getResponsavel() != null) {
+            crianca.getResponsavel().setNumeroNis(nisValue);
         }
 
         // Mobilidade reduzida
@@ -884,13 +989,18 @@ public class CadastroMatriculaController {
         String alergiaValue = comboAlergias.getValue();
         crianca.setAlergia(alergiaValue != null && !alergiaValue.equals("Nenhum"));
 
-        // Irmão gêmeo
-        crianca.setPossuiIrmaoGemeo(checkIrmaoGemeo.isSelected());
 
         // Documentos
         crianca.setCertidaoNascimentoNum(fieldCertidaoNascimento.getText().trim());
         crianca.setMunicipioNascimento(fieldMunicipioNascimento.getText().trim());
         crianca.setCartorioRegistro(fieldCartorioRegistro.getText().trim());
+        crianca.setMunicipioRegistro(fieldMunicipioRegistro.getText().trim());
+
+        // Data emissão RG
+        if (datePickerEmissaoRG.getValue() != null) {
+            crianca.setDataEmissaoCertidao(java.sql.Date.valueOf(datePickerEmissaoRG.getValue()));
+        }
+        crianca.setOrgEmissorCertidao(fieldOrgaoEmissor.getText().trim());
 
         // Auxílio governo
         String auxilioValue = comboTipoAuxilio.getValue();
@@ -906,6 +1016,103 @@ public class CadastroMatriculaController {
         return crianca;
     }
 
+    // 🔥 MÉTODO CORRIGIDO: Criar situação habitacional com bens
+    private SituacaoHabitacional criarSituacaoHabitacional(Crianca crianca) {
+        SituacaoHabitacional situacao = new SituacaoHabitacional();
+        situacao.setCrianca(crianca);
+
+        // Tipo de moradia
+        if (comboTipoMoradia.getValue() != null) {
+            String tipoMoradia = comboTipoMoradia.getValue();
+            // Mapear para os campos booleanos corretos
+            situacao.setCasaPropria("Casa própria".equals(tipoMoradia));
+            situacao.setCasaCedida("Casa cedida".equals(tipoMoradia));
+            situacao.setCasaAlugada("Casa alugada".equals(tipoMoradia));
+        }
+
+        // Valor aluguel
+        if (!fieldValorAluguel.getText().trim().isEmpty()) {
+            try {
+                situacao.setValorAluguel(new BigDecimal(fieldValorAluguel.getText().trim().replace(",", ".")));
+            } catch (NumberFormatException e) {
+                System.err.println("❌ Erro ao converter valor do aluguel");
+            }
+        }
+
+        // Número de cômodos
+        if (!fieldNumeroComodos.getText().trim().isEmpty()) {
+            try {
+                situacao.setNumeroComodos(Integer.parseInt(fieldNumeroComodos.getText().trim()));
+            } catch (NumberFormatException e) {
+                System.err.println("❌ Erro ao converter número de cômodos");
+            }
+        }
+
+        // Características da moradia
+        situacao.setTipoPiso(converterParaTipoPiso(comboTipoPiso.getValue()));
+        situacao.setTipoMoradia(converterParaTipoMoradia(comboMaterialParede.getValue()));
+        situacao.setTipoCobertura(converterParaTipoCobertura(comboTipoCobertura.getValue()));
+
+        // Serviços públicos
+        situacao.setFossa(checkFossa.isSelected());
+        situacao.setCifon(checkCifon.isSelected());
+        situacao.setEnergiaEletrica(checkEnergiaEletrica.isSelected());
+        situacao.setAguaEncanada(checkAguaEncanada.isSelected());
+
+        // 🔥 BENS DA FAMÍLIA - Agora dentro da mesma tabela
+        situacao.setTv(checkTV.isSelected());
+        situacao.setDvd(checkDVD.isSelected());
+        situacao.setComputador(checkComputador.isSelected());
+        situacao.setInternet(checkInternet.isSelected());
+        situacao.setGeladeira(checkGeladeira.isSelected());
+        situacao.setFogao(checkFogao.isSelected());
+        situacao.setMaquinaLavar(checkMaquinaLavar.isSelected());
+        //situacao.set(checkMicroondas.isSelected());
+        situacao.setCarro(checkCarro.isSelected());
+        situacao.setMoto(checkMoto.isSelected());
+
+        return situacao;
+    }
+
+    // 🔥 MÉTODOS AUXILIARES PARA CONVERSÃO DE ENUMS
+    private SituacaoHabitacional.TipoPiso converterParaTipoPiso(String valor) {
+        if (valor == null) return null;
+
+        switch (valor) {
+            case "Cimento": return SituacaoHabitacional.TipoPiso.CIMENTO;
+            case "Lajota": return SituacaoHabitacional.TipoPiso.LAJOTA;
+            case "Chão batido": return SituacaoHabitacional.TipoPiso.CHAO_BATIDO;
+            case "Cerâmica": return SituacaoHabitacional.TipoPiso.CERAMICA;
+            case "Madeira": return SituacaoHabitacional.TipoPiso.MADEIRA;
+            default: return SituacaoHabitacional.TipoPiso.OUTRO;
+        }
+    }
+
+    private SituacaoHabitacional.TipoMoradia converterParaTipoMoradia(String valor) {
+        if (valor == null) return null;
+
+        switch (valor) {
+            case "Tijolo": return SituacaoHabitacional.TipoMoradia.TIJOLO;
+            case "Taipa": return SituacaoHabitacional.TipoMoradia.TAIPA;
+            case "Madeira": return SituacaoHabitacional.TipoMoradia.MADEIRA;
+            case "Mista": return SituacaoHabitacional.TipoMoradia.MISTA;
+            case "Alvenaria": return SituacaoHabitacional.TipoMoradia.ALVENARIA;
+            default: return SituacaoHabitacional.TipoMoradia.OUTRO;
+        }
+    }
+
+    private SituacaoHabitacional.TipoCobertura converterParaTipoCobertura(String valor) {
+        if (valor == null) return null;
+
+        switch (valor) {
+            case "Telha": return SituacaoHabitacional.TipoCobertura.TELHA;
+            case "Zinco": return SituacaoHabitacional.TipoCobertura.ZINCO;
+            case "Palha": return SituacaoHabitacional.TipoCobertura.PALHA;
+            case "Laje": return SituacaoHabitacional.TipoCobertura.LAJE;
+            default: return SituacaoHabitacional.TipoCobertura.OUTRO;
+        }
+    }
+
     private Endereco criarEndereco() {
         Endereco endereco = new Endereco();
 
@@ -917,6 +1124,7 @@ public class CadastroMatriculaController {
         endereco.setUf(comboUF.getValue());
         endereco.setPontoReferencia(fieldPontoReferencia.getText().trim());
         endereco.setTelefoneResidencial(fieldTelefoneResidencial.getText().trim());
+        endereco.setNumero(fieldTelefoneContato.getText().trim());
 
         return endereco;
     }
@@ -948,9 +1156,10 @@ public class CadastroMatriculaController {
 
     private void salvarMembrosFamilia(EntityManager em, Crianca crianca) {
         for (MembroFamilia membro : membrosFamiliares) {
-            // Cria uma nova instância para o banco
             MembroFamilia novoMembro = new MembroFamilia();
             novoMembro.setCrianca(crianca);
+            novoMembro.setNome(membro.getNome());
+            novoMembro.setIdade(membro.getIdade());
             novoMembro.setParentesco(membro.getParentesco());
             novoMembro.setSituacaoEscolar(membro.getSituacaoEscolar());
             novoMembro.setSituacaoEmprego(membro.getSituacaoEmprego());
@@ -964,10 +1173,8 @@ public class CadastroMatriculaController {
 
     private void salvarPessoasAutorizadas(EntityManager em, Crianca crianca) {
         for (PessoaAutorizada pessoa : pessoaAutorizadas) {
-            // Associa a criança à pessoa autorizada
             pessoa.setCrianca(crianca);
 
-            // Se a pessoa já foi persistida (tem ID), faz merge
             if (pessoa.getId() != null) {
                 em.merge(pessoa);
             } else {
@@ -982,8 +1189,7 @@ public class CadastroMatriculaController {
         ComposicaoFamiliar composicao = new ComposicaoFamiliar();
         composicao.setCrianca(crianca);
 
-        // Calcula renda familiar total
-        java.math.BigDecimal rendaTotal = java.math.BigDecimal.ZERO;
+        BigDecimal rendaTotal = BigDecimal.ZERO;
         for (MembroFamilia membro : membrosFamiliares) {
             if (membro.getRenda() != null) {
                 rendaTotal = rendaTotal.add(membro.getRenda());
@@ -991,15 +1197,14 @@ public class CadastroMatriculaController {
         }
         composicao.setRendaFamiliarTotal(rendaTotal);
 
-        // Calcula renda per capita
-        int totalMembros = membrosFamiliares.size() + 1; // +1 para a criança
+        int totalMembros = membrosFamiliares.size() + 1;
         if (totalMembros > 0) {
-            java.math.BigDecimal rendaPerCapita = rendaTotal.divide(
-                    new java.math.BigDecimal(totalMembros), 2, java.math.RoundingMode.HALF_UP
+            BigDecimal rendaPerCapita = rendaTotal.divide(
+                    new BigDecimal(totalMembros), 2, java.math.RoundingMode.HALF_UP
             );
             composicao.setRendaPerCapita(rendaPerCapita);
         } else {
-            composicao.setRendaPerCapita(java.math.BigDecimal.ZERO);
+            composicao.setRendaPerCapita(BigDecimal.ZERO);
         }
 
         composicao.setTotalMembros(totalMembros);
@@ -1013,38 +1218,32 @@ public class CadastroMatriculaController {
         try {
             MembroFamilia membro = new MembroFamilia();
 
-            // NOME
             membro.setNome(dados.getNome());
 
-            // Converte idade de String para Integer
             try {
                 membro.setIdade(Integer.parseInt(dados.getIdade()));
             } catch (NumberFormatException e) {
-                membro.setIdade(0); // Valor padrão se conversão falhar
+                membro.setIdade(0);
             }
 
-            // Converte string para enum Parentesco
             MembroFamilia.Parentesco parentesco = converterStringParaParentesco(dados.getParentesco());
             membro.setParentesco(parentesco);
 
-            // Converte string para enum SituacaoEscolar
             MembroFamilia.SituacaoEscolar escolaridade = converterParaSituacaoEscolar(dados.getEscolaridade());
             membro.setSituacaoEscolar(escolaridade);
 
-            // Converte string para enum SituacaoEmprego
             MembroFamilia.SituacaoEmprego emprego = converterParaSituacaoEmprego(dados.getEmprego());
             membro.setSituacaoEmprego(emprego);
 
-            // Converte renda para BigDecimal
             if (!dados.getRenda().isEmpty()) {
                 try {
                     String rendaFormatada = dados.getRenda().replace(",", ".");
-                    membro.setRenda(new java.math.BigDecimal(rendaFormatada));
+                    membro.setRenda(new BigDecimal(rendaFormatada));
                 } catch (NumberFormatException e) {
-                    membro.setRenda(java.math.BigDecimal.ZERO);
+                    membro.setRenda(BigDecimal.ZERO);
                 }
             } else {
-                membro.setRenda(java.math.BigDecimal.ZERO);
+                membro.setRenda(BigDecimal.ZERO);
             }
 
             membrosFamiliares.add(membro);
@@ -1062,7 +1261,6 @@ public class CadastroMatriculaController {
     // Método para adicionar pessoa autorizada à tabela
     public void adicionarPessoaAutorizada(PessoaAutorizada pessoaAutorizada) {
         try {
-            // Adiciona diretamente a pessoa autorizada salva no banco
             pessoaAutorizadas.add(pessoaAutorizada);
             tablePessoasAutorizadas.refresh();
 
@@ -1088,7 +1286,7 @@ public class CadastroMatriculaController {
         }
     }
 
-    // Método para converter string para enum SituacaoEmprego (CORRIGIDO)
+    // Método para converter string para enum SituacaoEmprego
     private MembroFamilia.SituacaoEmprego converterParaSituacaoEmprego(String emprego) {
         if (emprego == null) return MembroFamilia.SituacaoEmprego.OUTRO;
 
@@ -1112,12 +1310,11 @@ public class CadastroMatriculaController {
         try {
             return MembroFamilia.Parentesco.valueOf(parentescoUpper);
         } catch (IllegalArgumentException e) {
-            // Mapeamento para valores comuns
             switch (parentescoUpper) {
                 case "MAE": case "MÃE": return MembroFamilia.Parentesco.MAE;
                 case "PAI": return MembroFamilia.Parentesco.PAI;
                 case "IRMAO": case "IRMÃO": return MembroFamilia.Parentesco.IRMAO;
-                case "IRMA": case "IRMÃ": return MembroFamilia.Parentesco.IRMA; // ← CORREÇÃO AQUI
+                case "IRMA": case "IRMÃ": return MembroFamilia.Parentesco.IRMA;
                 case "AVO": case "AVÔ": case "AVÓ": return MembroFamilia.Parentesco.AVO;
                 case "TIO": return MembroFamilia.Parentesco.TIO;
                 case "TIA": return MembroFamilia.Parentesco.TIA;
@@ -1150,9 +1347,7 @@ public class CadastroMatriculaController {
     private IrmaoCard criarIrmaoCard(Crianca irmao) {
         IrmaoCard card = new IrmaoCard(irmao);
 
-        // Configura os eventos
         card.setOnGemeoSelected(() -> {
-            // Marca o checkbox principal
             System.out.println("✅ " + irmao.getNome() + " marcado(a) como gêmeo(a)");
         });
 
@@ -1163,7 +1358,7 @@ public class CadastroMatriculaController {
         return card;
     }
 
-    // 🔥 MÉTODO PARA OBTER IRMÃO GÊMEO SELECIONADO
+    // MÉTODO PARA OBTER IRMÃO GÊMEO SELECIONADO
     private Crianca getIrmaoGemeoSelecionado() {
         for (javafx.scene.Node node : containerIrmaos.getChildren()) {
             if (node instanceof IrmaoCard) {
@@ -1176,29 +1371,24 @@ public class CadastroMatriculaController {
         return null;
     }
 
-    // 🔥 MÉTODO PARA LIMPAR SELEÇÃO DE GÊMEOS
-    public void limparSelecaoGemeos() {
-        checkIrmaoGemeo.setSelected(false);
-        for (javafx.scene.Node node : containerIrmaos.getChildren()) {
-            if (node instanceof IrmaoCard) {
-                IrmaoCard card = (IrmaoCard) node;
-                card.setSelecionado(false);
-            }
-        }
-    }
-
-    // 🔥 MÉTODO PARA DETECTAR IRMÃOS AUTOMATICAMENTE
+    // MÉTODO PARA DETECTAR IRMÃOS AUTOMATICAMENTE - COM MELHOR DEBUG
     private void detectarIrmaosAutomaticamente() {
+        System.out.println("🔍 INICIANDO DETECÇÃO DE IRMÃOS...");
+
         irmaosEncontrados.clear();
         containerIrmaos.getChildren().clear();
 
-        // Só funciona se já tiver mãe ou pai selecionados
-        Responsavel maeSelecionada = getResponsavelSelecionado(cardsContainerMaes);
-        Responsavel paiSelecionado = getResponsavelSelecionado(cardsContainerPais);
+        // ✅ CORREÇÃO: Usar as variáveis de instância diretamente
+        Responsavel maeAtual = maeSelecionada;
+        Responsavel paiAtual = paiSelecionado;
 
-        if (maeSelecionada == null && paiSelecionado == null) {
+        System.out.println("👩 Mãe selecionada: " + (maeAtual != null ? maeAtual.getPessoa().getNome() : "Nenhuma"));
+        System.out.println("👨 Pai selecionado: " + (paiAtual != null ? paiAtual.getPessoa().getNome() : "Nenhum"));
+
+        if (maeAtual == null && paiAtual == null) {
             EmptyCard emptyCard = new EmptyCard("Selecione uma mãe ou pai para detectar irmãos automaticamente.");
             containerIrmaos.getChildren().add(emptyCard);
+            System.out.println("ℹ️ Nenhum pai/mãe selecionado - mostrando mensagem");
             return;
         }
 
@@ -1206,16 +1396,15 @@ public class CadastroMatriculaController {
         try {
             em = DBConnection.getEntityManager();
 
-            // Construir query dinamicamente baseado nos pais selecionados
             StringBuilder queryBuilder = new StringBuilder(
                     "SELECT c FROM Crianca c WHERE 1=1 "
             );
 
-            // Adiciona condições baseadas nos pais selecionados
-            if (maeSelecionada != null) {
+            // ✅ CORREÇÃO: Usar IDs dos pais selecionados
+            if (maeAtual != null) {
                 queryBuilder.append("AND c.mae.id = :idMae ");
             }
-            if (paiSelecionado != null) {
+            if (paiAtual != null) {
                 queryBuilder.append("AND c.pai.id = :idPai ");
             }
 
@@ -1223,12 +1412,13 @@ public class CadastroMatriculaController {
 
             TypedQuery<Crianca> query = em.createQuery(queryBuilder.toString(), Crianca.class);
 
-            // Define os parâmetros
-            if (maeSelecionada != null) {
-                query.setParameter("idMae", maeSelecionada.getPessoa().getId());
+            if (maeAtual != null) {
+                query.setParameter("idMae", maeAtual.getPessoa().getId());
+                System.out.println("🔍 Buscando por mãe ID: " + maeAtual.getPessoa().getId());
             }
-            if (paiSelecionado != null) {
-                query.setParameter("idPai", paiSelecionado.getPessoa().getId());
+            if (paiAtual != null) {
+                query.setParameter("idPai", paiAtual.getPessoa().getId());
+                System.out.println("🔍 Buscando por pai ID: " + paiAtual.getPessoa().getId());
             }
 
             List<Crianca> irmaos = query.getResultList();
@@ -1237,15 +1427,11 @@ public class CadastroMatriculaController {
                 irmaosEncontrados.addAll(irmaos);
                 exibirIrmaosEncontrados();
 
-                System.out.println("🔍 " + irmaos.size() + " irmão(s) encontrado(s) com os mesmos pais");
+                System.out.println("✅ " + irmaos.size() + " irmão(s) encontrado(s) com os mesmos pais");
+                for (Crianca irmao : irmaos) {
+                    System.out.println("   👶 " + irmao.getNome() + " - Nasc: " + irmao.getDataNascimento());
+                }
 
-                // Log dos pais selecionados para debug
-                if (maeSelecionada != null) {
-                    System.out.println("👩 Mãe selecionada: " + maeSelecionada.getPessoa().getNome());
-                }
-                if (paiSelecionado != null) {
-                    System.out.println("👨 Pai selecionado: " + paiSelecionado.getPessoa().getNome());
-                }
             } else {
                 EmptyCard emptyCard = new EmptyCard("Nenhum irmão encontrado com os pais selecionados.");
                 containerIrmaos.getChildren().add(emptyCard);
@@ -1270,8 +1456,102 @@ public class CadastroMatriculaController {
         // TODO: Fechar a tela ou voltar para lista
     }
 
+    private void aplicarMascaraNis() {
+        fieldNis.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                fieldNis.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+            if (newValue.length() > 11) {
+                fieldNis.setText(newValue.substring(0, 11));
+            }
+            validarNis();
+        });
+    }
+
+    // 🔥 NOVO: Aplicar máscaras para outros campos
+    private void aplicarMascaras() {
+        // Máscara para CPF
+        fieldCpfCrianca.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                fieldCpfCrianca.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+            if (newValue.length() > 11) {
+                fieldCpfCrianca.setText(newValue.substring(0, 11));
+            }
+        });
+
+        // Máscara para CEP
+        fieldCEP.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                fieldCEP.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+            if (newValue.length() > 8) {
+                fieldCEP.setText(newValue.substring(0, 8));
+            }
+        });
+
+        // Máscara para telefone
+        fieldTelefoneContato.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                fieldTelefoneContato.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
+
+        fieldTelefoneResidencial.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                fieldTelefoneResidencial.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
+    }
+
+    // 🔥 NOVO: Configurar validações
+    private void configurarValidacoes() {
+        // Validar data de nascimento (não pode ser futura)
+        datePickerNascimento.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && newValue.isAfter(LocalDate.now())) {
+                mostrarMensagem("Erro", "Data de nascimento não pode ser futura!");
+                datePickerNascimento.setValue(oldValue);
+            }
+        });
+
+        // Validar ano letivo
+        fieldAnoLetivo.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                fieldAnoLetivo.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+            if (newValue.length() > 4) {
+                fieldAnoLetivo.setText(newValue.substring(0, 4));
+            }
+        });
+    }
+
+    // Validação em tempo real do NIS
+    private void validarNis() {
+        String tipoAuxilio = comboTipoAuxilio.getValue();
+        String nis = fieldNis.getText().trim();
+
+        List<String> auxiliosQueExigemNIS = List.of(
+                "Bolsa Família", "BPC", "Auxílio Brasil", "Auxílio Emergencial"
+        );
+
+        boolean auxilioExigeNIS = tipoAuxilio != null &&
+                !tipoAuxilio.equals("Nenhum") &&
+                auxiliosQueExigemNIS.contains(tipoAuxilio);
+
+        if (auxilioExigeNIS) {
+            if (nis.isEmpty()) {
+                fieldNis.setStyle("-fx-border-color: #ff4444; -fx-border-width: 2px;");
+            } else if (nis.length() != 11) {
+                fieldNis.setStyle("-fx-border-color: #ff8800; -fx-border-width: 2px;");
+            } else {
+                fieldNis.setStyle("-fx-border-color: #00ff00; -fx-border-width: 1px;");
+            }
+        } else {
+            fieldNis.setStyle("");
+        }
+    }
+
     private boolean validarCamposObrigatorios() {
-        // Validar campos mais importantes
         if (fieldNomeCrianca.getText().trim().isEmpty()) {
             mostrarMensagem("Erro", "Nome da criança é obrigatório!");
             fieldNomeCrianca.requestFocus();
@@ -1296,6 +1576,12 @@ public class CadastroMatriculaController {
             return false;
         }
 
+        // Validar se pelo menos um responsável foi selecionado
+        if (maeSelecionada == null && paiSelecionado == null && responsavelSelecionado == null) {
+            mostrarMensagem("Erro", "Pelo menos um responsável (mãe, pai ou responsável) deve ser selecionado!");
+            return false;
+        }
+
         return true;
     }
 
@@ -1308,6 +1594,7 @@ public class CadastroMatriculaController {
         comboCorRaca.setValue(null);
         fieldSus.clear();
         fieldUnidadeSaude.clear();
+        fieldNis.clear();
 
         // Limpar combos do banco
         comboClassificacaoEspecial.setValue(null);
@@ -1321,10 +1608,62 @@ public class CadastroMatriculaController {
         fieldNumero.clear();
         fieldCEP.clear();
         comboUF.setValue(null);
+        fieldTelefoneResidencial.clear();
+        fieldTelefoneContato.clear();
+
+        // Limpar documentos
+        fieldCertidaoNascimento.clear();
+        fieldCpfCrianca.clear();
+        fieldMunicipioNascimento.clear();
+        fieldCartorioRegistro.clear();
+        fieldMunicipioRegistro.clear();
+        datePickerEmissaoRG.setValue(null);
+        fieldOrgaoEmissor.clear();
+
+        // Limpar situação habitacional
+        comboTipoMoradia.setValue(null);
+        fieldValorAluguel.clear();
+        fieldNumeroComodos.clear();
+        comboTipoPiso.setValue(null);
+        comboMaterialParede.setValue(null);
+        comboTipoCobertura.setValue(null);
+        checkFossa.setSelected(false);
+        checkCifon.setSelected(false);
+        checkEnergiaEletrica.setSelected(false);
+        checkAguaEncanada.setSelected(false);
+
+        // Limpar bens
+        checkTV.setSelected(false);
+        checkDVD.setSelected(false);
+        checkComputador.setSelected(false);
+        checkInternet.setSelected(false);
+        checkGeladeira.setSelected(false);
+        checkFogao.setSelected(false);
+        checkMaquinaLavar.setSelected(false);
+        checkMicroondas.setSelected(false);
+        checkCarro.setSelected(false);
+        checkMoto.setSelected(false);
 
         // Limpar série
         comboSerie.setValue(null);
         fieldAnoLetivo.clear();
+
+        // Limpar tabelas
+        membrosFamiliares.clear();
+        pessoaAutorizadas.clear();
+
+        // Limpar seleção de responsáveis
+        maeSelecionada = null;
+        paiSelecionado = null;
+        responsavelSelecionado = null;
+
+        // Recarregar os containers de responsáveis
+        carregarMaes();
+        carregarPais();
+        carregarResponsaveis();
+
+        // Limpar irmãos
+        limparDetecaoIrmaos();
     }
 
     private void mostrarMensagem(String titulo, String mensagem) {
@@ -1338,5 +1677,6 @@ public class CadastroMatriculaController {
     @FXML
     private void importarAnexo() {
         System.out.println("Importando anexo...");
+        // TODO: Implementar importação de anexos
     }
 }

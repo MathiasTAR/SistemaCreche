@@ -82,8 +82,6 @@ public class FiliacaoResponsavelController {
                     pessoa.setRg(getRgFormatadoParaBanco());
                     pessoa.setTelefone(getCelularFormatadoParaBanco());
                     pessoa.setOutroContato(getOutroContatoFormatadoParaBanco());
-                    pessoa.setDataNascimento(Date.valueOf(LocalDate.now().minusYears(30)));
-                    pessoa.setEmail("");
 
                     em.persist(pessoa);
                     System.out.println("✅ Nova pessoa criada: " + pessoa.getNome());
@@ -279,7 +277,7 @@ public class FiliacaoResponsavelController {
         // === OUTRO CONTATO ===
         if (!fieldOutroContato.getText().trim().isEmpty() &&
                 !validarTelefone(fieldOutroContato.getText())) {
-            mostrarErro("Outro contato inválido!\nFormato: (11) 9999-9999");
+            mostrarErro("Outro contato inválido!\nFormato: (98) 9999-9999");
             fieldOutroContato.requestFocus();
             return false;
         }

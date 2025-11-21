@@ -87,14 +87,15 @@
                         </VBox>
 
                         <VBox spacing="3" GridPane.columnIndex="2" GridPane.rowIndex="3">
-                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Restrição Alimentar" />
-                            <ComboBox fx:id="comboRestricaoAlimentar" prefHeight="35.0" prefWidth="190.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
-                        </VBox>
-
-                        <VBox spacing="3" GridPane.columnIndex="3" GridPane.rowIndex="3">
                             <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Tipo de Auxílio" />
                             <ComboBox fx:id="comboTipoAuxilio" prefHeight="35.0" prefWidth="190.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
+
+                        <VBox spacing="3" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Número NIS" />
+                            <TextField fx:id="fieldNis" prefHeight="35.0" prefWidth="190.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                        </VBox>
+
                   <VBox layoutX="632.0" layoutY="224.0" spacing="3" GridPane.columnIndex="2" GridPane.rowIndex="2">
                      <children>
                         <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Mobilidade Reduzida" />
@@ -120,7 +121,7 @@
                 </Label>
 
                 <!-- Mãe -->
-                <VBox prefWidth="815.0" spacing="10">
+                <VBox spacing="10">
                     <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Mãe" />
 
                     <!-- Barra de pesquisa -->
@@ -133,7 +134,7 @@
                     <!-- Lista de resultados -->
                     <ScrollPane prefHeight="200.0" style="-fx-background-color: #f8f8f8; -fx-border-color: #c8e1e6;">
                         <VBox spacing="5" style="-fx-padding: 10;">
-                            <HBox alignment="CENTER_LEFT" prefWidth="2000.0" spacing="10">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
                                 <VBox fx:id="cardsContainerMaes" spacing="10.0" style="-fx-background-color: #f8fdf8;" />
                             </HBox>
                         </VBox>

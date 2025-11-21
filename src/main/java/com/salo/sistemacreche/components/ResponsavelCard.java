@@ -24,6 +24,23 @@ public class ResponsavelCard extends VBox {
         setupLayout();
         applyStyles();
         loadResponsavelData();
+
+        // Configurar clique em qualquer lugar do card
+        configurarCliqueNoCard();
+    }
+
+    // NOVO MÉTODO: Configurar clique em qualquer lugar do card
+    private void configurarCliqueNoCard() {
+        this.setOnMouseClicked(event -> {
+            // Não faz nada se clicou diretamente no checkbox ou botão editar
+            if (event.getTarget() instanceof CheckBox || event.getTarget() instanceof Button) {
+                return;
+            }
+
+            // Alterna a seleção quando clicar em qualquer outro lugar do card
+            System.out.println("Clicado em lugar");
+            setSelecionado(!selecionado);
+        });
     }
 
     private void initializeComponents() {
@@ -139,8 +156,10 @@ public class ResponsavelCard extends VBox {
 
         if (selecionado && onSelectAction != null) {
             onSelectAction.run();
+            System.out.println("Selecionado");
         } else if (!selecionado && onDeselectAction != null) {
             onDeselectAction.run();
+            System.out.println("Desselecionado");
         }
     }
 
