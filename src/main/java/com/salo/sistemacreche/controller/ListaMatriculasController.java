@@ -45,13 +45,13 @@
         }
 
         private SituacaoMatricula converterStringParaSituacaoEnum(String situacao) {
-            switch(situacao) {
-                case "Concluída": return SituacaoMatricula.CONCLUIDA;
-                case "Cancelada": return SituacaoMatricula.CANCELADA;
-                case "Vencida": return  SituacaoMatricula.VENCIDA;
-                case "Matriculado": return SituacaoMatricula.ATIVA;
-                default: return null;
-            }
+            return switch (situacao) {
+                case "Concluída" -> SituacaoMatricula.CONCLUIDA;
+                case "Cancelada" -> SituacaoMatricula.CANCELADA;
+                case "Vencida" -> SituacaoMatricula.VENCIDA;
+                case "Matriculado" -> SituacaoMatricula.ATIVA;
+                default -> null;
+            };
         }
 
         @FXML
@@ -87,8 +87,6 @@
                     return;
                 }
 
-                System.out.println("🔍 Executando busca com filtros...");
-                System.out.println("📊 Situação selecionada: " + comboSituacao.getValue());
 
                 // Usando JPQL para maior simplicidade e controle
                 StringBuilder jpql = new StringBuilder(

@@ -1,8 +1,6 @@
 package com.salo.sistemacreche.controller;
 
-import com.salo.sistemacreche.components.EmptyCard;
-import com.salo.sistemacreche.components.IrmaoCard;
-import com.salo.sistemacreche.components.ResponsavelCard;
+import com.salo.sistemacreche.components.*;
 import com.salo.sistemacreche.controller.extracadastro.FiliacaoResponsavelController;
 import com.salo.sistemacreche.controller.extracadastro.MembroFamiliarController;
 import com.salo.sistemacreche.controller.extracadastro.PessoaAutorizadaController;
@@ -29,6 +27,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CadastroMatriculaController {
@@ -89,16 +88,10 @@ public class CadastroMatriculaController {
     @FXML private CheckBox checkAguaEncanada;
 
     // Seção 6: Bens
-    @FXML private CheckBox checkTV;
-    @FXML private CheckBox checkDVD;
-    @FXML private CheckBox checkComputador;
-    @FXML private CheckBox checkInternet;
-    @FXML private CheckBox checkGeladeira;
-    @FXML private CheckBox checkFogao;
-    @FXML private CheckBox checkMaquinaLavar;
-    @FXML private CheckBox checkMicroondas;
-    @FXML private CheckBox checkCarro;
-    @FXML private CheckBox checkMoto;
+    private CheckBoxTemplate checkBoxTemplateBens;
+
+    // Substitua a seção de bens no FXML por:
+    @FXML private VBox containerBens;
 
     // Seção 7: Composição Familiar
     @FXML private TableView<MembroFamilia> tableComposicaoFamiliar;
@@ -114,6 +107,7 @@ public class CadastroMatriculaController {
 
     // Seção 11: Irmão Gêmeo
     @FXML private VBox containerIrmaos;
+    @FXML private CheckBox checkIrmaoGemeo;
     private final ObservableList<Crianca> irmaosEncontrados = FXCollections.observableArrayList();
 
     // Botões
@@ -143,6 +137,13 @@ public class CadastroMatriculaController {
         aplicarMascaraNis();
         aplicarMascaras();
         configurarValidacoes();
+    }
+
+    private void carregarDadosDoBanco() {
+        carregarClassificacoesEspeciais();
+        carregarAlergias();
+        carregarTiposAuxilio();
+        configurarBensFamilia();
     }
 
     private void configurarComboBoxFixos() {
@@ -191,12 +192,6 @@ public class CadastroMatriculaController {
         comboSerie.setItems(FXCollections.observableArrayList(
                 "Berçário I", "Berçário II", "Maternal I", "Maternal II", "Pré I", "Pré II"
         ));
-    }
-
-    private void carregarDadosDoBanco() {
-        carregarClassificacoesEspeciais();
-        carregarAlergias();
-        carregarTiposAuxilio();
     }
 
     private void carregarClassificacoesEspeciais() {
@@ -292,6 +287,71 @@ public class CadastroMatriculaController {
             if (em != null && em.isOpen()) {
                 em.close();
             }
+        }
+    }
+
+    // NOVO MÉTODO: Configurar sistema de bens da família
+    private void configurarBensFamilia() {
+        // Inicializar o template
+        checkBoxTemplateBens = new CheckBoxTemplate();
+
+        // Carregar tipos de bem do banco
+        List<TipoBem> todosTiposBem = carregarTiposBemDoBanco();
+        checkBoxTemplateBens.carregarTiposBem(todosTiposBem);
+
+        // Adicionar ao container
+        containerBens.getChildren().clear();
+        containerBens.getChildren().add(checkBoxTemplateBens);
+    }
+
+    // NOVO MÉTODO: Carregar tipos de bem do banco
+    private List<TipoBem> carregarTiposBemDoBanco() {
+        EntityManager em = null;
+        try {
+            em = DBConnection.getEntityManager();
+
+            TypedQuery<TipoBem> query = em.createQuery(
+                    "SELECT t FROM TipoBem t ORDER BY t.nomeBem",
+                    TipoBem.class
+            );
+
+            List<TipoBem> tiposBem = query.getResultList();
+            System.out.println("✅ " + tiposBem.size() + " tipo(s) de bem carregado(s)");
+
+            return tiposBem;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao carregar tipos de bem: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>(); // Retorna lista vazia em caso de erro
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+    }
+
+    // NOVO MÉTODO: Obter bens selecionados para salvar
+    private List<TipoBem> getBensSelecionados() {
+        if (checkBoxTemplateBens != null) {
+            // Converter ObservableList para ArrayList
+            System.out.println("Selecionado");
+            return new ArrayList<>(checkBoxTemplateBens.getTiposBemSelecionados());
+        }
+        return new ArrayList<>();
+    }
+
+    // NOVO MÉTODO: Para edição - pré-selecionar bens
+    private void setBensSelecionados(List<TipoBem> bensSelecionados) {
+        if (checkBoxTemplateBens != null && bensSelecionados != null) {
+            checkBoxTemplateBens.setTiposBemSelecionados(bensSelecionados);
+        }
+    }
+
+    // NOVO MÉTODO: Limpar seleção de bens
+    private void limparBensSelecionados() {
+        if (checkBoxTemplateBens != null) {
+            checkBoxTemplateBens.clearAllSelections();
         }
     }
 
@@ -479,9 +539,8 @@ public class CadastroMatriculaController {
         }
     }
 
-    // ✅ NOVO MÉTODO: Configurar ações do card de forma centralizada
+    // Configurar ações do card
     private void configurarAcoesDoCard(ResponsavelCard card, VBox container, Responsavel responsavel) {
-        // 🔥 CORREÇÃO CRÍTICA: Usar onSelectAction (não onEditAction)
         card.setOnEditAction(() -> {
             System.out.println("🎯 SELECT ACTION - Selecionado: " + responsavel.getPessoa().getNome());
 
@@ -831,28 +890,31 @@ public class CadastroMatriculaController {
             Crianca crianca = criarCrianca(em);
             em.persist(crianca);
 
-            // 2. Associar responsáveis à criança
-            associarResponsaveisACrianca(em, crianca);
-
             // 3. Criar e salvar Endereço
             Endereco endereco = criarEndereco();
             em.persist(endereco);
+
+            // REMOVIDO: crianca.setEndereco(endereco); // Se não existe na entidade Crianca
+            // Em vez disso, ajuste sua entidade Endereco para ter referência à Crianca se necessário
 
             // 4. Criar e salvar Matrícula
             Matricula matricula = criarMatricula(crianca);
             em.persist(matricula);
 
-            // 5. Salvar Situação Habitacional (AGORA INCLUI OS BENS)
+            // 5. Salvar Situação Habitacional
             SituacaoHabitacional situacaoHabitacional = criarSituacaoHabitacional(crianca);
             em.persist(situacaoHabitacional);
 
-            // 6. Salvar Membros da Família
+            // 6. Salvar Bens da Família
+            salvarBensFamilia(em, crianca);
+
+            // 7. Salvar Membros da Família
             salvarMembrosFamilia(em, crianca);
 
-            // 7. Salvar Pessoas Autorizadas
+            // 8. Salvar Pessoas Autorizadas
             salvarPessoasAutorizadas(em, crianca);
 
-            // 8. Salvar Composição Familiar
+            // 9. Salvar Composição Familiar
             salvarComposicaoFamiliar(em, crianca);
 
             transaction.commit();
@@ -876,6 +938,37 @@ public class CadastroMatriculaController {
         }
     }
 
+    private void salvarBensFamilia(EntityManager em, Crianca crianca) {
+        List<TipoBem> bensSelecionados = getBensSelecionados();
+
+        if (bensSelecionados.isEmpty()) {
+            System.out.println("ℹ️ Nenhum bem selecionado para salvar");
+            return;
+        }
+
+        for (TipoBem tipoBem : bensSelecionados) {
+            try {
+                // Verificar se o tipoBem já está managed
+                TipoBem managedTipoBem = em.find(TipoBem.class, tipoBem.getIdTipoBem());
+                if (managedTipoBem == null) {
+                    // Se não estiver managed, tentar fazer merge
+                    managedTipoBem = em.merge(tipoBem);
+                }
+
+                // Criar e persistir o BensFamilia
+                TipoBem bemFamilia = new TipoBem(crianca, managedTipoBem);
+                em.persist(bemFamilia);
+
+                System.out.println("✅ Bem salvo: " + tipoBem.getNomeBem() + " (ID: " + tipoBem.getIdTipoBem() + ")");
+
+            } catch (Exception e) {
+                System.err.println("❌ Erro ao salvar bem: " + tipoBem.getNomeBem() + " - " + e.getMessage());
+            }
+        }
+
+        System.out.println("✅ " + bensSelecionados.size() + " bem(ns) da família salvos no banco");
+    }
+
     // NOVO MÉTODO: Associar responsáveis à criança
     private void associarResponsaveisACrianca(EntityManager em, Crianca crianca) {
         if (maeSelecionada != null) {
@@ -894,7 +987,7 @@ public class CadastroMatriculaController {
         }
     }
 
-    // 🔥 NOVO MÉTODO: Validar se auxílio obrigatório tem NIS
+    // NOVO MÉTODO: Validar se auxílio obrigatório tem NIS
     private boolean validarAuxilioComNIS() {
         String tipoAuxilio = comboTipoAuxilio.getValue();
         String nis = fieldNis.getText().trim();
@@ -916,49 +1009,80 @@ public class CadastroMatriculaController {
         return true;
     }
 
-    // 🔥 MÉTODO CRIAR CRIANÇA COMPLETO
+    // MÉTODO CRIAR CRIANÇA COMPLETO
     private Crianca criarCrianca(EntityManager em) {
         Crianca crianca = new Crianca();
 
-        // Dados básicos
+        // === DADOS BÁSICOS OBRIGATÓRIOS ===
         crianca.setNome(fieldNomeCrianca.getText().trim());
-        crianca.setDataNascimento(java.sql.Date.valueOf(datePickerNascimento.getValue()));
 
-        // RG e documentos
+        if (datePickerNascimento.getValue() != null) {
+            crianca.setDataNascimento(java.sql.Date.valueOf(datePickerNascimento.getValue()));
+        } else {
+            throw new IllegalArgumentException("Data de nascimento é obrigatória");
+        }
+
+        // === DOCUMENTOS ===
         crianca.setRG(fieldRgCrianca.getText().trim());
         crianca.setCPF(fieldCpfCrianca.getText().trim());
+        crianca.setCertidaoNascimentoNum(fieldCertidaoNascimento.getText().trim());
+        crianca.setMunicipioNascimento(fieldMunicipioNascimento.getText().trim());
+        crianca.setCartorioRegistro(fieldCartorioRegistro.getText().trim());
+        crianca.setMunicipioRegistro(fieldMunicipioRegistro.getText().trim());
 
-        // Sexo
+        if (datePickerEmissaoRG.getValue() != null) {
+            crianca.setDataEmissaoCertidao(java.sql.Date.valueOf(datePickerEmissaoRG.getValue()));
+        }
+        crianca.setOrgEmissorCertidao(fieldOrgaoEmissor.getText().trim());
+
+        // === SEXO ===
         String sexoValue = comboSexo.getValue();
         if (sexoValue != null) {
-            try {
-                crianca.setSexo(Crianca.Sexo.valueOf(sexoValue.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                crianca.setSexo(Crianca.Sexo.OUTRO);
+            switch (sexoValue.toLowerCase()) {
+                case "masculino":
+                    crianca.setSexo(Crianca.Sexo.MASCULINO);
+                    break;
+                case "feminino":
+                    crianca.setSexo(Crianca.Sexo.FEMININO);
+                    break;
+                default:
+                    crianca.setSexo(Crianca.Sexo.OUTRO);
+                    break;
             }
+        } else {
+            throw new IllegalArgumentException("Sexo é obrigatório");
         }
 
-        // Cor/Raça
+        // === COR/RAÇA ===
         String corRacaValue = comboCorRaca.getValue();
         if (corRacaValue != null) {
-            try {
-                crianca.setCorRaca(Crianca.CorRaca.valueOf(corRacaValue.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                crianca.setCorRaca(Crianca.CorRaca.OUTRO);
+            switch (corRacaValue.toLowerCase()) {
+                case "branca":
+                    crianca.setCorRaca(Crianca.CorRaca.BRANCA);
+                    break;
+                case "preta":
+                    crianca.setCorRaca(Crianca.CorRaca.PRETA);
+                    break;
+                case "parda":
+                    crianca.setCorRaca(Crianca.CorRaca.PARDA);
+                    break;
+                case "amarela":
+                    crianca.setCorRaca(Crianca.CorRaca.AMARELA);
+                    break;
+                case "indígena":
+                    crianca.setCorRaca(Crianca.CorRaca.INDIGENA);
+                    break;
+                default:
+                    crianca.setCorRaca(Crianca.CorRaca.OUTRO);
+                    break;
             }
         }
 
-        // Saúde
-        crianca.setCartSus(fieldSus.getText() != null ? fieldSus.getText().trim() : null);
+        // === SAÚDE ===
+        crianca.setCartSus(fieldSus.getText().trim());
         crianca.setUnidadeSaude(fieldUnidadeSaude.getText().trim());
 
-        // NIS - Salvar no responsável
-        String nisValue = fieldNis.getText().trim();
-        if (!nisValue.isEmpty() && crianca.getResponsavel() != null) {
-            crianca.getResponsavel().setNumeroNis(nisValue);
-        }
-
-        // Mobilidade reduzida
+        // === MOBILIDADE REDUZIDA ===
         String mobilidadeValue = comboMobilidadeReduzida.getValue();
         if (mobilidadeValue != null) {
             if (mobilidadeValue.contains("temporária")) {
@@ -968,52 +1092,166 @@ public class CadastroMatriculaController {
             } else {
                 crianca.setMobRed(Crianca.MobRed.NENHUMA);
             }
+        } else {
+            crianca.setMobRed(Crianca.MobRed.NENHUMA);
         }
 
-        // Educação especial
+        // === EDUCAÇÃO ESPECIAL ===
         String educacaoEspecialValue = comboEducacaoEspecial.getValue();
         crianca.setEducEspecial("Sim".equals(educacaoEspecialValue));
 
-        // Classificação especial
+        // === CLASSIFICAÇÃO ESPECIAL ===
         String classificacaoValue = comboClassificacaoEspecial.getValue();
         if (classificacaoValue != null && !classificacaoValue.equals("Nenhum")) {
-            ClassificacaoEspecial classificacao = em.createQuery(
-                    "SELECT c FROM ClassificacaoEspecial c WHERE c.classificacaoEspecial = :nome",
-                    ClassificacaoEspecial.class
-            ).setParameter("nome", classificacaoValue).getSingleResult();
-            crianca.setClassificacaoEspecial(classificacao);
-            crianca.setStatusClassificacaoEspecial(true);
+            try {
+                ClassificacaoEspecial classificacao = em.createQuery(
+                        "SELECT c FROM ClassificacaoEspecial c WHERE c.classificacaoEspecial = :nome",
+                        ClassificacaoEspecial.class
+                ).setParameter("nome", classificacaoValue).getSingleResult();
+                crianca.setClassificacaoEspecial(classificacao);
+                crianca.setStatusClassificacaoEspecial(true);
+            } catch (Exception e) {
+                System.err.println("❌ Classificação especial não encontrada: " + classificacaoValue);
+                crianca.setStatusClassificacaoEspecial(false);
+            }
+        } else {
+            crianca.setStatusClassificacaoEspecial(false);
         }
 
-        // Alergias
+        // === ALERGIAS ===
         String alergiaValue = comboAlergias.getValue();
         crianca.setAlergia(alergiaValue != null && !alergiaValue.equals("Nenhum"));
 
+        // === IRMÃO GÊMEO ===
+        boolean possuiIrmaoGemeo = checkIrmaoGemeo != null && checkIrmaoGemeo.isSelected();
+        crianca.setPossuiIrmaoGemeo(possuiIrmaoGemeo);
 
-        // Documentos
-        crianca.setCertidaoNascimentoNum(fieldCertidaoNascimento.getText().trim());
-        crianca.setMunicipioNascimento(fieldMunicipioNascimento.getText().trim());
-        crianca.setCartorioRegistro(fieldCartorioRegistro.getText().trim());
-        crianca.setMunicipioRegistro(fieldMunicipioRegistro.getText().trim());
+        // === CAMPOS COM VALORES PADRÃO (PARA EVITAR NULL) ===
+        crianca.setDefMulti(false);
+        crianca.setPossuiIrmaoCreche(false);
+        crianca.setRestricaoAlimentar(false);
 
-        // Data emissão RG
-        if (datePickerEmissaoRG.getValue() != null) {
-            crianca.setDataEmissaoCertidao(java.sql.Date.valueOf(datePickerEmissaoRG.getValue()));
-        }
-        crianca.setOrgEmissorCertidao(fieldOrgaoEmissor.getText().trim());
+        // REMOVIDO: crianca.setObservacoes(null); // Se não existe na entidade
 
-        // Auxílio governo
+        // Se existir algum campo de observações na sua entidade, use o nome correto
+        // crianca.setObservacao(null); // ou whatever o nome correto
+
+        // === AUXÍLIO GOVERNO ===
         String auxilioValue = comboTipoAuxilio.getValue();
-        crianca.setResponsavelBeneficiarioAuxilioGov(auxilioValue != null && !auxilioValue.equals("Nenhum"));
-        if (auxilioValue != null && !auxilioValue.equals("Nenhum")) {
-            TipoAuxilio tipoAuxilio = em.createQuery(
-                    "SELECT t FROM TipoAuxilio t WHERE t.nomeAuxilio = :nome",
-                    TipoAuxilio.class
-            ).setParameter("nome", auxilioValue).getSingleResult();
-            crianca.setTipoAuxilio(tipoAuxilio);
+        boolean temAuxilio = auxilioValue != null && !auxilioValue.equals("Nenhum");
+        crianca.setResponsavelBeneficiarioAuxilioGov(temAuxilio);
+
+        if (temAuxilio) {
+            try {
+                TipoAuxilio tipoAuxilio = em.createQuery(
+                        "SELECT t FROM TipoAuxilio t WHERE t.nomeAuxilio = :nome",
+                        TipoAuxilio.class
+                ).setParameter("nome", auxilioValue).getSingleResult();
+                crianca.setTipoAuxilio(tipoAuxilio);
+            } catch (Exception e) {
+                System.err.println("❌ Tipo de auxílio não encontrado: " + auxilioValue);
+            }
         }
+
+        // === NIS (SALVAR NO RESPONSÁVEL SE EXISTIR) ===
+        String nisValue = fieldNis.getText().trim();
+        if (!nisValue.isEmpty()) {
+            // Se já temos um responsável selecionado, associar o NIS a ele
+            if (responsavelSelecionado != null) {
+                // Buscar o responsável managed
+                Responsavel responsavelManaged = em.find(Responsavel.class, responsavelSelecionado.getId());
+                if (responsavelManaged != null) {
+                    responsavelManaged.setNumeroNis(nisValue);
+                    crianca.setResponsavel(responsavelManaged);
+                }
+            } else if (maeSelecionada != null) {
+                // Ou associar à mãe se for o caso
+                Responsavel maeManaged = em.find(Responsavel.class, maeSelecionada.getId());
+                if (maeManaged != null) {
+                    maeManaged.setNumeroNis(nisValue);
+                }
+            }
+        }
+
+        // === ASSOCIAR RESPONSÁVEIS ===
+        if (maeSelecionada != null) {
+            try {
+                Pessoa maeManaged = em.find(Pessoa.class, maeSelecionada.getPessoa().getId());
+                crianca.setMae(maeManaged);
+                System.out.println("👩 Mãe associada: " + maeManaged.getNome());
+            } catch (Exception e) {
+                System.err.println("❌ Erro ao associar mãe: " + e.getMessage());
+            }
+        }
+
+        if (paiSelecionado != null) {
+            try {
+                Pessoa paiManaged = em.find(Pessoa.class, paiSelecionado.getPessoa().getId());
+                crianca.setPai(paiManaged);
+                System.out.println("👨 Pai associado: " + paiManaged.getNome());
+            } catch (Exception e) {
+                System.err.println("❌ Erro ao associar pai: " + e.getMessage());
+            }
+        }
+
+        if (responsavelSelecionado != null) {
+            try {
+                Responsavel responsavelManaged = em.find(Responsavel.class, responsavelSelecionado.getId());
+                crianca.setResponsavel(responsavelManaged);
+                System.out.println("👤 Responsável associado: " + responsavelManaged.getPessoa().getNome());
+            } catch (Exception e) {
+                System.err.println("❌ Erro ao associar responsável: " + e.getMessage());
+            }
+        }
+
+        // === VALIDAÇÃO FINAL DOS CAMPOS OBRIGATÓRIOS ===
+        validarCamposCrianca(crianca);
+
+        System.out.println("✅ Criança criada com sucesso: " + crianca.getNome());
+        System.out.println("   📅 Nascimento: " + crianca.getDataNascimento());
+        System.out.println("   👦 Sexo: " + crianca.getSexo());
+        System.out.println("   🏠 Mãe: " + (crianca.getMae() != null ? crianca.getMae().getNome() : "Nenhuma"));
+        System.out.println("   🏠 Pai: " + (crianca.getPai() != null ? crianca.getPai().getNome() : "Nenhum"));
 
         return crianca;
+    }
+
+    // ✅ MÉTODO PARA VALIDAR CAMPOS OBRIGATÓRIOS DA CRIANÇA
+    private void validarCamposCrianca(Crianca crianca) {
+        System.out.println("=== VALIDAÇÃO DOS CAMPOS DA CRIANÇA ===");
+
+        // Campos NOT NULL que devem ser verificados
+        if (crianca.getDefMulti() == null) {
+            System.err.println("❌ DEF_MULTI é null - definindo como false");
+            crianca.setDefMulti(false);
+        }
+
+        if (crianca.getPossuiIrmaoCreche() == null) {
+            System.err.println("❌ POSSUI_IRMAO_CRECHE é null - definindo como false");
+            crianca.setPossuiIrmaoCreche(false);
+        }
+
+        if (crianca.getRestricaoAlimentar() == null) {
+            System.err.println("❌ RESTRICAO_ALIMENTAR é null - definindo como false");
+            crianca.setRestricaoAlimentar(false);
+        }
+
+        if (crianca.getAlergia() == null) {
+            System.err.println("❌ ALERGIA é null - definindo como false");
+            crianca.setAlergia(false);
+        }
+
+        if (crianca.getEducEspecial() == null) {
+            System.err.println("❌ EDUC_ESPECIAL é null - definindo como false");
+            crianca.setEducEspecial(false);
+        }
+
+        if (crianca.getResponsavelBeneficiarioAuxilioGov() == null) {
+            System.err.println("❌ RESPONSAVEL_BENEFICIARIO_AUXILIO_GOV é null - definindo como false");
+            crianca.setResponsavelBeneficiarioAuxilioGov(false);
+        }
+
+        System.out.println("✅ Todos os campos obrigatórios validados");
     }
 
     // 🔥 MÉTODO CORRIGIDO: Criar situação habitacional com bens
@@ -1053,28 +1291,10 @@ public class CadastroMatriculaController {
         situacao.setTipoMoradia(converterParaTipoMoradia(comboMaterialParede.getValue()));
         situacao.setTipoCobertura(converterParaTipoCobertura(comboTipoCobertura.getValue()));
 
-        // Serviços públicos
-        situacao.setFossa(checkFossa.isSelected());
-        situacao.setCifon(checkCifon.isSelected());
-        situacao.setEnergiaEletrica(checkEnergiaEletrica.isSelected());
-        situacao.setAguaEncanada(checkAguaEncanada.isSelected());
-
-        // 🔥 BENS DA FAMÍLIA - Agora dentro da mesma tabela
-        situacao.setTv(checkTV.isSelected());
-        situacao.setDvd(checkDVD.isSelected());
-        situacao.setComputador(checkComputador.isSelected());
-        situacao.setInternet(checkInternet.isSelected());
-        situacao.setGeladeira(checkGeladeira.isSelected());
-        situacao.setFogao(checkFogao.isSelected());
-        situacao.setMaquinaLavar(checkMaquinaLavar.isSelected());
-        //situacao.set(checkMicroondas.isSelected());
-        situacao.setCarro(checkCarro.isSelected());
-        situacao.setMoto(checkMoto.isSelected());
-
         return situacao;
     }
 
-    // 🔥 MÉTODOS AUXILIARES PARA CONVERSÃO DE ENUMS
+    // MÉTODOS AUXILIARES PARA CONVERSÃO DE ENUMS
     private SituacaoHabitacional.TipoPiso converterParaTipoPiso(String valor) {
         if (valor == null) return null;
 
@@ -1371,6 +1591,17 @@ public class CadastroMatriculaController {
         return null;
     }
 
+    // MÉTODO PARA LIMPAR SELEÇÃO DE GÊMEOS
+    public void limparSelecaoGemeos() {
+        checkIrmaoGemeo.setSelected(false);
+        for (javafx.scene.Node node : containerIrmaos.getChildren()) {
+            if (node instanceof IrmaoCard) {
+                IrmaoCard card = (IrmaoCard) node;
+                card.setSelecionado(false);
+            }
+        }
+    }
+
     // MÉTODO PARA DETECTAR IRMÃOS AUTOMATICAMENTE - COM MELHOR DEBUG
     private void detectarIrmaosAutomaticamente() {
         System.out.println("🔍 INICIANDO DETECÇÃO DE IRMÃOS...");
@@ -1627,22 +1858,9 @@ public class CadastroMatriculaController {
         comboTipoPiso.setValue(null);
         comboMaterialParede.setValue(null);
         comboTipoCobertura.setValue(null);
-        checkFossa.setSelected(false);
-        checkCifon.setSelected(false);
-        checkEnergiaEletrica.setSelected(false);
-        checkAguaEncanada.setSelected(false);
 
         // Limpar bens
-        checkTV.setSelected(false);
-        checkDVD.setSelected(false);
-        checkComputador.setSelected(false);
-        checkInternet.setSelected(false);
-        checkGeladeira.setSelected(false);
-        checkFogao.setSelected(false);
-        checkMaquinaLavar.setSelected(false);
-        checkMicroondas.setSelected(false);
-        checkCarro.setSelected(false);
-        checkMoto.setSelected(false);
+        limparBensSelecionados();
 
         // Limpar série
         comboSerie.setValue(null);
