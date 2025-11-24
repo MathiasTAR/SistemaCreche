@@ -508,7 +508,7 @@
 
             <!-- Botões de ação -->
             <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 10 10 0 10;">
-                <Button fx:id="btnSalvar" mnemonicParsing="false" onAction="#salvarMatricula" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 150; -fx-pref-height: 35;" text="Salvar Matrícula" />
+                <Button fx:id="btnSalvar" mnemonicParsing="false" onAction="#salvarPreMatricula" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 150; -fx-pref-height: 35;" text="Salvar Matrícula" />
                 <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#cancelarCadastro" style="-fx-background-color: #b02e50; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 100; -fx-pref-height: 35;" text="Cancelar" />
             </HBox>
         </VBox>

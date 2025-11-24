@@ -869,7 +869,7 @@ public class CadastroMatriculaController {
     }
 
     @FXML
-    public void salvarMatricula() {
+    public void salvarPreMatricula() {
         EntityManager em = null;
         EntityTransaction transaction = null;
 
@@ -890,47 +890,44 @@ public class CadastroMatriculaController {
             Crianca crianca = criarCrianca(em);
             em.persist(crianca);
 
-            // 3. Criar e salvar Endereço
+            // 2. Criar e salvar Endereço
             Endereco endereco = criarEndereco();
             em.persist(endereco);
 
-            // REMOVIDO: crianca.setEndereco(endereco); // Se não existe na entidade Crianca
-            // Em vez disso, ajuste sua entidade Endereco para ter referência à Crianca se necessário
-
-            // 4. Criar e salvar Matrícula
-            Matricula matricula = criarMatricula(crianca);
-            em.persist(matricula);
-
-            // 5. Salvar Situação Habitacional
+            // 3. Salvar Situação Habitacional
             SituacaoHabitacional situacaoHabitacional = criarSituacaoHabitacional(crianca);
             em.persist(situacaoHabitacional);
 
-            // 6. Salvar Bens da Família
+            // 4. Criar e salvar Pré-Matrícula (AGORA É PRE-MATRÍCULA)
+            PreMatricula preMatricula = criarPreMatricula(crianca, situacaoHabitacional);
+            em.persist(preMatricula);
+
+            // 5. Salvar Bens da Família
             salvarBensFamilia(em, crianca);
 
-            // 7. Salvar Membros da Família
+            // 6. Salvar Membros da Família
             salvarMembrosFamilia(em, crianca);
 
-            // 8. Salvar Pessoas Autorizadas
+            // 7. Salvar Pessoas Autorizadas
             salvarPessoasAutorizadas(em, crianca);
 
-            // 9. Salvar Composição Familiar
+            // 8. Salvar Composição Familiar
             salvarComposicaoFamiliar(em, crianca);
 
             transaction.commit();
 
-            mostrarMensagem("Sucesso", "Matrícula cadastrada com sucesso!");
+            mostrarMensagem("Sucesso", "Pré-matrícula cadastrada com sucesso! Situação: EM ANÁLISE");
             limparFormulario();
 
-            System.out.println("✅ Matrícula salva com ID: " + matricula.getId());
+            System.out.println("✅ Pré-matrícula salva com ID: " + preMatricula.getId());
 
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            System.err.println("❌ Erro ao salvar matrícula: " + e.getMessage());
+            System.err.println("❌ Erro ao salvar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
-            mostrarMensagem("Erro", "Erro ao salvar matrícula: " + e.getMessage());
+            mostrarMensagem("Erro", "Erro ao salvar pré-matrícula: " + e.getMessage());
         } finally {
             if (em != null && em.isOpen()) {
                 em.close();
@@ -1349,29 +1346,22 @@ public class CadastroMatriculaController {
         return endereco;
     }
 
-    private Matricula criarMatricula(Crianca crianca) {
-        Matricula matricula = new Matricula();
+    private PreMatricula criarPreMatricula(Crianca crianca, SituacaoHabitacional situacaoHabitacional) {
+        PreMatricula preMatricula = new PreMatricula();
 
-        matricula.setCrianca(crianca);
-        matricula.setDataMatricula(new java.sql.Date(System.currentTimeMillis()));
-        matricula.setSerie(comboSerie.getValue());
+        preMatricula.setCrianca(crianca);
+        preMatricula.setDataPreMatricula(new java.sql.Date(System.currentTimeMillis()));
+        preMatricula.setSituacaoHabitacional(situacaoHabitacional);
 
-        // Ano letivo
-        try {
-            matricula.setAnoLetivo(Integer.parseInt(fieldAnoLetivo.getText().trim()));
-        } catch (NumberFormatException e) {
-            matricula.setAnoLetivo(java.time.LocalDate.now().getYear());
-        }
+        // Situação padrão: EM_ANALISE
+        preMatricula.setSituacaoPreMatricula(PreMatricula.SituacaoPreMatricula.EM_ANALISE);
 
-        matricula.setOrientacaoRecebida(false);
-        matricula.setSituacaoMatricula(Matricula.SituacaoMatricula.ATIVA);
+        // Observação opcional - você pode adicionar um campo no FXML se quiser
+        preMatricula.setObservacao("Pré-matrícula cadastrada em " + new java.util.Date());
 
-        // Data de vencimento (1 ano a partir de hoje)
-        java.time.LocalDate hoje = java.time.LocalDate.now();
-        java.time.LocalDate vencimento = hoje.plusYears(1);
-        matricula.setDataVencimento(java.sql.Date.valueOf(vencimento));
+        System.out.println("✅ Pré-matrícula criada - Situação: " + preMatricula.getSituacaoPreMatricula());
 
-        return matricula;
+        return preMatricula;
     }
 
     private void salvarMembrosFamilia(EntityManager em, Crianca crianca) {
@@ -1684,7 +1674,8 @@ public class CadastroMatriculaController {
     @FXML
     public void cancelarCadastro() {
         limparFormulario();
-        // TODO: Fechar a tela ou voltar para lista
+        mostrarMensagem("Informação", "Cadastro de pré-matrícula cancelado");
+        // TODO: Fechar a tela ou voltar para lista de pré-matrículas
     }
 
     private void aplicarMascaraNis() {
