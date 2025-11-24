@@ -10,11 +10,13 @@
 
         <!-- Liste suas entidades aqui -->
         <class>com.salo.sistemacreche.entidades.Alergia</class>
+        <class>com.salo.sistemacreche.entidades.BensFamilia</class>
         <class>com.salo.sistemacreche.entidades.ClassificacaoEspecial</class>
         <class>com.salo.sistemacreche.entidades.ComposicaoFamiliar</class>
         <class>com.salo.sistemacreche.entidades.Crianca</class>
         <class>com.salo.sistemacreche.entidades.CriancaAlergia</class>
         <class>com.salo.sistemacreche.entidades.Endereco</class>
+        <class>com.salo.sistemacreche.entidades.MembroFamilia</class>
         <class>com.salo.sistemacreche.entidades.Matricula</class>
         <class>com.salo.sistemacreche.entidades.MembroFamilia</class>
         <class>com.salo.sistemacreche.entidades.Pessoa</class>
@@ -23,6 +25,7 @@
         <class>com.salo.sistemacreche.entidades.Responsavel</class>
         <class>com.salo.sistemacreche.entidades.SituacaoHabitacional</class>
         <class>com.salo.sistemacreche.entidades.TipoAuxilio</class>
+        <class>com.salo.sistemacreche.entidades.TipoBem</class>
         <class>com.salo.sistemacreche.entidades.TipoResponsavel</class>
 
 

@@ -6,8 +6,8 @@ import com.salo.sistemacreche.controller.extracadastro.MembroFamiliarController;
 import com.salo.sistemacreche.controller.extracadastro.PessoaAutorizadaController;
 import com.salo.sistemacreche.dao.DBConnection;
 import com.salo.sistemacreche.entidades.*;
+import com.salo.sistemacreche.service.CadastroMatriculaService;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -67,7 +67,6 @@ public class CadastroMatriculaController {
 
     // Seção 4: Documentos
     @FXML private TextField fieldCertidaoNascimento;
-    @FXML private TextField fieldNumeroMatricula;
     @FXML private TextField fieldMunicipioNascimento;
     @FXML private TextField fieldCartorioRegistro;
     @FXML private TextField fieldMunicipioRegistro;
@@ -290,25 +289,34 @@ public class CadastroMatriculaController {
         }
     }
 
-    // NOVO MÉTODO: Configurar sistema de bens da família
     private void configurarBensFamilia() {
-        // Inicializar o template
-        checkBoxTemplateBens = new CheckBoxTemplate();
+        try {
+            // Inicializar o template
+            checkBoxTemplateBens = new CheckBoxTemplate();
 
-        // Carregar tipos de bem do banco
-        List<TipoBem> todosTiposBem = carregarTiposBemDoBanco();
-        checkBoxTemplateBens.carregarTiposBem(todosTiposBem);
+            // Carregar tipos de bem do banco
+            List<TipoBem> todosTiposBem = carregarTiposBemDoBanco();
+            checkBoxTemplateBens.carregarTiposBem(todosTiposBem);
 
-        // Adicionar ao container
-        containerBens.getChildren().clear();
-        containerBens.getChildren().add(checkBoxTemplateBens);
+            // Adicionar ao container
+            containerBens.getChildren().clear();
+            containerBens.getChildren().add(checkBoxTemplateBens);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro crítico ao configurar bens da família: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    // NOVO MÉTODO: Carregar tipos de bem do banco
     private List<TipoBem> carregarTiposBemDoBanco() {
         EntityManager em = null;
         try {
             em = DBConnection.getEntityManager();
+            System.out.println("✅ EntityManager criado com sucesso");
+
+            // Teste: verificar se a EntityManager está funcionando
+            Long count = em.createQuery("SELECT COUNT(t) FROM TipoBem t", Long.class).getSingleResult();
+            System.out.println("✅ Total de registros na tabela TIPO_BEM: " + count);
 
             TypedQuery<TipoBem> query = em.createQuery(
                     "SELECT t FROM TipoBem t ORDER BY t.nomeBem",
@@ -316,17 +324,23 @@ public class CadastroMatriculaController {
             );
 
             List<TipoBem> tiposBem = query.getResultList();
-            System.out.println("✅ " + tiposBem.size() + " tipo(s) de bem carregado(s)");
+            System.out.println("✅ Query executada, " + tiposBem.size() + " resultado(s) encontrado(s)");
+
+            // Debug: mostrar os nomes dos bens carregados
+            for (TipoBem bem : tiposBem) {
+                System.out.println("   - " + bem.getNomeBem() + " (" + bem.getCategoria() + ")");
+            }
 
             return tiposBem;
 
         } catch (Exception e) {
             System.err.println("❌ Erro ao carregar tipos de bem: " + e.getMessage());
             e.printStackTrace();
-            return new ArrayList<>(); // Retorna lista vazia em caso de erro
+            return new ArrayList<>();
         } finally {
             if (em != null && em.isOpen()) {
                 em.close();
+                System.out.println("✅ EntityManager fechado");
             }
         }
     }
@@ -339,13 +353,6 @@ public class CadastroMatriculaController {
             return new ArrayList<>(checkBoxTemplateBens.getTiposBemSelecionados());
         }
         return new ArrayList<>();
-    }
-
-    // NOVO MÉTODO: Para edição - pré-selecionar bens
-    private void setBensSelecionados(List<TipoBem> bensSelecionados) {
-        if (checkBoxTemplateBens != null && bensSelecionados != null) {
-            checkBoxTemplateBens.setTiposBemSelecionados(bensSelecionados);
-        }
     }
 
     // NOVO MÉTODO: Limpar seleção de bens
@@ -588,12 +595,6 @@ public class CadastroMatriculaController {
 
             limparDetecaoIrmaos();
         });
-
-        // ✅ Configurar ação de edição também (se necessário)
-//        card.setOnEditAction(() -> {
-//            System.out.println("✏️ EDIT ACTION - Editando: " + responsavel.getPessoa().getNome());
-//            // Aqui você pode adicionar lógica de edição se quiser
-//        });
     }
 
     // === CONFIGURAR PESQUISA POR ENTER ===
@@ -868,561 +869,6 @@ public class CadastroMatriculaController {
         tablePessoasAutorizadas.setItems(pessoaAutorizadas);
     }
 
-    @FXML
-    public void salvarPreMatricula() {
-        EntityManager em = null;
-        EntityTransaction transaction = null;
-
-        try {
-            if (!validarCamposObrigatorios()) {
-                return;
-            }
-
-            if (!validarAuxilioComNIS()) {
-                return;
-            }
-
-            em = DBConnection.getEntityManager();
-            transaction = em.getTransaction();
-            transaction.begin();
-
-            // 1. Criar e salvar a Criança
-            Crianca crianca = criarCrianca(em);
-            em.persist(crianca);
-
-            // 2. Criar e salvar Endereço
-            Endereco endereco = criarEndereco();
-            em.persist(endereco);
-
-            // 3. Salvar Situação Habitacional
-            SituacaoHabitacional situacaoHabitacional = criarSituacaoHabitacional(crianca);
-            em.persist(situacaoHabitacional);
-
-            // 4. Criar e salvar Pré-Matrícula (AGORA É PRE-MATRÍCULA)
-            PreMatricula preMatricula = criarPreMatricula(crianca, situacaoHabitacional);
-            em.persist(preMatricula);
-
-            // 5. Salvar Bens da Família
-            salvarBensFamilia(em, crianca);
-
-            // 6. Salvar Membros da Família
-            salvarMembrosFamilia(em, crianca);
-
-            // 7. Salvar Pessoas Autorizadas
-            salvarPessoasAutorizadas(em, crianca);
-
-            // 8. Salvar Composição Familiar
-            salvarComposicaoFamiliar(em, crianca);
-
-            transaction.commit();
-
-            mostrarMensagem("Sucesso", "Pré-matrícula cadastrada com sucesso! Situação: EM ANÁLISE");
-            limparFormulario();
-
-            System.out.println("✅ Pré-matrícula salva com ID: " + preMatricula.getId());
-
-        } catch (Exception e) {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            System.err.println("❌ Erro ao salvar pré-matrícula: " + e.getMessage());
-            e.printStackTrace();
-            mostrarMensagem("Erro", "Erro ao salvar pré-matrícula: " + e.getMessage());
-        } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
-        }
-    }
-
-    private void salvarBensFamilia(EntityManager em, Crianca crianca) {
-        List<TipoBem> bensSelecionados = getBensSelecionados();
-
-        if (bensSelecionados.isEmpty()) {
-            System.out.println("ℹ️ Nenhum bem selecionado para salvar");
-            return;
-        }
-
-        for (TipoBem tipoBem : bensSelecionados) {
-            try {
-                // Verificar se o tipoBem já está managed
-                TipoBem managedTipoBem = em.find(TipoBem.class, tipoBem.getIdTipoBem());
-                if (managedTipoBem == null) {
-                    // Se não estiver managed, tentar fazer merge
-                    managedTipoBem = em.merge(tipoBem);
-                }
-
-                // Criar e persistir o BensFamilia
-                TipoBem bemFamilia = new TipoBem(crianca, managedTipoBem);
-                em.persist(bemFamilia);
-
-                System.out.println("✅ Bem salvo: " + tipoBem.getNomeBem() + " (ID: " + tipoBem.getIdTipoBem() + ")");
-
-            } catch (Exception e) {
-                System.err.println("❌ Erro ao salvar bem: " + tipoBem.getNomeBem() + " - " + e.getMessage());
-            }
-        }
-
-        System.out.println("✅ " + bensSelecionados.size() + " bem(ns) da família salvos no banco");
-    }
-
-    // NOVO MÉTODO: Associar responsáveis à criança
-    private void associarResponsaveisACrianca(EntityManager em, Crianca crianca) {
-        if (maeSelecionada != null) {
-            crianca.setMae(maeSelecionada.getPessoa());
-            System.out.println("👩 Mãe associada: " + maeSelecionada.getPessoa().getNome());
-        }
-
-        if (paiSelecionado != null) {
-            crianca.setPai(paiSelecionado.getPessoa());
-            System.out.println("👨 Pai associado: " + paiSelecionado.getPessoa().getNome());
-        }
-
-        if (responsavelSelecionado != null) {
-            crianca.setResponsavel(responsavelSelecionado);
-            System.out.println("👤 Responsável associado: " + responsavelSelecionado.getPessoa().getNome());
-        }
-    }
-
-    // NOVO MÉTODO: Validar se auxílio obrigatório tem NIS
-    private boolean validarAuxilioComNIS() {
-        String tipoAuxilio = comboTipoAuxilio.getValue();
-        String nis = fieldNis.getText().trim();
-
-        List<String> auxiliosQueExigemNIS = List.of(
-                "Bolsa Família", "BPC", "Auxílio Brasil", "Auxílio Emergencial"
-        );
-
-        boolean temAuxilio = tipoAuxilio != null && !tipoAuxilio.equals("Nenhum");
-        boolean auxilioExigeNIS = temAuxilio && auxiliosQueExigemNIS.contains(tipoAuxilio);
-
-        if (auxilioExigeNIS && (nis.isEmpty() || nis.length() != 11)) {
-            mostrarMensagem("Validação",
-                    "O auxílio " + tipoAuxilio + " exige o preenchimento do NIS (11 dígitos)!");
-            fieldNis.requestFocus();
-            return false;
-        }
-
-        return true;
-    }
-
-    // MÉTODO CRIAR CRIANÇA COMPLETO
-    private Crianca criarCrianca(EntityManager em) {
-        Crianca crianca = new Crianca();
-
-        // === DADOS BÁSICOS OBRIGATÓRIOS ===
-        crianca.setNome(fieldNomeCrianca.getText().trim());
-
-        if (datePickerNascimento.getValue() != null) {
-            crianca.setDataNascimento(java.sql.Date.valueOf(datePickerNascimento.getValue()));
-        } else {
-            throw new IllegalArgumentException("Data de nascimento é obrigatória");
-        }
-
-        // === DOCUMENTOS ===
-        crianca.setRG(fieldRgCrianca.getText().trim());
-        crianca.setCPF(fieldCpfCrianca.getText().trim());
-        crianca.setCertidaoNascimentoNum(fieldCertidaoNascimento.getText().trim());
-        crianca.setMunicipioNascimento(fieldMunicipioNascimento.getText().trim());
-        crianca.setCartorioRegistro(fieldCartorioRegistro.getText().trim());
-        crianca.setMunicipioRegistro(fieldMunicipioRegistro.getText().trim());
-
-        if (datePickerEmissaoRG.getValue() != null) {
-            crianca.setDataEmissaoCertidao(java.sql.Date.valueOf(datePickerEmissaoRG.getValue()));
-        }
-        crianca.setOrgEmissorCertidao(fieldOrgaoEmissor.getText().trim());
-
-        // === SEXO ===
-        String sexoValue = comboSexo.getValue();
-        if (sexoValue != null) {
-            switch (sexoValue.toLowerCase()) {
-                case "masculino":
-                    crianca.setSexo(Crianca.Sexo.MASCULINO);
-                    break;
-                case "feminino":
-                    crianca.setSexo(Crianca.Sexo.FEMININO);
-                    break;
-                default:
-                    crianca.setSexo(Crianca.Sexo.OUTRO);
-                    break;
-            }
-        } else {
-            throw new IllegalArgumentException("Sexo é obrigatório");
-        }
-
-        // === COR/RAÇA ===
-        String corRacaValue = comboCorRaca.getValue();
-        if (corRacaValue != null) {
-            switch (corRacaValue.toLowerCase()) {
-                case "branca":
-                    crianca.setCorRaca(Crianca.CorRaca.BRANCA);
-                    break;
-                case "preta":
-                    crianca.setCorRaca(Crianca.CorRaca.PRETA);
-                    break;
-                case "parda":
-                    crianca.setCorRaca(Crianca.CorRaca.PARDA);
-                    break;
-                case "amarela":
-                    crianca.setCorRaca(Crianca.CorRaca.AMARELA);
-                    break;
-                case "indígena":
-                    crianca.setCorRaca(Crianca.CorRaca.INDIGENA);
-                    break;
-                default:
-                    crianca.setCorRaca(Crianca.CorRaca.OUTRO);
-                    break;
-            }
-        }
-
-        // === SAÚDE ===
-        crianca.setCartSus(fieldSus.getText().trim());
-        crianca.setUnidadeSaude(fieldUnidadeSaude.getText().trim());
-
-        // === MOBILIDADE REDUZIDA ===
-        String mobilidadeValue = comboMobilidadeReduzida.getValue();
-        if (mobilidadeValue != null) {
-            if (mobilidadeValue.contains("temporária")) {
-                crianca.setMobRed(Crianca.MobRed.TEMPORARIA);
-            } else if (mobilidadeValue.contains("permanente")) {
-                crianca.setMobRed(Crianca.MobRed.PERMANENTE);
-            } else {
-                crianca.setMobRed(Crianca.MobRed.NENHUMA);
-            }
-        } else {
-            crianca.setMobRed(Crianca.MobRed.NENHUMA);
-        }
-
-        // === EDUCAÇÃO ESPECIAL ===
-        String educacaoEspecialValue = comboEducacaoEspecial.getValue();
-        crianca.setEducEspecial("Sim".equals(educacaoEspecialValue));
-
-        // === CLASSIFICAÇÃO ESPECIAL ===
-        String classificacaoValue = comboClassificacaoEspecial.getValue();
-        if (classificacaoValue != null && !classificacaoValue.equals("Nenhum")) {
-            try {
-                ClassificacaoEspecial classificacao = em.createQuery(
-                        "SELECT c FROM ClassificacaoEspecial c WHERE c.classificacaoEspecial = :nome",
-                        ClassificacaoEspecial.class
-                ).setParameter("nome", classificacaoValue).getSingleResult();
-                crianca.setClassificacaoEspecial(classificacao);
-                crianca.setStatusClassificacaoEspecial(true);
-            } catch (Exception e) {
-                System.err.println("❌ Classificação especial não encontrada: " + classificacaoValue);
-                crianca.setStatusClassificacaoEspecial(false);
-            }
-        } else {
-            crianca.setStatusClassificacaoEspecial(false);
-        }
-
-        // === ALERGIAS ===
-        String alergiaValue = comboAlergias.getValue();
-        crianca.setAlergia(alergiaValue != null && !alergiaValue.equals("Nenhum"));
-
-        // === IRMÃO GÊMEO ===
-        boolean possuiIrmaoGemeo = checkIrmaoGemeo != null && checkIrmaoGemeo.isSelected();
-        crianca.setPossuiIrmaoGemeo(possuiIrmaoGemeo);
-
-        // === CAMPOS COM VALORES PADRÃO (PARA EVITAR NULL) ===
-        crianca.setDefMulti(false);
-        crianca.setPossuiIrmaoCreche(false);
-        crianca.setRestricaoAlimentar(false);
-
-        // REMOVIDO: crianca.setObservacoes(null); // Se não existe na entidade
-
-        // Se existir algum campo de observações na sua entidade, use o nome correto
-        // crianca.setObservacao(null); // ou whatever o nome correto
-
-        // === AUXÍLIO GOVERNO ===
-        String auxilioValue = comboTipoAuxilio.getValue();
-        boolean temAuxilio = auxilioValue != null && !auxilioValue.equals("Nenhum");
-        crianca.setResponsavelBeneficiarioAuxilioGov(temAuxilio);
-
-        if (temAuxilio) {
-            try {
-                TipoAuxilio tipoAuxilio = em.createQuery(
-                        "SELECT t FROM TipoAuxilio t WHERE t.nomeAuxilio = :nome",
-                        TipoAuxilio.class
-                ).setParameter("nome", auxilioValue).getSingleResult();
-                crianca.setTipoAuxilio(tipoAuxilio);
-            } catch (Exception e) {
-                System.err.println("❌ Tipo de auxílio não encontrado: " + auxilioValue);
-            }
-        }
-
-        // === NIS (SALVAR NO RESPONSÁVEL SE EXISTIR) ===
-        String nisValue = fieldNis.getText().trim();
-        if (!nisValue.isEmpty()) {
-            // Se já temos um responsável selecionado, associar o NIS a ele
-            if (responsavelSelecionado != null) {
-                // Buscar o responsável managed
-                Responsavel responsavelManaged = em.find(Responsavel.class, responsavelSelecionado.getId());
-                if (responsavelManaged != null) {
-                    responsavelManaged.setNumeroNis(nisValue);
-                    crianca.setResponsavel(responsavelManaged);
-                }
-            } else if (maeSelecionada != null) {
-                // Ou associar à mãe se for o caso
-                Responsavel maeManaged = em.find(Responsavel.class, maeSelecionada.getId());
-                if (maeManaged != null) {
-                    maeManaged.setNumeroNis(nisValue);
-                }
-            }
-        }
-
-        // === ASSOCIAR RESPONSÁVEIS ===
-        if (maeSelecionada != null) {
-            try {
-                Pessoa maeManaged = em.find(Pessoa.class, maeSelecionada.getPessoa().getId());
-                crianca.setMae(maeManaged);
-                System.out.println("👩 Mãe associada: " + maeManaged.getNome());
-            } catch (Exception e) {
-                System.err.println("❌ Erro ao associar mãe: " + e.getMessage());
-            }
-        }
-
-        if (paiSelecionado != null) {
-            try {
-                Pessoa paiManaged = em.find(Pessoa.class, paiSelecionado.getPessoa().getId());
-                crianca.setPai(paiManaged);
-                System.out.println("👨 Pai associado: " + paiManaged.getNome());
-            } catch (Exception e) {
-                System.err.println("❌ Erro ao associar pai: " + e.getMessage());
-            }
-        }
-
-        if (responsavelSelecionado != null) {
-            try {
-                Responsavel responsavelManaged = em.find(Responsavel.class, responsavelSelecionado.getId());
-                crianca.setResponsavel(responsavelManaged);
-                System.out.println("👤 Responsável associado: " + responsavelManaged.getPessoa().getNome());
-            } catch (Exception e) {
-                System.err.println("❌ Erro ao associar responsável: " + e.getMessage());
-            }
-        }
-
-        // === VALIDAÇÃO FINAL DOS CAMPOS OBRIGATÓRIOS ===
-        validarCamposCrianca(crianca);
-
-        System.out.println("✅ Criança criada com sucesso: " + crianca.getNome());
-        System.out.println("   📅 Nascimento: " + crianca.getDataNascimento());
-        System.out.println("   👦 Sexo: " + crianca.getSexo());
-        System.out.println("   🏠 Mãe: " + (crianca.getMae() != null ? crianca.getMae().getNome() : "Nenhuma"));
-        System.out.println("   🏠 Pai: " + (crianca.getPai() != null ? crianca.getPai().getNome() : "Nenhum"));
-
-        return crianca;
-    }
-
-    // ✅ MÉTODO PARA VALIDAR CAMPOS OBRIGATÓRIOS DA CRIANÇA
-    private void validarCamposCrianca(Crianca crianca) {
-        System.out.println("=== VALIDAÇÃO DOS CAMPOS DA CRIANÇA ===");
-
-        // Campos NOT NULL que devem ser verificados
-        if (crianca.getDefMulti() == null) {
-            System.err.println("❌ DEF_MULTI é null - definindo como false");
-            crianca.setDefMulti(false);
-        }
-
-        if (crianca.getPossuiIrmaoCreche() == null) {
-            System.err.println("❌ POSSUI_IRMAO_CRECHE é null - definindo como false");
-            crianca.setPossuiIrmaoCreche(false);
-        }
-
-        if (crianca.getRestricaoAlimentar() == null) {
-            System.err.println("❌ RESTRICAO_ALIMENTAR é null - definindo como false");
-            crianca.setRestricaoAlimentar(false);
-        }
-
-        if (crianca.getAlergia() == null) {
-            System.err.println("❌ ALERGIA é null - definindo como false");
-            crianca.setAlergia(false);
-        }
-
-        if (crianca.getEducEspecial() == null) {
-            System.err.println("❌ EDUC_ESPECIAL é null - definindo como false");
-            crianca.setEducEspecial(false);
-        }
-
-        if (crianca.getResponsavelBeneficiarioAuxilioGov() == null) {
-            System.err.println("❌ RESPONSAVEL_BENEFICIARIO_AUXILIO_GOV é null - definindo como false");
-            crianca.setResponsavelBeneficiarioAuxilioGov(false);
-        }
-
-        System.out.println("✅ Todos os campos obrigatórios validados");
-    }
-
-    // 🔥 MÉTODO CORRIGIDO: Criar situação habitacional com bens
-    private SituacaoHabitacional criarSituacaoHabitacional(Crianca crianca) {
-        SituacaoHabitacional situacao = new SituacaoHabitacional();
-        situacao.setCrianca(crianca);
-
-        // Tipo de moradia
-        if (comboTipoMoradia.getValue() != null) {
-            String tipoMoradia = comboTipoMoradia.getValue();
-            // Mapear para os campos booleanos corretos
-            situacao.setCasaPropria("Casa própria".equals(tipoMoradia));
-            situacao.setCasaCedida("Casa cedida".equals(tipoMoradia));
-            situacao.setCasaAlugada("Casa alugada".equals(tipoMoradia));
-        }
-
-        // Valor aluguel
-        if (!fieldValorAluguel.getText().trim().isEmpty()) {
-            try {
-                situacao.setValorAluguel(new BigDecimal(fieldValorAluguel.getText().trim().replace(",", ".")));
-            } catch (NumberFormatException e) {
-                System.err.println("❌ Erro ao converter valor do aluguel");
-            }
-        }
-
-        // Número de cômodos
-        if (!fieldNumeroComodos.getText().trim().isEmpty()) {
-            try {
-                situacao.setNumeroComodos(Integer.parseInt(fieldNumeroComodos.getText().trim()));
-            } catch (NumberFormatException e) {
-                System.err.println("❌ Erro ao converter número de cômodos");
-            }
-        }
-
-        // Características da moradia
-        situacao.setTipoPiso(converterParaTipoPiso(comboTipoPiso.getValue()));
-        situacao.setTipoMoradia(converterParaTipoMoradia(comboMaterialParede.getValue()));
-        situacao.setTipoCobertura(converterParaTipoCobertura(comboTipoCobertura.getValue()));
-
-        return situacao;
-    }
-
-    // MÉTODOS AUXILIARES PARA CONVERSÃO DE ENUMS
-    private SituacaoHabitacional.TipoPiso converterParaTipoPiso(String valor) {
-        if (valor == null) return null;
-
-        switch (valor) {
-            case "Cimento": return SituacaoHabitacional.TipoPiso.CIMENTO;
-            case "Lajota": return SituacaoHabitacional.TipoPiso.LAJOTA;
-            case "Chão batido": return SituacaoHabitacional.TipoPiso.CHAO_BATIDO;
-            case "Cerâmica": return SituacaoHabitacional.TipoPiso.CERAMICA;
-            case "Madeira": return SituacaoHabitacional.TipoPiso.MADEIRA;
-            default: return SituacaoHabitacional.TipoPiso.OUTRO;
-        }
-    }
-
-    private SituacaoHabitacional.TipoMoradia converterParaTipoMoradia(String valor) {
-        if (valor == null) return null;
-
-        switch (valor) {
-            case "Tijolo": return SituacaoHabitacional.TipoMoradia.TIJOLO;
-            case "Taipa": return SituacaoHabitacional.TipoMoradia.TAIPA;
-            case "Madeira": return SituacaoHabitacional.TipoMoradia.MADEIRA;
-            case "Mista": return SituacaoHabitacional.TipoMoradia.MISTA;
-            case "Alvenaria": return SituacaoHabitacional.TipoMoradia.ALVENARIA;
-            default: return SituacaoHabitacional.TipoMoradia.OUTRO;
-        }
-    }
-
-    private SituacaoHabitacional.TipoCobertura converterParaTipoCobertura(String valor) {
-        if (valor == null) return null;
-
-        switch (valor) {
-            case "Telha": return SituacaoHabitacional.TipoCobertura.TELHA;
-            case "Zinco": return SituacaoHabitacional.TipoCobertura.ZINCO;
-            case "Palha": return SituacaoHabitacional.TipoCobertura.PALHA;
-            case "Laje": return SituacaoHabitacional.TipoCobertura.LAJE;
-            default: return SituacaoHabitacional.TipoCobertura.OUTRO;
-        }
-    }
-
-    private Endereco criarEndereco() {
-        Endereco endereco = new Endereco();
-
-        endereco.setLogradouro(fieldEndereco.getText().trim());
-        endereco.setNumero(fieldNumero.getText().trim());
-        endereco.setBairro(fieldBairro.getText().trim());
-        endereco.setMunicipio(fieldMunicipio.getText().trim());
-        endereco.setCep(fieldCEP.getText().trim());
-        endereco.setUf(comboUF.getValue());
-        endereco.setPontoReferencia(fieldPontoReferencia.getText().trim());
-        endereco.setTelefoneResidencial(fieldTelefoneResidencial.getText().trim());
-        endereco.setNumero(fieldTelefoneContato.getText().trim());
-
-        return endereco;
-    }
-
-    private PreMatricula criarPreMatricula(Crianca crianca, SituacaoHabitacional situacaoHabitacional) {
-        PreMatricula preMatricula = new PreMatricula();
-
-        preMatricula.setCrianca(crianca);
-        preMatricula.setDataPreMatricula(new java.sql.Date(System.currentTimeMillis()));
-        preMatricula.setSituacaoHabitacional(situacaoHabitacional);
-
-        // Situação padrão: EM_ANALISE
-        preMatricula.setSituacaoPreMatricula(PreMatricula.SituacaoPreMatricula.EM_ANALISE);
-
-        // Observação opcional - você pode adicionar um campo no FXML se quiser
-        preMatricula.setObservacao("Pré-matrícula cadastrada em " + new java.util.Date());
-
-        System.out.println("✅ Pré-matrícula criada - Situação: " + preMatricula.getSituacaoPreMatricula());
-
-        return preMatricula;
-    }
-
-    private void salvarMembrosFamilia(EntityManager em, Crianca crianca) {
-        for (MembroFamilia membro : membrosFamiliares) {
-            MembroFamilia novoMembro = new MembroFamilia();
-            novoMembro.setCrianca(crianca);
-            novoMembro.setNome(membro.getNome());
-            novoMembro.setIdade(membro.getIdade());
-            novoMembro.setParentesco(membro.getParentesco());
-            novoMembro.setSituacaoEscolar(membro.getSituacaoEscolar());
-            novoMembro.setSituacaoEmprego(membro.getSituacaoEmprego());
-            novoMembro.setRenda(membro.getRenda());
-
-            em.persist(novoMembro);
-        }
-
-        System.out.println("✅ " + membrosFamiliares.size() + " membro(s) familiar(es) salvo(s)");
-    }
-
-    private void salvarPessoasAutorizadas(EntityManager em, Crianca crianca) {
-        for (PessoaAutorizada pessoa : pessoaAutorizadas) {
-            pessoa.setCrianca(crianca);
-
-            if (pessoa.getId() != null) {
-                em.merge(pessoa);
-            } else {
-                em.persist(pessoa);
-            }
-        }
-
-        System.out.println("✅ " + pessoaAutorizadas.size() + " pessoa(s) autorizada(s) salva(s)");
-    }
-
-    private void salvarComposicaoFamiliar(EntityManager em, Crianca crianca) {
-        ComposicaoFamiliar composicao = new ComposicaoFamiliar();
-        composicao.setCrianca(crianca);
-
-        BigDecimal rendaTotal = BigDecimal.ZERO;
-        for (MembroFamilia membro : membrosFamiliares) {
-            if (membro.getRenda() != null) {
-                rendaTotal = rendaTotal.add(membro.getRenda());
-            }
-        }
-        composicao.setRendaFamiliarTotal(rendaTotal);
-
-        int totalMembros = membrosFamiliares.size() + 1;
-        if (totalMembros > 0) {
-            BigDecimal rendaPerCapita = rendaTotal.divide(
-                    new BigDecimal(totalMembros), 2, java.math.RoundingMode.HALF_UP
-            );
-            composicao.setRendaPerCapita(rendaPerCapita);
-        } else {
-            composicao.setRendaPerCapita(BigDecimal.ZERO);
-        }
-
-        composicao.setTotalMembros(totalMembros);
-
-        em.persist(composicao);
-        System.out.println("✅ Composição familiar salva");
-    }
-
     // Método para adicionar membro familiar à tabela
     public void adicionarMembroFamiliar(MembroFamiliarController.DadosMembroFamiliar dados) {
         try {
@@ -1690,7 +1136,7 @@ public class CadastroMatriculaController {
         });
     }
 
-    // 🔥 NOVO: Aplicar máscaras para outros campos
+    // NOVO: Aplicar máscaras para outros campos
     private void aplicarMascaras() {
         // Máscara para CPF
         fieldCpfCrianca.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -1726,7 +1172,7 @@ public class CadastroMatriculaController {
         });
     }
 
-    // 🔥 NOVO: Configurar validações
+    // NOVO: Configurar validações
     private void configurarValidacoes() {
         // Validar data de nascimento (não pode ser futura)
         datePickerNascimento.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -1747,20 +1193,18 @@ public class CadastroMatriculaController {
         });
     }
 
+    // MÉTODO ÚNICO com a lógica centralizada
+    private boolean auxilioExigeNIS() {
+        String tipoAuxilio = comboTipoAuxilio.getValue();
+        return tipoAuxilio != null && !tipoAuxilio.equals("Nenhum");
+    }
+
     // Validação em tempo real do NIS
     private void validarNis() {
-        String tipoAuxilio = comboTipoAuxilio.getValue();
+        boolean exigeNIS = auxilioExigeNIS();
         String nis = fieldNis.getText().trim();
 
-        List<String> auxiliosQueExigemNIS = List.of(
-                "Bolsa Família", "BPC", "Auxílio Brasil", "Auxílio Emergencial"
-        );
-
-        boolean auxilioExigeNIS = tipoAuxilio != null &&
-                !tipoAuxilio.equals("Nenhum") &&
-                auxiliosQueExigemNIS.contains(tipoAuxilio);
-
-        if (auxilioExigeNIS) {
+        if (exigeNIS) {
             if (nis.isEmpty()) {
                 fieldNis.setStyle("-fx-border-color: #ff4444; -fx-border-width: 2px;");
             } else if (nis.length() != 11) {
@@ -1771,6 +1215,20 @@ public class CadastroMatriculaController {
         } else {
             fieldNis.setStyle("");
         }
+    }
+
+    // Validação no salvamento
+    private boolean validarAuxilioComNIS() {
+        boolean exigeNIS = auxilioExigeNIS();
+        String nis = fieldNis.getText().trim();
+
+        if (exigeNIS && (nis.isEmpty() || nis.length() != 11)) {
+            mostrarMensagem("Validação", "O auxílio selecionado exige o preenchimento do NIS (11 dígitos)!");
+            fieldNis.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private boolean validarCamposObrigatorios() {
@@ -1805,6 +1263,79 @@ public class CadastroMatriculaController {
         }
 
         return true;
+    }
+
+    @FXML
+    public void salvarPreMatricula() {
+        try {
+            if (!validarCamposObrigatorios()) return;
+            if (!validarAuxilioComNIS()) return;
+
+            // Usar o service para criar as entidades
+            CadastroMatriculaService service = new CadastroMatriculaService();
+
+            // Obter listas dos componentes visuais
+            List<TipoBem> bensSelecionados = getBensSelecionados();
+            List<MembroFamilia> membrosFamiliares = new ArrayList<>(this.membrosFamiliares);
+            List<PessoaAutorizada> pessoasAutorizadas = new ArrayList<>(this.pessoaAutorizadas);
+
+            // Salvar tudo usando o service
+            PreMatricula preMatriculaSalva = service.salvarPreMatriculaCompleta(
+                    fieldNomeCrianca.getText().trim(),
+                    datePickerNascimento.getValue(),
+                    fieldRgCrianca.getText().trim(),
+                    fieldCpfCrianca.getText().trim(),
+                    fieldCertidaoNascimento.getText().trim(),
+                    fieldMunicipioNascimento.getText().trim(),
+                    fieldCartorioRegistro.getText().trim(),
+                    fieldMunicipioRegistro.getText().trim(),
+                    datePickerEmissaoRG.getValue(),
+                    fieldOrgaoEmissor.getText().trim(),
+                    comboSexo.getValue(),
+                    comboCorRaca.getValue(),
+                    fieldSus.getText().trim(),
+                    fieldUnidadeSaude.getText().trim(),
+                    comboMobilidadeReduzida.getValue(),
+                    "Sim".equals(comboEducacaoEspecial.getValue()),
+                    comboClassificacaoEspecial.getValue(),
+                    comboAlergias.getValue(),
+                    checkIrmaoGemeo.isSelected(),
+                    comboTipoAuxilio.getValue(),
+                    fieldNis.getText().trim(),
+                    maeSelecionada != null ? maeSelecionada.getPessoa() : null,
+                    paiSelecionado != null ? paiSelecionado.getPessoa() : null,
+                    responsavelSelecionado,
+                    fieldEndereco.getText().trim(),
+                    fieldNumero.getText().trim(),
+                    fieldBairro.getText().trim(),
+                    fieldMunicipio.getText().trim(),
+                    fieldCEP.getText().trim(),
+                    comboUF.getValue(),
+                    fieldPontoReferencia.getText().trim(),
+                    fieldTelefoneResidencial.getText().trim(),
+                    fieldTelefoneContato.getText().trim(),
+                    comboTipoMoradia.getValue(),
+                    fieldValorAluguel.getText().trim(),
+                    fieldNumeroComodos.getText().trim(),
+                    comboTipoPiso.getValue(),
+                    comboMaterialParede.getValue(),
+                    comboTipoCobertura.getValue(),
+                    checkFossa.isSelected(),
+                    checkCifon.isSelected(),
+                    checkEnergiaEletrica.isSelected(),
+                    checkAguaEncanada.isSelected(),
+                    bensSelecionados,
+                    membrosFamiliares,
+                    pessoasAutorizadas
+            );
+
+            mostrarMensagem("Sucesso", "Pré-matrícula cadastrada com sucesso!");
+            limparFormulario();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao salvar pré-matrícula: " + e.getMessage());
+            mostrarMensagem("Erro", "Erro ao salvar pré-matrícula: " + e.getMessage());
+        }
     }
 
     private void limparFormulario() {
