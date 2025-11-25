@@ -1,9 +1,7 @@
 package com.salo.sistemacreche.components;
 
 import com.salo.sistemacreche.entidades.PreMatricula;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
@@ -13,7 +11,6 @@ import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
 import java.text.SimpleDateFormat;
-import java.util.Optional;
 
 public class PreMatriculaCard extends VBox {
 
@@ -31,7 +28,7 @@ public class PreMatriculaCard extends VBox {
     private Button btnAprovar;
     private Button btnReprovar;
     private Button btnCancelar;
-    private VBox boxAcoes;
+    private VBox boxAcoes; // área que aparece quando clica em "Editar"
 
     public PreMatriculaCard(PreMatricula preMatricula) {
         this.preMatricula = preMatricula;
@@ -64,83 +61,27 @@ public class PreMatriculaCard extends VBox {
         btnEditar = new Button("Editar");
         btnEditar.setOnAction(e -> toggleAcoesVisiveis());
 
-        // Botões de ação COM CONFIRMAÇÃO
+        // Botões de ação
         btnAprovar = new Button("Aprovar");
-        btnAprovar.setOnAction(e -> confirmarAcao("aprovar", onAprovarAction));
+        btnAprovar.setOnAction(e -> {
+            if (onAprovarAction != null) onAprovarAction.run();
+        });
 
         btnReprovar = new Button("Reprovar");
-        btnReprovar.setOnAction(e -> confirmarAcao("reprovar", onReprovarAction));
+        btnReprovar.setOnAction(e -> {
+            if (onReprovarAction != null) onReprovarAction.run();
+        });
 
         btnCancelar = new Button("Cancelar");
-        btnCancelar.setOnAction(e -> confirmarAcao("cancelar", onCancelarAction));
+        btnCancelar.setOnAction(e -> {
+            if (onCancelarAction != null) onCancelarAction.run();
+        });
 
         // Caixa de botões (oculta inicialmente)
         boxAcoes = new VBox(8, btnAprovar, btnReprovar, btnCancelar);
         boxAcoes.setVisible(false);
-        boxAcoes.setManaged(false);
+        boxAcoes.setManaged(false); // não ocupa espaço quando oculta
         boxAcoes.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-    }
-
-    // MÉTODO PARA CONFIRMAR AÇÃO
-    private void confirmarAcao(String acao, Runnable acaoCallback) {
-        if (acaoCallback == null) return;
-
-        String nomeCrianca = preMatricula.getCrianca() != null ?
-                preMatricula.getCrianca().getNome() : "esta pré-matrícula";
-
-        String titulo = "";
-        String mensagem = "";
-        Alert.AlertType tipoAlerta = Alert.AlertType.CONFIRMATION;
-
-        switch (acao.toLowerCase()) {
-            case "aprovar":
-                titulo = "Confirmar Aprovação";
-                mensagem = "Tem certeza que deseja APROVAR a pré-matrícula de " + nomeCrianca + "?\n\n" +
-                        "Esta ação irá:\n" +
-                        "Alterar o status para 'Aprovada'\n" +
-                        "Permitir a criação da matrícula definitiva";
-                tipoAlerta = Alert.AlertType.WARNING;
-                break;
-
-            case "reprovar":
-                titulo = "Confirmar Reprovação";
-                mensagem = "Tem certeza que deseja REPROVAR a pré-matrícula de " + nomeCrianca + "?\n\n" +
-                        "Esta ação irá:\n" +
-                        "Alterar o status para 'Reprovada'\n" +
-                        "Impedir a criação da matrícula";
-                tipoAlerta = Alert.AlertType.WARNING;
-                break;
-
-            case "cancelar":
-                titulo = "Confirmar Cancelamento";
-                mensagem = "Tem certeza que deseja CANCELAR a pré-matrícula de " + nomeCrianca + "?\n\n" +
-                        "Esta ação irá:\n" +
-                        "Alterar o status para 'Cancelada'\n" +
-                        "Encerrar o processo de análise";
-                tipoAlerta = Alert.AlertType.WARNING;
-                break;
-        }
-
-        Alert alert = new Alert(tipoAlerta);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensagem);
-
-        // Customizar botões
-        ButtonType btnSim = new ButtonType("Sim, Confirmar");
-        ButtonType btnNao = new ButtonType("Não, Cancelar");
-        alert.getButtonTypes().setAll(btnSim, btnNao);
-
-        // Estilizar botão de confirmação baseado na ação
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent() && result.get() == btnSim) {
-            System.out.println("✅ Confirmação recebida para " + acao + " a pré-matrícula: " + nomeCrianca);
-            acaoCallback.run();
-            toggleAcoesVisiveis();
-        } else {
-            System.out.println("❌ Ação de " + acao + " cancelada pelo usuário");
-        }
     }
 
     private void setupLayout() {
@@ -220,7 +161,6 @@ public class PreMatriculaCard extends VBox {
         btnEditar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
                 + "-fx-background-radius: 5; -fx-padding: 5 10;");
 
-        // Estilos específicos para cada botão de ação
         btnAprovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
                 + "-fx-background-radius: 5; -fx-padding: 6 12;");
         btnReprovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
@@ -252,15 +192,9 @@ public class PreMatriculaCard extends VBox {
         btnCancelar.setVisible(true);
 
         switch (situacao) {
-            case "APROVADA" -> {
+            case "APROVADA", "REPROVADA" -> {
                 btnAprovar.setVisible(false);
                 btnReprovar.setVisible(false);
-                btnAprovar.setStyle("-fx-background-color: #4caf50; -fx-text-fill: white;");
-            }
-            case "REPROVADA" -> {
-                btnAprovar.setVisible(false);
-                btnReprovar.setVisible(false);
-                btnReprovar.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
             }
             case "CANCELADA" -> {
                 btnAprovar.setVisible(false);

@@ -87,7 +87,7 @@
                                 "LEFT JOIN FETCH m.crianca c " +
                                 "LEFT JOIN FETCH c.mae mae " +
                                 "LEFT JOIN FETCH c.pai pai " +
-                                "WHERE m.situacaoMatricula != com.salo.sistemacreche.entidades.Matricula$SituacaoMatricula.VENCIDA"
+                                "WHERE 1 = 1"
                 );
 
                 List<Object> parametros = new ArrayList<>();
@@ -155,65 +155,9 @@
             } else {
                 for (Matricula matricula : matriculas) {
                     MatriculaCard card = new MatriculaCard(matricula);
-
-                    // CORREÇÃO: Configurar TODAS as ações
                     card.setOnEditAction(() -> editarMatricula(matricula));
-                    card.setOnConcluirAction(() -> concluirMatricula(matricula));
-                    card.setOnCancelarAction(() -> cancelarMatricula(matricula));
-
                     cardsContainer.getChildren().add(card);
                 }
-            }
-        }
-
-        // ADICIONE ESTES MÉTODOS NO CONTROLLER
-        private void concluirMatricula(Matricula matricula) {
-            System.out.println("🎓 Concluindo matrícula: " + matricula.getId());
-
-            try {
-                EntityManager em = DBConnection.getEntityManager();
-                em.getTransaction().begin();
-
-                // Buscar a matrícula gerenciada
-                Matricula matriculaManaged = em.find(Matricula.class, matricula.getId());
-                matriculaManaged.setSituacaoMatricula(Matricula.SituacaoMatricula.CONCLUIDA);
-                matriculaManaged.setDataDesligamento(new java.sql.Date(System.currentTimeMillis()));
-
-                em.merge(matriculaManaged);
-                em.getTransaction().commit();
-                em.close();
-
-                System.out.println("✅ Matrícula concluída com sucesso!");
-                buscarMatriculas(); // Recarrega a lista
-
-            } catch (Exception e) {
-                System.err.println("❌ Erro ao concluir matrícula: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        private void cancelarMatricula(Matricula matricula) {
-            System.out.println("❌ Cancelando matrícula: " + matricula.getId());
-
-            try {
-                EntityManager em = DBConnection.getEntityManager();
-                em.getTransaction().begin();
-
-                // Buscar a matrícula gerenciada
-                Matricula matriculaManaged = em.find(Matricula.class, matricula.getId());
-                matriculaManaged.setSituacaoMatricula(Matricula.SituacaoMatricula.CANCELADA);
-                matriculaManaged.setDataDesligamento(new java.sql.Date(System.currentTimeMillis()));
-
-                em.merge(matriculaManaged);
-                em.getTransaction().commit();
-                em.close();
-
-                System.out.println("✅ Matrícula cancelada com sucesso!");
-                buscarMatriculas(); // Recarrega a lista
-
-            } catch (Exception e) {
-                System.err.println("❌ Erro ao cancelar matrícula: " + e.getMessage());
-                e.printStackTrace();
             }
         }
 

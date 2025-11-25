@@ -1,7 +1,7 @@
 package com.salo.sistemacreche.controller;
 
 import com.salo.sistemacreche.components.EmptyCard;
-import com.salo.sistemacreche.components.RematriculaCard;
+import com.salo.sistemacreche.components.MatriculaCard;
 import com.salo.sistemacreche.dao.DBConnection;
 import com.salo.sistemacreche.entidades.Matricula;
 import com.salo.sistemacreche.entidades.Matricula.SituacaoMatricula;
@@ -97,13 +97,13 @@ public class RematriculaController {
                 return;
             }
 
-            System.out.println("🔍 Buscando matrículas VENCIDAS para rematrícula...");
+            System.out.println("🔍 Buscando matrículas vencidas para rematrícula...");
 
+            // Usando JPQL para buscar apenas matrículas VENCIDAS
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT m FROM Matricula m " +
                             "LEFT JOIN FETCH m.crianca c " +
-                            "WHERE m.situacaoMatricula = :situacaoVencida " +
-                            "AND m.dataVencimento < CURRENT_DATE" // Só matrículas que realmente venceram
+                            "WHERE m.situacaoMatricula = :situacaoVencida"
             );
 
             List<Object> parametros = new ArrayList<>();
@@ -113,8 +113,8 @@ public class RematriculaController {
             String termoPesquisa = fieldPesquisarAluno.getText();
             if (termoPesquisa != null && !termoPesquisa.trim().isEmpty()) {
                 jpql.append(" AND (LOWER(c.nome) LIKE ?").append(paramIndex);
-                jpql.append(" OR LOWER(COALESCE(mae.nome, '')) LIKE ?").append(paramIndex);
-                jpql.append(" OR LOWER(COALESCE(pai.nome, '')) LIKE ?").append(paramIndex);
+                jpql.append(" OR LOWER(c.nomeMae) LIKE ?").append(paramIndex);
+                jpql.append(" OR LOWER(c.nomePai) LIKE ?").append(paramIndex);
                 jpql.append(" OR CAST(m.id AS string) LIKE ?").append(paramIndex).append(")");
                 parametros.add("%" + termoPesquisa.toLowerCase() + "%");
                 paramIndex++;
@@ -138,7 +138,7 @@ public class RematriculaController {
             }
 
             List<Matricula> matriculasVencidas = query.getResultList();
-            System.out.println("✅ " + matriculasVencidas.size() + " matrícula(s) VENCIDA(S) encontrada(s)");
+            System.out.println("✅ " + matriculasVencidas.size() + " matrícula(s) vencida(s) encontrada(s)");
 
             atualizarInterface(matriculasVencidas);
 
@@ -162,45 +162,33 @@ public class RematriculaController {
             containerAlunos.getChildren().add(cardVazio);
         } else {
             for (Matricula matricula : matriculas) {
-                RematriculaCard card = new RematriculaCard(matricula);
-
-                // Configurar ações específicas para rematrícula
-                card.setOnRenovarAction(() -> renovarMatricula(matricula));
-                card.setOnVisualizarAction(() -> visualizarMatricula(matricula));
-
+                MatriculaCard card = new MatriculaCard(matricula);
+                // Configurar ação específica para rematrícula
+                card.setOnEditAction(() -> realizarRematricula(matricula));
                 containerAlunos.getChildren().add(card);
             }
         }
-    }
-
-    private void renovarMatricula(Matricula matricula) {
-        System.out.println("🔄 Renovando matrícula para: " +
-                (matricula.getCrianca() != null ?
-                        matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
-
-        // TODO: Implementar lógica de renovação
-        // - Atualizar data de vencimento
-        // - Manter mesma série
-        // - Atualizar situação para ATIVA
-
-        mostrarMensagemSucesso("Matrícula renovada para: " +
-                (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : ""));
-    }
-
-    private void visualizarMatricula(Matricula matricula) {
-        System.out.println("👁️ Visualizando matrícula: " +
-                (matricula.getCrianca() != null ?
-                        matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
-
-        // TODO: Implementar visualização detalhada da matrícula
-        // - Abrir tela de detalhes
-        // - Mostrar histórico completo
     }
 
     private void mostrarMensagemErro(String mensagem) {
         containerAlunos.getChildren().clear();
         EmptyCard cardErro = new EmptyCard(mensagem);
         containerAlunos.getChildren().add(cardErro);
+    }
+
+    private void realizarRematricula(Matricula matricula) {
+        System.out.println("🔄 Iniciando rematrícula para: " +
+                (matricula.getCrianca() != null ?
+                        matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
+
+        // TODO: Implementar lógica de rematrícula
+        // - Criar nova matrícula com dados da anterior
+        // - Atualizar data de vencimento
+        // - Registrar no histórico
+        // - Fechar matrícula anterior
+
+        mostrarMensagemSucesso("Rematrícula iniciada para: " +
+                (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : ""));
     }
 
     private void mostrarMensagemSucesso(String mensagem) {
