@@ -104,20 +104,7 @@
                             </ComboBox>
                         </VBox>
 
-                        <VBox spacing="3" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Restrição Alimentar" />
-                            <ComboBox fx:id="comboRestricaoAlimentar" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
-                                <items>
-                                    <FXCollections fx:factory="observableArrayList">
-                                        <String fx:value="Todas as situações" />
-                                        <String fx:value="Com restrição" />
-                                        <String fx:value="Sem restrição" />
-                                    </FXCollections>
-                                </items>
-                            </ComboBox>
-                        </VBox>
-
-                        <VBox spacing="3" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                        <VBox spacing="3" GridPane.columnIndex="2">
                             <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Alergia" />
                             <ComboBox fx:id="comboAlergia" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;">
                                 <items>

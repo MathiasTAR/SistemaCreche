@@ -338,10 +338,10 @@
                             <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Tipo de Cobertura" />
                             <ComboBox fx:id="comboTipoCobertura" prefHeight="35.0" prefWidth="332.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
-                  <CheckBox fx:id="checkFossa" mnemonicParsing="false" text="checkFossa" GridPane.rowIndex="2" />
-                  <CheckBox fx:id="checkCifon" mnemonicParsing="false" text="checkCifon" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <CheckBox fx:id="checkEnergiaEletrica" mnemonicParsing="false" text="checkEnergiaEletrica" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <CheckBox fx:id="checkAguaEncanada" mnemonicParsing="false" text="checkAguaEncanada" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkFossa" mnemonicParsing="false" text="Fossa" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkCifon" mnemonicParsing="false" text="Cifon" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkEnergiaEletrica" mnemonicParsing="false" text="Energia Eletrica" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkAguaEncanada" mnemonicParsing="false" text="Agua Encanada" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                     </children>
                     <rowConstraints>
                         <RowConstraints />

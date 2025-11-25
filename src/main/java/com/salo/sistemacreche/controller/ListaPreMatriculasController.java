@@ -75,25 +75,20 @@ public class ListaPreMatriculasController {
         try {
             em = DBConnection.getEntityManager();
 
-            if (em == null) {
+            if (em == null || !em.isOpen()) {
                 System.err.println("❌ Erro de conexão com o banco");
                 mostrarMensagemErro("Erro de conexão com o banco de dados");
                 return;
             }
 
-            if (!em.isOpen()) {
-                System.err.println("❌ EntityManager está fechado");
-                mostrarMensagemErro("Conexão com o banco de dados está fechada");
-                return;
-            }
-
             System.out.println("🔍 Executando busca de pré-matrículas com filtros...");
-            System.out.println("📊 Situação selecionada: " + comboSituacao.getValue());
 
-            // Usando JPQL para buscar pré-matrículas
+            // CORREÇÃO: Query JPQL corrigida
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT pm FROM PreMatricula pm " +
                             "LEFT JOIN FETCH pm.crianca c " +
+                            "LEFT JOIN FETCH c.mae mae " +
+                            "LEFT JOIN FETCH c.pai pai " +
                             "LEFT JOIN FETCH pm.situacaoHabitacional sh " +
                             "WHERE 1 = 1"
             );
@@ -101,12 +96,12 @@ public class ListaPreMatriculasController {
             List<Object> parametros = new ArrayList<>();
             int paramIndex = 1;
 
-            // FILTRO 1: Pesquisa por texto (nome da criança)
+            // FILTRO 1: Pesquisa por texto (nome da criança, mãe, pai ou ID)
             String termoPesquisa = fieldPesquisarPreMatricula.getText();
             if (termoPesquisa != null && !termoPesquisa.trim().isEmpty()) {
                 jpql.append(" AND (LOWER(c.nome) LIKE ?").append(paramIndex);
-                jpql.append(" OR LOWER(c.nomeMae) LIKE ?").append(paramIndex);
-                jpql.append(" OR LOWER(c.nomePai) LIKE ?").append(paramIndex);
+                jpql.append(" OR LOWER(mae.nome) LIKE ?").append(paramIndex); // CORREÇÃO: mae.nome
+                jpql.append(" OR LOWER(pai.nome) LIKE ?").append(paramIndex); // CORREÇÃO: pai.nome
                 jpql.append(" OR CAST(pm.id AS string) LIKE ?").append(paramIndex).append(")");
                 parametros.add("%" + termoPesquisa.toLowerCase() + "%");
                 paramIndex++;
@@ -128,7 +123,7 @@ public class ListaPreMatriculasController {
 
             System.out.println("📝 JPQL: " + jpql.toString());
 
-            // Criar e executar a query para PreMatricula
+            // Criar e executar a query
             TypedQuery<PreMatricula> query = em.createQuery(jpql.toString(), PreMatricula.class);
 
             // Aplicar parâmetros
@@ -147,10 +142,6 @@ public class ListaPreMatriculasController {
             System.err.println(errorMsg);
             e.printStackTrace();
             mostrarMensagemErro("Erro ao buscar pré-matrículas: " + e.getMessage());
-
-            if (e.getCause() != null) {
-                System.err.println("Causa: " + e.getCause().getMessage());
-            }
         } finally {
             if (em != null && em.isOpen()) {
                 em.close();

@@ -419,8 +419,7 @@ public class CadastroMatriculaService {
         return situacao;
     }
 
-    private PreMatricula criarPreMatricula(Crianca crianca, SituacaoHabitacional situacaoHabitacional,
-                                           String serie, String anoLetivo) {
+    private PreMatricula criarPreMatricula(Crianca crianca, SituacaoHabitacional situacaoHabitacional, String serie, String anoLetivo) {
         PreMatricula preMatricula = new PreMatricula();
 
         preMatricula.setCrianca(crianca);
@@ -465,7 +464,6 @@ public class CadastroMatriculaService {
             ).setParameter("crianca", crianca).getSingleResult();
             System.out.println("✅ Composição familiar encontrada: ID " + composicaoFamiliar.getId());
         } catch (NoResultException e) {
-            // Se não existe, criar uma nova
             System.out.println("ℹ️ Composição familiar não encontrada, criando nova...");
             composicaoFamiliar = new ComposicaoFamiliar();
             composicaoFamiliar.setCrianca(crianca);

@@ -75,35 +75,30 @@
             try {
                 em = DBConnection.getEntityManager();
 
-                if (em == null) {
+                if (em == null || !em.isOpen()) {
                     System.err.println("❌ Erro de conexão com o banco");
                     mostrarMensagemErro("Erro de conexão com o banco de dados");
                     return;
                 }
 
-                if (!em.isOpen()) {
-                    System.err.println("❌ EntityManager está fechado");
-                    mostrarMensagemErro("Conexão com o banco de dados está fechada");
-                    return;
-                }
-
-
-                // Usando JPQL para maior simplicidade e controle
+                // CORREÇÃO: Query JPQL simplificada e corrigida
                 StringBuilder jpql = new StringBuilder(
                         "SELECT DISTINCT m FROM Matricula m " +
                                 "LEFT JOIN FETCH m.crianca c " +
-                                "WHERE m.situacaoMatricula != com.salo.sistemacreche.entidades.Matricula$SituacaoMatricula.VENCIDA"
+                                "LEFT JOIN FETCH c.mae mae " +
+                                "LEFT JOIN FETCH c.pai pai " +
+                                "WHERE 1 = 1"
                 );
 
                 List<Object> parametros = new ArrayList<>();
                 int paramIndex = 1;
 
-                // FILTRO 1: Pesquisa por texto (nome da criança)
+                // FILTRO 1: Pesquisa por texto (nome da criança, mãe, pai ou ID)
                 String termoPesquisa = fieldPesquisarMatricula.getText();
                 if (termoPesquisa != null && !termoPesquisa.trim().isEmpty()) {
                     jpql.append(" AND (LOWER(c.nome) LIKE ?").append(paramIndex);
-                    jpql.append(" OR LOWER(c.nomeMae) LIKE ?").append(paramIndex);
-                    jpql.append(" OR LOWER(c.nomePai) LIKE ?").append(paramIndex);
+                    jpql.append(" OR LOWER(mae.nome) LIKE ?").append(paramIndex);
+                    jpql.append(" OR LOWER(pai.nome) LIKE ?").append(paramIndex);
                     jpql.append(" OR CAST(m.id AS string) LIKE ?").append(paramIndex).append(")");
                     parametros.add("%" + termoPesquisa.toLowerCase() + "%");
                     paramIndex++;
@@ -144,10 +139,6 @@
                 System.err.println(errorMsg);
                 e.printStackTrace();
                 mostrarMensagemErro("Erro ao buscar matrículas: " + e.getMessage());
-
-                if (e.getCause() != null) {
-                    System.err.println("Causa: " + e.getCause().getMessage());
-                }
             } finally {
                 if (em != null && em.isOpen()) {
                     em.close();
