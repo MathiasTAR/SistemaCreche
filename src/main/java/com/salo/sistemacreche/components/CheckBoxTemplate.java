@@ -8,16 +8,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class CheckBoxTemplate extends GridPane {
 
     private final ObservableList<TipoBem> tiposBemSelecionados;
     private final List<CheckBox> checkBoxes;
+    private final Map<CheckBox, TipoBem> mapaCheckBoxParaTipoBem;
+    private List<TipoBem> todosTiposBem;
 
     public CheckBoxTemplate() {
         this.tiposBemSelecionados = FXCollections.observableArrayList();
         this.checkBoxes = new ArrayList<>();
+        this.mapaCheckBoxParaTipoBem = new HashMap<>();
+        this.todosTiposBem = new ArrayList<>();
         initializeUI();
     }
 
@@ -31,7 +39,10 @@ public class CheckBoxTemplate extends GridPane {
         // Limpar checkboxes existentes
         getChildren().clear();
         checkBoxes.clear();
+        mapaCheckBoxParaTipoBem.clear();
         tiposBemSelecionados.clear();
+
+        this.todosTiposBem = new ArrayList<>(tiposBem);
 
         int row = 0;
         int col = 0;
@@ -40,6 +51,7 @@ public class CheckBoxTemplate extends GridPane {
         for (TipoBem tipoBem : tiposBem) {
             CheckBox checkBox = criarCheckBox(tipoBem);
             checkBoxes.add(checkBox);
+            mapaCheckBoxParaTipoBem.put(checkBox, tipoBem);
 
             add(checkBox, col, row);
 
@@ -97,15 +109,24 @@ public class CheckBoxTemplate extends GridPane {
         return FXCollections.unmodifiableObservableList(tiposBemSelecionados);
     }
 
-    public void setTiposBemSelecionados(List<TipoBem> tiposBem) {
+    public void setTiposBemSelecionados(List<TipoBem> tiposBemParaSelecionar) {
         clearAllSelections();
-        for (TipoBem tipoBem : tiposBem) {
-            for (CheckBox checkBox : checkBoxes) {
-                // Encontrar o checkbox correspondente pelo texto
-                if (checkBox.getText().equals(formatDisplayName(tipoBem.getNomeBem()))) {
-                    checkBox.setSelected(true);
-                    break;
-                }
+
+        if (tiposBemParaSelecionar == null || tiposBemParaSelecionar.isEmpty()) {
+            return;
+        }
+
+        // Criar conjunto para busca rápida
+        Set<TipoBem.NomeBem> nomesParaSelecionar = new HashSet<>();
+        for (TipoBem tipoBem : tiposBemParaSelecionar) {
+            nomesParaSelecionar.add(tipoBem.getNomeBem());
+        }
+
+        // Marcar checkboxes usando o mapa
+        for (CheckBox checkBox : checkBoxes) {
+            TipoBem tipoBemAssociado = mapaCheckBoxParaTipoBem.get(checkBox);
+            if (tipoBemAssociado != null && nomesParaSelecionar.contains(tipoBemAssociado.getNomeBem())) {
+                checkBox.setSelected(true);
             }
         }
     }
@@ -119,5 +140,20 @@ public class CheckBoxTemplate extends GridPane {
 
     public boolean hasSelections() {
         return !tiposBemSelecionados.isEmpty();
+    }
+
+    // Método para obter a lista completa de tipos de bem (útil para debug)
+    public List<TipoBem> getTodosTiposBem() {
+        return new ArrayList<>(todosTiposBem);
+    }
+
+    // Método para verificar se um tipo específico está selecionado
+    public boolean isTipoBemSelecionado(TipoBem.NomeBem nomeBem) {
+        for (TipoBem tipoBem : tiposBemSelecionados) {
+            if (tipoBem.getNomeBem() == nomeBem) {
+                return true;
+            }
+        }
+        return false;
     }
 }

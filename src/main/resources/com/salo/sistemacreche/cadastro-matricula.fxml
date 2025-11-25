@@ -262,14 +262,10 @@
                     </columnConstraints>
                     <children>
                         <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Certidão de Nascimento" />
-                            <TextField fx:id="fieldCertidaoNascimento" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Certidão de Nascimento Número Matricula" />
+                            <TextField fx:id="fieldCertidaoNascimento" minWidth="415.0" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
-                        <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                            <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Nº Matrícula" />
-                            <TextField fx:id="fieldNumeroMatricula" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
-                        </VBox>
-                        <VBox spacing="3" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <VBox spacing="3" GridPane.columnIndex="2">
                             <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Município de Nascimento" />
                             <TextField fx:id="fieldMunicipioNascimento" prefHeight="35.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
@@ -312,9 +308,10 @@
 
                 <GridPane hgap="15" vgap="15">
                     <columnConstraints>
-                        <ColumnConstraints prefWidth="200" />
-                        <ColumnConstraints prefWidth="200" />
-                        <ColumnConstraints prefWidth="200" />
+                        <ColumnConstraints prefWidth="200.0" />
+                        <ColumnConstraints prefWidth="200.0" />
+                        <ColumnConstraints prefWidth="200.0" />
+                  <ColumnConstraints prefWidth="200.0" />
                     </columnConstraints>
                     <children>
                         <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="0">
@@ -341,10 +338,15 @@
                             <Label style="-fx-text-fill: #0f766e; -fx-font-size: 12;" text="Tipo de Cobertura" />
                             <ComboBox fx:id="comboTipoCobertura" prefHeight="35.0" prefWidth="332.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
                         </VBox>
+                  <CheckBox fx:id="checkFossa" mnemonicParsing="false" text="checkFossa" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkCifon" mnemonicParsing="false" text="checkCifon" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkEnergiaEletrica" mnemonicParsing="false" text="checkEnergiaEletrica" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="checkAguaEncanada" mnemonicParsing="false" text="checkAguaEncanada" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                     </children>
                     <rowConstraints>
                         <RowConstraints />
                         <RowConstraints />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
                     </rowConstraints>
                 </GridPane>
             </VBox>
@@ -356,7 +358,7 @@
                         <Font size="16.0" />
                     </font>
                 </Label>
-                <VBox fx:id="containerBens" spacing="10"/>
+                <VBox fx:id="containerBens" spacing="10" />
             </VBox>
 
             <!-- Seção 7: Composição Familiar -->

@@ -1,10 +1,7 @@
 package com.salo.sistemacreche.entidades;
 
-import com.salo.sistemacreche.entidades.ComposicaoFamiliar;
-import com.salo.sistemacreche.entidades.TipoBem;
 import jakarta.persistence.*;
 
-// Entidade para registrar quais bens a família possui
 @Entity
 @Table(name = "BENS_FAMILIA")
 public class BensFamilia {
@@ -28,7 +25,7 @@ public class BensFamilia {
     @Column(name = "QUANTIDADE")
     private Integer quantidade;
 
-    // Construtores, getters e setters
+    // Construtores
     public BensFamilia() {}
 
     public BensFamilia(ComposicaoFamiliar composicaoFamiliar, TipoBem tipoBem, Boolean possui, Integer quantidade) {
@@ -39,44 +36,18 @@ public class BensFamilia {
     }
 
     // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public ComposicaoFamiliar getComposicaoFamiliar() { return composicaoFamiliar; }
+    public void setComposicaoFamiliar(ComposicaoFamiliar composicaoFamiliar) { this.composicaoFamiliar = composicaoFamiliar; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public TipoBem getTipoBem() { return tipoBem; }
+    public void setTipoBem(TipoBem tipoBem) { this.tipoBem = tipoBem; }
 
-    public ComposicaoFamiliar getComposicaoFamiliar() {
-        return composicaoFamiliar;
-    }
+    public Boolean getPossui() { return possui; }
+    public void setPossui(Boolean possui) { this.possui = possui; }
 
-    public void setComposicaoFamiliar(ComposicaoFamiliar composicaoFamiliar) {
-        this.composicaoFamiliar = composicaoFamiliar;
-    }
-
-    public TipoBem getTipoBem() {
-        return tipoBem;
-    }
-
-    public void setTipoBem(TipoBem tipoBem) {
-        this.tipoBem = tipoBem;
-    }
-
-    public Boolean getPossui() {
-        return possui;
-    }
-
-    public void setPossui(Boolean possui) {
-        this.possui = possui;
-    }
-
-    public Integer getQuantidade() {
-        return quantidade;
-    }
-
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
-    }
+    public Integer getQuantidade() { return quantidade; }
+    public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
 }

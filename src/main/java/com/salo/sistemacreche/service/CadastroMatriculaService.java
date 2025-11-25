@@ -5,6 +5,7 @@ import com.salo.sistemacreche.entidades.*;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -70,8 +71,8 @@ public class CadastroMatriculaService {
             // Listas
             List<TipoBem> bensSelecionados,
             List<MembroFamilia> membrosFamiliares,
-            List<PessoaAutorizada> pessoasAutorizadas
-    ) {
+            List<PessoaAutorizada> pessoasAutorizadas,
+            String serie, String anoLetivo) {
         Objects.requireNonNull(nomeCrianca, "Nome da criança não pode ser nulo");
         Objects.requireNonNull(dataNascimento, "Data de nascimento não pode ser nula");
 
@@ -108,9 +109,8 @@ public class CadastroMatriculaService {
             situacaoHabitacional.setCrianca(crianca);
             em.persist(situacaoHabitacional);
 
-            // 4. Criar e salvar Pré-Matrícula
-            PreMatricula preMatricula = criarPreMatricula(crianca, situacaoHabitacional);
-            em.persist(preMatricula);
+            // 4. Salvar Composição Familiar
+            salvarComposicaoFamiliar(em, crianca, membrosFamiliares);
 
             // 5. Salvar Bens da Família
             salvarBensFamilia(em, crianca, bensSelecionados);
@@ -121,8 +121,9 @@ public class CadastroMatriculaService {
             // 7. Salvar Pessoas Autorizadas
             salvarPessoasAutorizadas(em, crianca, pessoasAutorizadas);
 
-            // 8. Salvar Composição Familiar
-            salvarComposicaoFamiliar(em, crianca, membrosFamiliares);
+            // 8. Criar e salvar Pré-Matrícula (agora com série e ano letivo)
+            PreMatricula preMatricula = criarPreMatricula(crianca, situacaoHabitacional, serie, anoLetivo);
+            em.persist(preMatricula);
 
             transaction.commit();
 
@@ -418,7 +419,8 @@ public class CadastroMatriculaService {
         return situacao;
     }
 
-    private PreMatricula criarPreMatricula(Crianca crianca, SituacaoHabitacional situacaoHabitacional) {
+    private PreMatricula criarPreMatricula(Crianca crianca, SituacaoHabitacional situacaoHabitacional,
+                                           String serie, String anoLetivo) {
         PreMatricula preMatricula = new PreMatricula();
 
         preMatricula.setCrianca(crianca);
@@ -427,7 +429,23 @@ public class CadastroMatriculaService {
         preMatricula.setSituacaoPreMatricula(PreMatricula.SituacaoPreMatricula.EM_ANALISE);
         preMatricula.setObservacao("Pré-matrícula cadastrada em " + new java.util.Date());
 
-        System.out.println("✅ Pré-matrícula criada - Situação: " + preMatricula.getSituacaoPreMatricula());
+        // SALVAR OS DADOS TEMPORÁRIOS
+        preMatricula.setSerieTemp(serie);
+
+        if (anoLetivo != null && !anoLetivo.trim().isEmpty()) {
+            try {
+                preMatricula.setAnoLetivoTemp(Integer.parseInt(anoLetivo.trim()));
+            } catch (NumberFormatException e) {
+                System.err.println("❌ Erro ao converter ano letivo: " + anoLetivo);
+                // Usar ano atual como fallback
+                preMatricula.setAnoLetivoTemp(LocalDate.now().getYear());
+            }
+        } else {
+            // Se não informado, usar ano atual
+            preMatricula.setAnoLetivoTemp(LocalDate.now().getYear());
+        }
+
+        System.out.println("✅ Pré-matrícula criada - Série: " + serie + ", Ano: " + preMatricula.getAnoLetivoTemp());
 
         return preMatricula;
     }
@@ -438,21 +456,50 @@ public class CadastroMatriculaService {
             return;
         }
 
+        // Buscar ou criar a composição familiar da criança
+        ComposicaoFamiliar composicaoFamiliar;
+        try {
+            composicaoFamiliar = em.createQuery(
+                    "SELECT cf FROM ComposicaoFamiliar cf WHERE cf.crianca = :crianca",
+                    ComposicaoFamiliar.class
+            ).setParameter("crianca", crianca).getSingleResult();
+            System.out.println("✅ Composição familiar encontrada: ID " + composicaoFamiliar.getId());
+        } catch (NoResultException e) {
+            // Se não existe, criar uma nova
+            System.out.println("ℹ️ Composição familiar não encontrada, criando nova...");
+            composicaoFamiliar = new ComposicaoFamiliar();
+            composicaoFamiliar.setCrianca(crianca);
+            composicaoFamiliar.setRendaFamiliarTotal(BigDecimal.ZERO);
+            composicaoFamiliar.setRendaPerCapita(BigDecimal.ZERO);
+            composicaoFamiliar.setTotalMembros(1); // Pelo menos a criança
+
+            em.persist(composicaoFamiliar);
+            System.out.println("✅ Nova composição familiar criada");
+        }
+
         for (TipoBem tipoBem : bensSelecionados) {
             try {
+                // Buscar o TipoBem gerenciado
                 TipoBem managedTipoBem = em.find(TipoBem.class, tipoBem.getIdTipoBem());
                 if (managedTipoBem == null) {
-                    managedTipoBem = em.merge(tipoBem);
+                    System.err.println("❌ TipoBem não encontrado: " + tipoBem.getIdTipoBem());
+                    continue;
                 }
 
-                TipoBem bemFamilia = new TipoBem();
+                // Criar e salvar o BemFamilia
+                BensFamilia bemFamilia = new BensFamilia();
+                bemFamilia.setComposicaoFamiliar(composicaoFamiliar);
+                bemFamilia.setTipoBem(managedTipoBem);
+                bemFamilia.setPossui(true); // Se está na lista, possui
+                bemFamilia.setQuantidade(1); // Quantidade padrão
+
                 em.persist(bemFamilia);
 
-                System.out.println("✅ Bem salvo: " + tipoBem.getNomeBem() +
-                        " (ID: " + tipoBem.getIdTipoBem() + ")");
+                System.out.println("✅ Bem salvo: " + managedTipoBem.getNomeBem());
 
             } catch (Exception e) {
                 System.err.println("❌ Erro ao salvar bem: " + tipoBem.getNomeBem() + " - " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
@@ -501,8 +548,20 @@ public class CadastroMatriculaService {
     }
 
     private void salvarComposicaoFamiliar(EntityManager em, Crianca crianca, List<MembroFamilia> membrosFamiliares) {
-        ComposicaoFamiliar composicao = new ComposicaoFamiliar();
-        composicao.setCrianca(crianca);
+        // Verificar se já existe composição familiar para esta criança
+        ComposicaoFamiliar composicao = null;
+        try {
+            composicao = em.createQuery(
+                    "SELECT cf FROM ComposicaoFamiliar cf WHERE cf.crianca = :crianca",
+                    ComposicaoFamiliar.class
+            ).setParameter("crianca", crianca).getSingleResult();
+            System.out.println("✅ Composição familiar encontrada, atualizando...");
+        } catch (NoResultException e) {
+            // Se não existe, criar nova
+            composicao = new ComposicaoFamiliar();
+            composicao.setCrianca(crianca);
+            System.out.println("✅ Nova composição familiar criada");
+        }
 
         BigDecimal rendaTotal = BigDecimal.ZERO;
         if (membrosFamiliares != null) {
@@ -514,7 +573,7 @@ public class CadastroMatriculaService {
         }
         composicao.setRendaFamiliarTotal(rendaTotal);
 
-        int totalMembros = (membrosFamiliares != null ? membrosFamiliares.size() : 0) + 1;
+        int totalMembros = (membrosFamiliares != null ? membrosFamiliares.size() : 0) + 1; // +1 para a criança
         if (totalMembros > 0) {
             BigDecimal rendaPerCapita = rendaTotal.divide(
                     new BigDecimal(totalMembros), 2, RoundingMode.HALF_UP
@@ -526,8 +585,15 @@ public class CadastroMatriculaService {
 
         composicao.setTotalMembros(totalMembros);
 
-        em.persist(composicao);
-        System.out.println("✅ Composição familiar salva");
+        if (composicao.getId() == null) {
+            em.persist(composicao);
+            System.out.println("✅ Composição familiar persistida - ID: " + composicao.getId());
+        } else {
+            em.merge(composicao);
+            System.out.println("✅ Composição familiar atualizada - ID: " + composicao.getId());
+        }
+
+        System.out.println("💰 Composição familiar - Renda total: " + rendaTotal + ", Membros: " + totalMembros);
     }
 
     private SituacaoHabitacional.TipoPiso converterParaTipoPiso(String valor) {

@@ -106,7 +106,6 @@ public class CadastroMatriculaController {
 
     // Seção 11: Irmão Gêmeo
     @FXML private VBox containerIrmaos;
-    @FXML private CheckBox checkIrmaoGemeo;
     private final ObservableList<Crianca> irmaosEncontrados = FXCollections.observableArrayList();
 
     // Botões
@@ -314,22 +313,12 @@ public class CadastroMatriculaController {
             em = DBConnection.getEntityManager();
             System.out.println("✅ EntityManager criado com sucesso");
 
-            // Teste: verificar se a EntityManager está funcionando
-            Long count = em.createQuery("SELECT COUNT(t) FROM TipoBem t", Long.class).getSingleResult();
-            System.out.println("✅ Total de registros na tabela TIPO_BEM: " + count);
-
             TypedQuery<TipoBem> query = em.createQuery(
                     "SELECT t FROM TipoBem t ORDER BY t.nomeBem",
                     TipoBem.class
             );
 
             List<TipoBem> tiposBem = query.getResultList();
-            System.out.println("✅ Query executada, " + tiposBem.size() + " resultado(s) encontrado(s)");
-
-            // Debug: mostrar os nomes dos bens carregados
-            for (TipoBem bem : tiposBem) {
-                System.out.println("   - " + bem.getNomeBem() + " (" + bem.getCategoria() + ")");
-            }
 
             return tiposBem;
 
@@ -340,7 +329,6 @@ public class CadastroMatriculaController {
         } finally {
             if (em != null && em.isOpen()) {
                 em.close();
-                System.out.println("✅ EntityManager fechado");
             }
         }
     }
@@ -348,10 +336,17 @@ public class CadastroMatriculaController {
     // NOVO MÉTODO: Obter bens selecionados para salvar
     private List<TipoBem> getBensSelecionados() {
         if (checkBoxTemplateBens != null) {
-            // Converter ObservableList para ArrayList
-            System.out.println("Selecionado");
-            return new ArrayList<>(checkBoxTemplateBens.getTiposBemSelecionados());
+            List<TipoBem> selecionados = new ArrayList<>(checkBoxTemplateBens.getTiposBemSelecionados());
+            System.out.println("📋 " + selecionados.size() + " bem(ns) selecionado(s)");
+
+            // Debug detalhado
+            for (TipoBem bem : selecionados) {
+                System.out.println("   ✅ " + bem.getNomeBem());
+            }
+
+            return selecionados;
         }
+        System.out.println("ℹ️ Nenhum bem selecionado");
         return new ArrayList<>();
     }
 
@@ -1014,7 +1009,20 @@ public class CadastroMatriculaController {
         return card;
     }
 
-    // MÉTODO PARA OBTER IRMÃO GÊMEO SELECIONADO
+    // ✅ ADICIONE ESTE MÉTODO para obter o irmão gêmeo selecionado:
+    private boolean possuiIrmaoGemeoSelecionado() {
+        for (javafx.scene.Node node : containerIrmaos.getChildren()) {
+            if (node instanceof IrmaoCard) {
+                IrmaoCard card = (IrmaoCard) node;
+                if (card.isSelecionado()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // ✅ MÉTODO para obter o irmão gêmeo selecionado (se precisar do objeto)
     private Crianca getIrmaoGemeoSelecionado() {
         for (javafx.scene.Node node : containerIrmaos.getChildren()) {
             if (node instanceof IrmaoCard) {
@@ -1027,9 +1035,8 @@ public class CadastroMatriculaController {
         return null;
     }
 
-    // MÉTODO PARA LIMPAR SELEÇÃO DE GÊMEOS
     public void limparSelecaoGemeos() {
-        checkIrmaoGemeo.setSelected(false);
+
         for (javafx.scene.Node node : containerIrmaos.getChildren()) {
             if (node instanceof IrmaoCard) {
                 IrmaoCard card = (IrmaoCard) node;
@@ -1271,6 +1278,10 @@ public class CadastroMatriculaController {
             if (!validarCamposObrigatorios()) return;
             if (!validarAuxilioComNIS()) return;
 
+            // Obter série e ano letivo
+            String serie = comboSerie.getValue();
+            String anoLetivo = fieldAnoLetivo.getText().trim();
+
             // Usar o service para criar as entidades
             CadastroMatriculaService service = new CadastroMatriculaService();
 
@@ -1279,7 +1290,10 @@ public class CadastroMatriculaController {
             List<MembroFamilia> membrosFamiliares = new ArrayList<>(this.membrosFamiliares);
             List<PessoaAutorizada> pessoasAutorizadas = new ArrayList<>(this.pessoaAutorizadas);
 
-            // Salvar tudo usando o service
+            boolean possuiIrmaoGemeo = possuiIrmaoGemeoSelecionado();
+            Crianca irmaoGemeoSelecionado = getIrmaoGemeoSelecionado();
+
+            // Salvar tudo usando o service - AGORA COM SÉRIE E ANO LETIVO
             PreMatricula preMatriculaSalva = service.salvarPreMatriculaCompleta(
                     fieldNomeCrianca.getText().trim(),
                     datePickerNascimento.getValue(),
@@ -1299,7 +1313,7 @@ public class CadastroMatriculaController {
                     "Sim".equals(comboEducacaoEspecial.getValue()),
                     comboClassificacaoEspecial.getValue(),
                     comboAlergias.getValue(),
-                    checkIrmaoGemeo.isSelected(),
+                    possuiIrmaoGemeo,
                     comboTipoAuxilio.getValue(),
                     fieldNis.getText().trim(),
                     maeSelecionada != null ? maeSelecionada.getPessoa() : null,
@@ -1326,14 +1340,17 @@ public class CadastroMatriculaController {
                     checkAguaEncanada.isSelected(),
                     bensSelecionados,
                     membrosFamiliares,
-                    pessoasAutorizadas
+                    pessoasAutorizadas,
+                    serie,
+                    anoLetivo
             );
 
-            mostrarMensagem("Sucesso", "Pré-matrícula cadastrada com sucesso!");
+            mostrarMensagem("Sucesso", "Pré-matrícula cadastrada com sucesso! Série: " + serie + ", Ano: " + anoLetivo);
             limparFormulario();
 
         } catch (Exception e) {
             System.err.println("❌ Erro ao salvar pré-matrícula: " + e.getMessage());
+            e.printStackTrace();
             mostrarMensagem("Erro", "Erro ao salvar pré-matrícula: " + e.getMessage());
         }
     }

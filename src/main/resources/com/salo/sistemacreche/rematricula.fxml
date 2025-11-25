@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml" fx:controller="com.salo.sistemacreche.controller.RematriculaController">
+<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.salo.sistemacreche.controller.RematriculaController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -24,12 +24,6 @@
         <!-- Botão de busca -->
         <Button mnemonicParsing="false" onAction="#buscarAlunos" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5;" text="Buscar" />
     </HBox>
-
-    <Label style="-fx-text-fill: #666; -fx-font-size: 14;">
-        <text>
-            Matrículas vencidas disponíveis para re-matrícula
-        </text>
-    </Label>
 
     <ScrollPane fitToWidth="true" prefHeight="1920.0" style="-fx-background: #f8fbfd; -fx-border-radius: 5; -fx-border-color: #c8e1e6; -fx-background-radius: 5;">
         <VBox fx:id="containerAlunos" spacing="10.0" style="-fx-background-color: #f8fdf8;" />

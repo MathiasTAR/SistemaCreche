@@ -31,6 +31,12 @@ public class PreMatricula {
     @Column(name = "OBSERVACAO", columnDefinition = "TEXT")
     private String observacao;
 
+    @Column(name = "SERIE_TEMP")
+    private String serieTemp;
+
+    @Column(name = "ANO_LETIVO_TEMP")
+    private Integer anoLetivoTemp;
+
     // Enum
     public enum SituacaoPreMatricula {
         APROVADA, EM_ANALISE, CANCELADA, REPROVADA
@@ -84,5 +90,22 @@ public class PreMatricula {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
+    }
+
+    // Novos getters e setters
+    public String getSerieTemp() {
+        return serieTemp;
+    }
+
+    public void setSerieTemp(String serieTemp) {
+        this.serieTemp = serieTemp;
+    }
+
+    public Integer getAnoLetivoTemp() {
+        return anoLetivoTemp;
+    }
+
+    public void setAnoLetivoTemp(Integer anoLetivoTemp) {
+        this.anoLetivoTemp = anoLetivoTemp;
     }
 }
