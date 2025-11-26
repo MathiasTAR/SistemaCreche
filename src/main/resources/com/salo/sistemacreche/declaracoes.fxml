@@ -1,64 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml" fx:controller="com.salo.sistemacreche.controller.DeclaracoesController">
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.salo.sistemacreche.controller.DeclaracoesController"
+      alignment="CENTER" spacing="20" style="-fx-padding: 50;">
 
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
+    <Label text="Abrindo declaração em PDF..." style="-fx-font-size: 16;"/>
+    <ProgressIndicator />
 
-    <HBox spacing="40.0">
-        <VBox alignment="CENTER" prefHeight="494.0" prefWidth="355.0">
-            <children>
-                <VBox alignment="CENTER" prefHeight="332.0" prefWidth="388.0" spacing="20.0" style="-fx-padding: 5; -fx-background-color: white; -fx-border-color: #c8e1e6; -fx-background-radius: 5; -fx-border-radius: 5;">
-                    <children>
-                        <VBox spacing="10.0">
-                            <children>
-                                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Selecionar Criança" />
-                                <ComboBox fx:id="comboAlunos" prefHeight="35.0" prefWidth="423.0" promptText="Criança" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
-                            </children>
-                        </VBox>
-                        <VBox layoutX="10.0" layoutY="10.0" spacing="10.0">
-                            <children>
-                                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Tipo de declaração" />
-                                <ComboBox fx:id="comboDeclaracao" prefHeight="35.0" prefWidth="484.0" promptText="Declaração" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
-                            </children>
-                        </VBox>
-                        <VBox spacing="10.0">
-                            <children>
-                                <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Data" />
-                                <DatePicker fx:id="datePickerData" prefHeight="35.0" prefWidth="473.0" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-radius: 5; -fx-background-radius: 5;" />
-                            </children>
-                        </VBox>
-                        <Button fx:id="btnGerarDeclaracao" mnemonicParsing="false" onAction="#gerarDeclaracao" prefWidth="500.0" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 320; -fx-pref-height: 40; -fx-font-weight: bold;" text="Gerar declaração" />
-                    </children>
-                </VBox>
-            </children>
-        </VBox>
-
-        <!-- Painel de pré-visualização -->
-        <VBox prefWidth="600.0" spacing="15.0" style="-fx-background-color: white; -fx-border-color: #c8e1e6; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;">
-            <Label style="-fx-text-fill: #0f766e; -fx-font-weight: bold;" text="Preview da declaração">
-                <font>
-                    <Font size="16.0" />
-                </font>
-            </Label>
-
-            <TextArea fx:id="textAreaDeclaracao" editable="false" prefHeight="350.0" prefWidth="550.0" style="-fx-background-color: #f9f9f9; -fx-font-family: 'Arial';" wrapText="true" />
-
-            <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 10 0 0 0;">
-                <Button fx:id="btnImprimirDeclaracao" mnemonicParsing="false" onAction="#imprimirDeclaracao" style="-fx-background-color: #0f766e; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 150; -fx-pref-height: 35;" text="Imprimir Declaração" />
-                <Button fx:id="btnSalvarPdf" mnemonicParsing="false" onAction="#salvarPdf" style="-fx-background-color: #b02e50; -fx-text-fill: white; -fx-background-radius: 5; -fx-pref-width: 120; -fx-pref-height: 35;" text="Salvar PDF" />
-            </HBox>
-        </VBox>
-    </HBox>
 </VBox>

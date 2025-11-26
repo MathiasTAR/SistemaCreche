@@ -53,6 +53,7 @@ public class RelatoriosController {
             default: return null;
         }
     }
+
     public void gerarPDF() {
         EntityManager em = DBConnection.getEntityManager();
 
@@ -196,16 +197,18 @@ public class RelatoriosController {
             );
 
             Map<String, Object> parametros = new HashMap<>();
-            parametros.put("sexo", comboSexo.getValue());
-            parametros.put("corRaca", comboRaca.getValue());
-            parametros.put("alergia", comboAlergia.getValue());
-            parametros.put("tipoMoradia", comboMoradia.getValue());
-            parametros.put("beneficioSocial", comboBeneficioSocial.getValue());
-            parametros.put("rendaMin", txtRendaMinima.getText());
-            parametros.put("rendaMax", txtRendaMaxima.getText());
+
+            // Alteração aqui: usar string vazia em vez de null para campos não preenchidos
+            parametros.put("sexo", comboSexo.getValue() != null ? comboSexo.getValue() : "");
+            parametros.put("corRaca", comboRaca.getValue() != null ? comboRaca.getValue() : "");
+            parametros.put("alergia", comboAlergia.getValue() != null ? comboAlergia.getValue() : "");
+            parametros.put("tipoMoradia", comboMoradia.getValue() != null ? comboMoradia.getValue() : "");
+            parametros.put("beneficioSocial", comboBeneficioSocial.getValue() != null ? comboBeneficioSocial.getValue() : "");
+            parametros.put("rendaMin", txtRendaMinima.getText() != null && !txtRendaMinima.getText().isEmpty() ? txtRendaMinima.getText() : "");
+            parametros.put("rendaMax", txtRendaMaxima.getText() != null && !txtRendaMaxima.getText().isEmpty() ? txtRendaMaxima.getText() : "");
             parametros.put("dataInicio", inicio != null ? java.sql.Date.valueOf(inicio) : null);
             parametros.put("dataFim", fim != null ? java.sql.Date.valueOf(fim) : null);
-            parametros.put("dataPreDef", periodoPreDefinido);
+            parametros.put("dataPreDef", periodoPreDefinido != null ? periodoPreDefinido : "");
             parametros.put("totalCriancas", resultado.size());
 
             List<Object> listaResumo = List.of(new Object()); // lista de tamanho 1

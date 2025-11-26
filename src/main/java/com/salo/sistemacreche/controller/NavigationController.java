@@ -102,6 +102,7 @@ public class NavigationController {
         if (mainController != null) {
             mainController.mostrarTelaDeclaracoes();
             atualizarBotaoAtivo(btnDeclaracoes);
+            DeclaracoesController.abrirPDF();
         }
     }
 
