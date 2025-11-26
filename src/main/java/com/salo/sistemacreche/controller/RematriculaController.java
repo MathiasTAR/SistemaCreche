@@ -44,25 +44,22 @@ public class RematriculaController {
 
             em.getTransaction().begin();
 
-            // Buscar todas as matrículas ATIVAS
-            List<Matricula> matriculasAtivas = em.createQuery(
-                            "SELECT m FROM Matricula m WHERE m.situacaoMatricula = :ativa", Matricula.class)
+            // ✅ VERSÃO OTIMIZADA - UPDATE EM LOTE
+            int atualizadas = em.createQuery(
+                            "UPDATE Matricula m SET m.situacaoMatricula = :vencida " +
+                                    "WHERE m.situacaoMatricula = :ativa AND m.dataVencimento < :hoje")
+                    .setParameter("vencida", SituacaoMatricula.VENCIDA)
                     .setParameter("ativa", SituacaoMatricula.ATIVA)
-                    .getResultList();
-
-            int atualizadas = 0;
-            for (Matricula matricula : matriculasAtivas) {
-                if (matricula.getDataVencimento() != null &&
-                        matricula.getDataVencimento().getYear() < LocalDate.now().getYear()) {
-
-                    matricula.setSituacaoMatricula(SituacaoMatricula.VENCIDA);
-                    em.merge(matricula);
-                    atualizadas++;
-                }
-            }
+                    .setParameter("hoje", java.sql.Date.valueOf(LocalDate.now()))
+                    .executeUpdate();
 
             em.getTransaction().commit();
-            System.out.println("✅ " + atualizadas + " matrícula(s) atualizada(s) para VENCIDA");
+
+            if (atualizadas > 0) {
+                System.out.println("✅ " + atualizadas + " matrícula(s) atualizada(s) para VENCIDA");
+            } else {
+                System.out.println("ℹ️ Nenhuma matrícula vencida encontrada");
+            }
 
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
