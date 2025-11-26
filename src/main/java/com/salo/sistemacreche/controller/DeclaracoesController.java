@@ -1,8 +1,6 @@
 package com.salo.sistemacreche.controller;
 
-import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +10,6 @@ import java.nio.file.StandardCopyOption;
 
 public class DeclaracoesController {
 
-    @FXML
     public static void abrirPDF() {
         try {
             // Carregar o PDF dos resources
@@ -38,6 +35,7 @@ public class DeclaracoesController {
                     desktop.open(tempFile);
                     System.out.println("✅ PDF aberto com sucesso!");
                 }
+
 
 
             }

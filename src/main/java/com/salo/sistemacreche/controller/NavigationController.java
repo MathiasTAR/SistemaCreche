@@ -1,7 +1,11 @@
 package com.salo.sistemacreche.controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.util.Duration;
 
 public class NavigationController {
 
@@ -103,6 +107,15 @@ public class NavigationController {
             mainController.mostrarTelaDeclaracoes();
             atualizarBotaoAtivo(btnDeclaracoes);
             DeclaracoesController.abrirPDF();
+
+            // volta para home após 3 segundos
+            Timeline timeline = new Timeline(new KeyFrame(
+                    Duration.seconds(3),
+                    e -> {
+                        navegarParaHome();
+                    }
+            ));
+            timeline.play();
         }
     }
 
