@@ -1,5 +1,3 @@
-package com.salo.sistemacreche.controller;
-
 /*package com.salo.sistemacreche.controller;
 
 import com.salo.sistemacreche.dao.DBConnection;
@@ -8,11 +6,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.TextField;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
+import java.awt.*;
+import java.io.File;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.List;
 
 public class RelatoriosController {
@@ -29,22 +32,35 @@ public class RelatoriosController {
     @FXML private ComboBox<String> comboMoradia;
     @FXML private ComboBox<String> comboBeneficioSocial;
 
-    @FXML private CheckBox checkAltasHabilidades;
-    @FXML private CheckBox checkCegueira;
-    @FXML private CheckBox checkTDAH;
+    @FXML private TextField txtRendaMinima;
+    @FXML private TextField txtRendaMaxima;
 
     @FXML private TableView<Crianca> tabela;
 
 
     @FXML
-    public void gerarPDF() {
+    private Crianca.CorRaca converterRaca(String texto) {
+        if (texto == null || texto.equals("Todas")) {
+            return null;
+        }
 
+        switch (texto) {
+            case "Branca": return Crianca.CorRaca.BRANCA;
+            case "Preta": return Crianca.CorRaca.PRETA;
+            case "Parda": return Crianca.CorRaca.PARDA;
+            case "Amarela": return Crianca.CorRaca.AMARELA;
+            case "Indígena": return Crianca.CorRaca.INDIGENA;
+            default: return null;
+        }
+    }
+    public void gerarPDF() {
         EntityManager em = DBConnection.getEntityManager();
 
         StringBuilder jpql = new StringBuilder(
                 "SELECT c FROM Crianca c " +
-                        " LEFT JOIN SituacaoHabitacional s ON s.crianca.id = c.id " +
-                        " WHERE 1=1 "
+                        "LEFT JOIN c.situacaoHabitacional s " +
+                        "LEFT JOIN c.composicaoFamiliar cf " +
+                        "WHERE 1=1 "
         );
 
         Map<String, Object> params = new HashMap<>();
@@ -54,138 +70,174 @@ public class RelatoriosController {
         // =============================
         LocalDate inicio = datePickerInicio.getValue();
         LocalDate fim = datePickerFim.getValue();
+        String periodoPreDefinido = comboPeriodo.getValue();
 
-        if (comboPeriodo.getValue() != null) {
-            switch (comboPeriodo.getValue()) {
-                case "Últimos 7 dias":
+        if (periodoPreDefinido != null) {
+            switch (periodoPreDefinido) {
+                case "Últimos 7 dias" -> {
                     inicio = LocalDate.now().minusDays(7);
                     fim = LocalDate.now();
-                    break;
-                case "Últimos 30 dias":
+                }
+                case "Últimos 30 dias" -> {
                     inicio = LocalDate.now().minusDays(30);
                     fim = LocalDate.now();
-                    break;
-                case "Este mês":
+                }
+                case "Este mês" -> {
                     inicio = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
                     fim = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-                    break;
-                case "Mês anterior":
+                }
+                case "Mês anterior" -> {
                     inicio = LocalDate.now().minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
                     fim = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-                    break;
-                case "Este ano":
+                }
+                case "Este ano" -> {
                     inicio = LocalDate.now().with(TemporalAdjusters.firstDayOfYear());
                     fim = LocalDate.now().with(TemporalAdjusters.lastDayOfYear());
-                    break;
+                }
             }
         }
 
-        if (inicio != null) {
-            jpql.append(" AND c.dataCriacao >= :inicio ");
-            params.put("inicio", inicio);
-        }
-
-        if (fim != null) {
-            jpql.append(" AND c.dataCriacao <= :fim ");
-            params.put("fim", fim);
-        }
-
+        if (inicio != null) params.put("dataInicio", java.sql.Date.valueOf(inicio));
+        if (fim != null) params.put("dataFim", java.sql.Date.valueOf(fim));
 
         // =============================
-        // FILTROS CRIANÇA
+        // FILTROS
         // =============================
 
         // SEXO
         if (comboSexo.getValue() != null && !comboSexo.getValue().equals("Todos")) {
             jpql.append(" AND c.sexo = :sexo ");
-            params.put("sexo", comboSexo.getValue());
+            params.put("sexo", Crianca.Sexo.valueOf(comboSexo.getValue().toUpperCase()));
         }
 
-        // ALERGIA (Boolean)
+        // ALERGIA
         if (comboAlergia.getValue() != null) {
             switch (comboAlergia.getValue()) {
-                case "Sim":
-                    jpql.append(" AND c.alergia = true ");
-                    break;
-                case "Não":
-                    jpql.append(" AND c.alergia = false ");
-                    break;
+                case "Com alergia" -> {
+                    jpql.append(" AND c.alergia = :alergia ");
+                    params.put("alergia", true);
+                }
+                case "Sem alergia" -> {
+                    jpql.append(" AND c.alergia = :alergia ");
+                    params.put("alergia", false);
+                }
             }
         }
 
-        // RAÇA (Enum)
+        // RAÇA
         if (comboRaca.getValue() != null && !comboRaca.getValue().equals("Todas")) {
             jpql.append(" AND c.corRaca = :raca ");
-            params.put("raca", comboRaca.getValue());
+            params.put("raca", converterRaca(comboRaca.getValue()));
         }
 
-        // MOBILIDADE REDUZIDA
-        if (comboMobilidade.getValue() != null) {
+        // MOBILIDADE
+        if (comboMobilidade.getValue() != null && !comboMobilidade.getValue().equals("Todas as situações")) {
             switch (comboMobilidade.getValue()) {
-                case "Com mobilidade reduzida":
-                    jpql.append(" AND c.mobilidadeReduzida = true ");
-                    break;
-                case "Sem mobilidade reduzida":
-                    jpql.append(" AND c.mobilidadeReduzida = false ");
-                    break;
+                case "Com mobilidade reduzida" -> {
+                    jpql.append(" AND c.mobRed IN :listaMob ");
+                    params.put("listaMob", Arrays.asList(Crianca.MobRed.TEMPORARIA, Crianca.MobRed.PERMANENTE));
+                }
+                case "Sem mobilidade reduzida" -> {
+                    jpql.append(" AND c.mobRed = :mob ");
+                    params.put("mob", Crianca.MobRed.NENHUMA);
+                }
             }
         }
 
-
-        // =============================
-        // DEFICIÊNCIAS E CLASSIFICAÇÕES
-        // =============================
-
-        if (checkAltasHabilidades.isSelected()) {
-            jpql.append(" AND c.altasHabilidades = true ");
-        }
-
-        if (checkCegueira.isSelected()) {
-            jpql.append(" AND c.cegueira = true ");
-        }
-
-        if (checkTDAH.isSelected()) {
-            jpql.append(" AND c.tdah = true ");
-        }
-
-
-        // =============================
-        // SITUAÇÃO HABITACIONAL (JOIN)
-        // =============================
-
+        // MORADIA
         if (comboMoradia.getValue() != null && !comboMoradia.getValue().equals("Todos")) {
-            jpql.append(" AND s.tipoMoradia = :moradia ");
-            params.put("moradia", comboMoradia.getValue());
+            switch (comboMoradia.getValue()) {
+                case "Casa Própria" -> jpql.append(" AND s.casaPropria = true ");
+                case "Casa Cedida" -> jpql.append(" AND s.casaCedida = true ");
+                case "Casa Alugada" -> jpql.append(" AND s.casaAlugada = true ");
+            }
         }
 
-
-        // =============================
-        // AUXÍLIO SOCIAL (ManyToOne)
-        // =============================
-
-        if (comboBeneficioSocial.getValue() != null && !comboBeneficioSocial.getValue().equals("Todos")) {
-            jpql.append(" AND c.tipoAuxilio.nomeAuxilio = :aux ");
-            params.put("aux", comboBeneficioSocial.getValue());
+        // BENEFÍCIO SOCIAL
+        if (comboBeneficioSocial.getValue() != null && !comboBeneficioSocial.getValue().equals("Todas as situações")) {
+            switch (comboBeneficioSocial.getValue()) {
+                case "Com benefício" -> jpql.append(" AND c.tipoAuxilio IS NOT NULL ");
+                case "Sem benefício" -> jpql.append(" AND c.tipoAuxilio IS NULL ");
+            }
         }
 
+        // RENDA
+        if (txtRendaMinima.getText() != null && !txtRendaMinima.getText().isEmpty()) {
+            try {
+                BigDecimal rendaMin = new BigDecimal(txtRendaMinima.getText());
+                jpql.append(" AND cf.rendaFamiliarTotal >= :rendaMin ");
+                params.put("rendaMin", rendaMin);
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (txtRendaMaxima.getText() != null && !txtRendaMaxima.getText().isEmpty()) {
+            try {
+                BigDecimal rendaMax = new BigDecimal(txtRendaMaxima.getText());
+                jpql.append(" AND cf.rendaFamiliarTotal <= :rendaMax ");
+                params.put("rendaMax", rendaMax);
+            } catch (NumberFormatException ignored) {}
+        }
 
         // =============================
-        // EXECUTAR CONSULTA
+        // EXECUTA CONSULTA
         // =============================
-
         TypedQuery<Crianca> query = em.createQuery(jpql.toString(), Crianca.class);
         params.forEach(query::setParameter);
 
         List<Crianca> resultado = query.getResultList();
-        tabela.getItems().setAll(resultado);
-
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle("Relatório");
-        alerta.setHeaderText("Filtros aplicados");
-        alerta.setContentText("Crianças encontradas: " + resultado.size());
-        alerta.show();
-
         em.close();
+
+        // =============================
+        // GERAR PDF
+        // =============================
+        try {
+            JasperReport jasperReport = JasperCompileManager.compileReport(
+                    getClass().getResourceAsStream("/reports/layoutRel.jrxml")
+            );
+
+            Map<String, Object> parametros = new HashMap<>();
+            parametros.put("sexo", comboSexo.getValue());
+            parametros.put("corRaca", comboRaca.getValue());
+            parametros.put("alergia", comboAlergia.getValue());
+            parametros.put("tipoMoradia", comboMoradia.getValue());
+            parametros.put("beneficioSocial", comboBeneficioSocial.getValue());
+            parametros.put("rendaMin", txtRendaMinima.getText());
+            parametros.put("rendaMax", txtRendaMaxima.getText());
+            parametros.put("dataInicio", inicio != null ? java.sql.Date.valueOf(inicio) : null);
+            parametros.put("dataFim", fim != null ? java.sql.Date.valueOf(fim) : null);
+            parametros.put("dataPreDef", periodoPreDefinido);
+            parametros.put("totalCriancas", resultado.size());
+
+            List<Object> listaResumo = List.of(new Object()); // lista de tamanho 1
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(listaResumo);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parametros, dataSource);
+
+            // Diretório seguro
+            String userHome = System.getProperty("user.home");
+            File pastaRelatorios = new File(userHome, "relatorios");
+            if (!pastaRelatorios.exists()) pastaRelatorios.mkdirs();
+
+            File arquivoPDF = new File(pastaRelatorios, "relatorio_amostragem.pdf");
+            JasperExportManager.exportReportToPdfFile(jasperPrint, arquivoPDF.getAbsolutePath());
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(arquivoPDF);
+            }
+
+            Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
+            alertInfo.setTitle("Relatório");
+            alertInfo.setHeaderText("PDF gerado com sucesso!");
+            alertInfo.setContentText("Crianças encontradas: " + resultado.size());
+            alertInfo.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alertErro = new Alert(Alert.AlertType.ERROR);
+            alertErro.setTitle("Erro");
+            alertErro.setHeaderText("Falha ao gerar relatório");
+            alertErro.setContentText(e.getMessage());
+            alertErro.show();
+        }
     }
 
 
@@ -202,13 +254,11 @@ public class RelatoriosController {
 
         comboMoradia.setValue(null);
         comboBeneficioSocial.setValue(null);
-
-        checkAltasHabilidades.setSelected(false);
-        checkCegueira.setSelected(false);
-        checkTDAH.setSelected(false);
     }
 }
 */
+
+package com.salo.sistemacreche.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
