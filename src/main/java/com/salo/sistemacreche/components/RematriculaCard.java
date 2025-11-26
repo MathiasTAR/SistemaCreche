@@ -55,7 +55,6 @@ public class RematriculaCard extends VBox {
         }
         labelNome.setPrefWidth(300.0);
 
-        // Situação da matrícula - SEMPRE VENCIDA (pois só aparece aqui se estiver vencida)
         labelSituacao = new Label("Vencida");
 
         // Data de vencimento
@@ -66,7 +65,7 @@ public class RematriculaCard extends VBox {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             String dataFormatada = sdf.format(matricula.getDataVencimento());
 
-            // Só calcular dias vencidos (já sabemos que está vencida)
+            // calcular dias vencidos
             long diasVencidos = calcularDiasVencidos();
 
             labelDataVencimento.setText("Vencida em: " + dataFormatada);
@@ -126,7 +125,7 @@ public class RematriculaCard extends VBox {
 
             LocalDate hoje = LocalDate.now();
 
-            // Dias que PASSARAM desde o vencimento (sempre positivo aqui)
+            // Dias que passaram desde o vencimento
             return ChronoUnit.DAYS.between(dataVencimento, hoje);
 
         } catch (Exception e) {
@@ -148,8 +147,8 @@ public class RematriculaCard extends VBox {
         alert.setHeaderText(null);
         alert.setContentText("Tem certeza que deseja RENOVAR a matrícula de " + nomeCrianca + "?\n\n" +
                 "Esta ação irá:\n" +
-                "• Renovar a matrícula ATUAL\n" +
-                "• Continuar na mesma série\n\n" +
+                "Renovar a matrícula atual\n" +
+                "Avançar série\n\n" +
                 "Matrícula vencida há " + diasVencidos + " dias");
 
         ButtonType btnSim = new ButtonType("Sim, Renovar");
@@ -233,8 +232,12 @@ public class RematriculaCard extends VBox {
 
     private void applyStyles() {
         // Card principal
-        this.setStyle("-fx-background-color: white; -fx-border-color: #e8f5e8; "
-                + "-fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15;");
+        this.setStyle("-fx-background-color: white; " +
+                "-fx-border-color: #e8f5e8; " +
+                "-fx-border-width: 1; " +
+                "-fx-border-radius: 5; " +
+                "-fx-padding: 15; " +
+                "-fx-cursor: hand;");
 
         // Nome
         labelNome.setStyle("-fx-text-fill: #2e7d32;");
@@ -246,18 +249,28 @@ public class RematriculaCard extends VBox {
         labelSerieAno.setStyle("-fx-text-fill: #666;");
 
         // Situação - SEMPRE VENCIDA (laranja para destaque)
-        labelSituacao.setStyle("-fx-text-fill: #ff9800; -fx-font-weight: bold; "
-                + "-fx-background-color: #fff3e0; -fx-padding: 2 8; -fx-background-radius: 10;");
+        labelSituacao.setStyle("-fx-text-fill: #ff9800; -fx-font-weight: bold; " +
+                "-fx-background-color: #fff3e0; -fx-padding: 2 8; -fx-background-radius: 10;");
 
         // Botão Ações
-        btnAcoes.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 5 10;");
+        btnAcoes.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 5 10; " +
+                "-fx-cursor: hand;");
 
         // Botões de ação
-        btnRenovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
-        btnVisualizar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
+        btnRenovar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
+
+        btnVisualizar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
     }
 
     // Getters e Setters

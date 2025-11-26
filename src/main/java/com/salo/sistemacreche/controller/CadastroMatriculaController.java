@@ -188,7 +188,7 @@ public class CadastroMatriculaController {
         ));
 
         comboSerie.setItems(FXCollections.observableArrayList(
-                "Berçário I", "Berçário II", "Maternal I", "Maternal II", "Pré I", "Pré II"
+                "BERCARIO_I", "BERCARIO_II", "MATERNAL_I", "MATERNAL_II", "PRE_I", "PRE_II"
         ));
     }
 
@@ -511,7 +511,6 @@ public class CadastroMatriculaController {
         }
     }
 
-    // === MÉTODO GENÉRICO PARA ATUALIZAR CONTAINER - VERSÃO CORRIGIDA ===
     private void atualizarCardsContainer(VBox container, List<Responsavel> responsaveis, String mensagemVazio) {
         container.getChildren().clear();
 
@@ -521,11 +520,10 @@ public class CadastroMatriculaController {
         } else {
             for (Responsavel responsavel : responsaveis) {
                 try {
-                    // ✅ CORREÇÃO: Usar variável final para o lambda
                     final Responsavel responsavelFinal = responsavel;
                     ResponsavelCard card = new ResponsavelCard(responsavelFinal);
 
-                    // ✅ CORREÇÃO: Configurar ações ANTES de adicionar ao container
+                    // ✅ APENAS configurar ações do card
                     configurarAcoesDoCard(card, container, responsavelFinal);
 
                     container.getChildren().add(card);
@@ -541,12 +539,49 @@ public class CadastroMatriculaController {
         }
     }
 
-    // Configurar ações do card
+    // MÉTODOS PARA GERENCIAR SELEÇÃO DE RESPONSÁVEIS
+    private void configurarSelecaoResponsaveis() {
+    }
+
+    // OBTER RESPONSÁVEL SELECIONADO DE UM CONTAINER
+    private Responsavel getResponsavelSelecionado(VBox container) {
+        for (javafx.scene.Node node : container.getChildren()) {
+            if (node instanceof ResponsavelCard) {
+                ResponsavelCard card = (ResponsavelCard) node;
+                if (card.isSelecionado()) {
+                    return card.getResponsavel();
+                }
+            }
+        }
+        return null;
+    }
+
+    // LIMPAR DETECÇÃO DE IRMÃOS
+    private void limparDetecaoIrmaos() {
+        irmaosEncontrados.clear();
+        containerIrmaos.getChildren().clear();
+        EmptyCard emptyCard = new EmptyCard("Selecione uma mãe ou pai para detectar irmãos automaticamente.");
+        containerIrmaos.getChildren().add(emptyCard);
+    }
+
+    // ATUALIZAR DETECÇÃO DE IRMÃOS QUANDO CARDS SÃO ADICIONADOS
+    private void atualizarSelecaoAposCarregar(VBox container) {
+        Platform.runLater(() -> {
+            for (javafx.scene.Node node : container.getChildren()) {
+                if (node instanceof ResponsavelCard) {
+                    ResponsavelCard card = (ResponsavelCard) node;
+                    configurarAcoesDoCard(card, container, card.getResponsavel());
+                }
+            }
+        });
+    }
+
+    // ✅ MÉTODO ÚNICO para configurar ações - VERSÃO CORRIGIDA
     private void configurarAcoesDoCard(ResponsavelCard card, VBox container, Responsavel responsavel) {
-        card.setOnEditAction(() -> {
+        card.setOnSelectAction(() -> {
             System.out.println("🎯 SELECT ACTION - Selecionado: " + responsavel.getPessoa().getNome());
 
-            // Desmarca outros cards no mesmo container
+            // Desmarca outros cards no mesmo container (seleção única)
             for (javafx.scene.Node outroNode : container.getChildren()) {
                 if (outroNode instanceof ResponsavelCard && outroNode != card) {
                     ResponsavelCard outroCard = (ResponsavelCard) outroNode;
@@ -569,7 +604,6 @@ public class CadastroMatriculaController {
                 System.out.println("👤 Responsável selecionado: " + responsavel.getPessoa().getNome());
             }
 
-            // 🔥 DETECTA IRMÃOS AUTOMATICAMENTE
             detectarIrmaosAutomaticamente();
         });
 
@@ -589,6 +623,13 @@ public class CadastroMatriculaController {
             }
 
             limparDetecaoIrmaos();
+        });
+
+        // ✅ CONFIGURAR AÇÃO DE EDIÇÃO SEPARADAMENTE
+        card.setOnEditAction(() -> {
+            System.out.println("✏️ EDIT ACTION - Editando: " + responsavel.getPessoa().getNome());
+            // Aqui você pode abrir o modal de edição se necessário
+            // abrirEdicaoResponsavel(responsavel);
         });
     }
 
@@ -726,63 +767,6 @@ public class CadastroMatriculaController {
             e.printStackTrace();
             mostrarMensagem("Erro", "Erro ao abrir cadastro de pessoa autorizada");
         }
-    }
-
-    // MÉTODOS PARA GERENCIAR SELEÇÃO DE RESPONSÁVEIS
-    private void configurarSelecaoResponsaveis() {
-        configurarSelecaoUnica(cardsContainerMaes);
-        configurarSelecaoUnica(cardsContainerPais);
-        configurarSelecaoUnica(cardsContainerResponsaveis);
-    }
-
-    // CONFIGURAR SELEÇÃO ÚNICA POR CONTAINER
-    private void configurarSelecaoUnica(VBox container) {
-        for (javafx.scene.Node node : container.getChildren()) {
-            if (node instanceof ResponsavelCard) {
-                ResponsavelCard card = (ResponsavelCard) node;
-
-                card.setOnSelectAction(() -> {
-                    for (javafx.scene.Node outroNode : container.getChildren()) {
-                        if (outroNode instanceof ResponsavelCard && outroNode != node) {
-                            ((ResponsavelCard) outroNode).setSelecionado(false);
-                        }
-                    }
-                    detectarIrmaosAutomaticamente();
-                });
-
-                card.setOnDeselectAction(() -> {
-                    limparDetecaoIrmaos();
-                });
-            }
-        }
-    }
-
-    // OBTER RESPONSÁVEL SELECIONADO DE UM CONTAINER
-    private Responsavel getResponsavelSelecionado(VBox container) {
-        for (javafx.scene.Node node : container.getChildren()) {
-            if (node instanceof ResponsavelCard) {
-                ResponsavelCard card = (ResponsavelCard) node;
-                if (card.isSelecionado()) {
-                    return card.getResponsavel();
-                }
-            }
-        }
-        return null;
-    }
-
-    // LIMPAR DETECÇÃO DE IRMÃOS
-    private void limparDetecaoIrmaos() {
-        irmaosEncontrados.clear();
-        containerIrmaos.getChildren().clear();
-        EmptyCard emptyCard = new EmptyCard("Selecione uma mãe ou pai para detectar irmãos automaticamente.");
-        containerIrmaos.getChildren().add(emptyCard);
-    }
-
-    // ATUALIZAR DETECÇÃO DE IRMÃOS QUANDO CARDS SÃO ADICIONADOS
-    private void atualizarSelecaoAposCarregar(VBox container) {
-        Platform.runLater(() -> {
-            configurarSelecaoUnica(container);
-        });
     }
 
     private void configurarTableViews() {

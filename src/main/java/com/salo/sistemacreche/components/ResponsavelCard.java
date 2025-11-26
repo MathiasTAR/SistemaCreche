@@ -29,17 +29,19 @@ public class ResponsavelCard extends VBox {
         configurarCliqueNoCard();
     }
 
-    // NOVO MÉTODO: Configurar clique em qualquer lugar do card
+    // VERSÃO MELHORADA do método configurarCliqueNoCard
     private void configurarCliqueNoCard() {
         this.setOnMouseClicked(event -> {
-            // Não faz nada se clicou diretamente no checkbox ou botão editar
-            if (event.getTarget() instanceof CheckBox || event.getTarget() instanceof Button) {
-                return;
-            }
+            // ✅ CORREÇÃO: Ignora completamente se o clique foi em checkbox ou botão
+            boolean isCheckboxClick = event.getTarget() instanceof CheckBox ||
+                    (event.getTarget() instanceof Label &&
+                            ((Label) event.getTarget()).getGraphic() instanceof CheckBox);
+            boolean isButtonClick = event.getTarget() instanceof Button;
 
-            // Alterna a seleção quando clicar em qualquer outro lugar do card
-            System.out.println("Clicado em lugar");
-            setSelecionado(!selecionado);
+            if (!isCheckboxClick && !isButtonClick) {
+                // Alterna a seleção quando clicar em qualquer outro lugar do card
+                setSelecionado(!selecionado);
+            }
         });
     }
 
@@ -53,19 +55,27 @@ public class ResponsavelCard extends VBox {
     }
 
     private void applyStyles() {
+        checkSelecionar.setStyle("-fx-text-fill: #0f766e; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        this.setStyle("-fx-cursor: hand;");
+
         updateCardStyle();
     }
 
     private void updateCardStyle() {
+        String currentStyle = this.getStyle();
+
         if (selecionado) {
-            this.setStyle("-fx-background-color: transparent; " +
+            this.setStyle(currentStyle +
+                    "-fx-background-color: transparent; " +
                     "-fx-border-color: #28a745; " +
                     "-fx-border-width: 2; " +
                     "-fx-border-radius: 8; " +
                     "-fx-padding: 15; " +
                     "-fx-effect: dropshadow(three-pass-box, rgba(40,167,69,0.3), 5, 0, 0, 2);");
         } else {
-            this.setStyle("-fx-background-color: transparent; " +
+            this.setStyle(currentStyle +
+                    "-fx-background-color: transparent; " +
                     "-fx-border-color: #c8e1e6; " +
                     "-fx-border-width: 1; " +
                     "-fx-border-radius: 8; " +

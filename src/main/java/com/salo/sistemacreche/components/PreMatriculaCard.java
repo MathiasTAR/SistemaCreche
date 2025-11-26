@@ -206,8 +206,12 @@ public class PreMatriculaCard extends VBox {
 
     private void applyStyles() {
         // Card
-        this.setStyle("-fx-background-color: white; -fx-border-color: #e8f5e8; "
-                + "-fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15;");
+        this.setStyle("-fx-background-color: white; " +
+                "-fx-border-color: #e8f5e8; " +
+                "-fx-border-width: 1; " +
+                "-fx-border-radius: 5; " +
+                "-fx-padding: 15; " +
+                "-fx-cursor: hand;");
 
         labelNome.setStyle("-fx-text-fill: #2e7d32;");
         labelNome.setFont(Font.font("System Bold", 14.0));
@@ -217,16 +221,30 @@ public class PreMatriculaCard extends VBox {
         aplicarEstiloSituacao();
 
         // Botões principais
-        btnEditar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 5 10;");
+        btnEditar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 5 10; " +
+                "-fx-cursor: hand;");
 
         // Estilos específicos para cada botão de ação
-        btnAprovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
-        btnReprovar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
-        btnCancelar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
+        btnAprovar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
+
+        btnReprovar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
+
+        btnCancelar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
     }
 
     private void aplicarEstiloSituacao() {
@@ -255,11 +273,13 @@ public class PreMatriculaCard extends VBox {
             case "APROVADA" -> {
                 btnAprovar.setVisible(false);
                 btnReprovar.setVisible(false);
+                btnCancelar.setVisible(false);
                 btnAprovar.setStyle("-fx-background-color: #4caf50; -fx-text-fill: white;");
             }
             case "REPROVADA" -> {
                 btnAprovar.setVisible(false);
                 btnReprovar.setVisible(false);
+                btnCancelar.setVisible(false);
                 btnReprovar.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
             }
             case "CANCELADA" -> {

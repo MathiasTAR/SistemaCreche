@@ -231,8 +231,12 @@ public class MatriculaCard extends VBox {
 
     private void applyStyles() {
         // Estilo do card principal
-        this.setStyle("-fx-background-color: white; -fx-border-color: #e8f5e8; "
-                + "-fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15;");
+        this.setStyle("-fx-background-color: white; " +
+                "-fx-border-color: #e8f5e8; " +
+                "-fx-border-width: 1; " +
+                "-fx-border-radius: 5; " +
+                "-fx-padding: 15; " +
+                "-fx-cursor: hand;");
 
         // Estilo dos labels
         labelNome.setStyle("-fx-text-fill: #2e7d32;");
@@ -244,14 +248,24 @@ public class MatriculaCard extends VBox {
         aplicarEstiloSituacao();
 
         // Estilo do botão editar
-        btnEditar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 5 10;");
+        btnEditar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 5 10; " +
+                "-fx-cursor: hand;");
 
         // Estilos específicos para cada botão de ação
-        btnConcluir.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
-        btnCancelar.setStyle("-fx-background-color: #0f766e; -fx-text-fill: white; "
-                + "-fx-background-radius: 5; -fx-padding: 6 12;");
+        btnConcluir.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
+
+        btnCancelar.setStyle("-fx-background-color: #0f766e; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 5; " +
+                "-fx-padding: 6 12; " +
+                "-fx-cursor: hand;");
     }
 
     private void aplicarEstiloSituacao() {

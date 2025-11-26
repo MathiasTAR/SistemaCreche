@@ -25,7 +25,12 @@ public class EmptyCard extends VBox {
     }
 
     private void applyStyles() {
-        this.setStyle("-fx-background-color: #fff3e0; -fx-border-color: #ffb74d; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 20;");
+        this.setStyle("-fx-background-color: #fff3e0; " +
+                "-fx-border-color: #ffb74d; " +
+                "-fx-border-width: 1; " +
+                "-fx-border-radius: 5; " +
+                "-fx-padding: 20; " +
+                "-fx-cursor: hand;");
     }
 
     public void setMessage(String message) {

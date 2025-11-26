@@ -53,20 +53,25 @@ public class IrmaoCard extends HBox {
     }
 
     private void updateCardStyle() {
+        String baseStyle = "-fx-cursor: hand; ";
+
         if (checkGemeo.isSelected()) {
-            this.setStyle("-fx-background-color: #fff3cd; " +
+            this.setStyle(baseStyle +
+                    "-fx-background-color: #fff3cd; " +
                     "-fx-border-color: #ffc107; " +
                     "-fx-border-width: 2; " +
                     "-fx-border-radius: 5; " +
                     "-fx-padding: 10;");
         } else if (irmao.getPossuiIrmaoGemeo() != null && irmao.getPossuiIrmaoGemeo()) {
-            this.setStyle("-fx-background-color: #e7f3ff; " +
+            this.setStyle(baseStyle +
+                    "-fx-background-color: #e7f3ff; " +
                     "-fx-border-color: #0dcaf0; " +
                     "-fx-border-width: 1; " +
                     "-fx-border-radius: 5; " +
                     "-fx-padding: 10;");
         } else {
-            this.setStyle("-fx-background-color: #f8f8f8; " +
+            this.setStyle(baseStyle +
+                    "-fx-background-color: #f8f8f8; " +
                     "-fx-border-color: #c8e1e6; " +
                     "-fx-border-width: 1; " +
                     "-fx-border-radius: 5; " +

@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class RematriculaController {
 
             em.getTransaction().begin();
 
-            // ✅ VERSÃO OTIMIZADA - UPDATE EM LOTE
+            // UPDATE EM LOTE
             int atualizadas = em.createQuery(
                             "UPDATE Matricula m SET m.situacaoMatricula = :vencida " +
                                     "WHERE m.situacaoMatricula = :ativa AND m.dataVencimento < :hoje")
@@ -99,6 +100,8 @@ public class RematriculaController {
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT m FROM Matricula m " +
                             "LEFT JOIN FETCH m.crianca c " +
+                            "LEFT JOIN FETCH c.mae mae " +
+                            "LEFT JOIN FETCH c.pai pai " +
                             "WHERE m.situacaoMatricula = :situacaoVencida " +
                             "AND m.dataVencimento < CURRENT_DATE" // Só matrículas que realmente venceram
             );
@@ -110,8 +113,8 @@ public class RematriculaController {
             String termoPesquisa = fieldPesquisarAluno.getText();
             if (termoPesquisa != null && !termoPesquisa.trim().isEmpty()) {
                 jpql.append(" AND (LOWER(c.nome) LIKE ?").append(paramIndex);
-                jpql.append(" OR LOWER(COALESCE(mae.nome, '')) LIKE ?").append(paramIndex);
-                jpql.append(" OR LOWER(COALESCE(pai.nome, '')) LIKE ?").append(paramIndex);
+                jpql.append(" OR LOWER(mae.nome) LIKE ?").append(paramIndex);
+                jpql.append(" OR LOWER(pai.nome) LIKE ?").append(paramIndex);
                 jpql.append(" OR CAST(m.id AS string) LIKE ?").append(paramIndex).append(")");
                 parametros.add("%" + termoPesquisa.toLowerCase() + "%");
                 paramIndex++;
@@ -119,8 +122,6 @@ public class RematriculaController {
 
             // Ordenação por data de vencimento mais antiga primeiro
             jpql.append(" ORDER BY m.dataVencimento ASC");
-
-            System.out.println("📝 JPQL: " + jpql.toString());
 
             // Criar e executar a query
             TypedQuery<Matricula> query = em.createQuery(jpql.toString(), Matricula.class);
@@ -175,23 +176,98 @@ public class RematriculaController {
                 (matricula.getCrianca() != null ?
                         matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
 
-        // TODO: Implementar lógica de renovação
-        // - Atualizar data de vencimento
-        // - Manter mesma série
-        // - Atualizar situação para ATIVA
+        try {
+            EntityManager em = DBConnection.getEntityManager();
+            em.getTransaction().begin();
 
-        mostrarMensagemSucesso("Matrícula renovada para: " +
-                (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : ""));
+            // Buscar a matrícula gerenciada
+            Matricula matriculaManaged = em.find(Matricula.class, matricula.getId());
+
+            // RENOVAR A MATRÍCULA
+            renovarDadosMatricula(matriculaManaged);
+
+            em.merge(matriculaManaged);
+            em.getTransaction().commit();
+            em.close();
+
+            System.out.println("✅ Matrícula renovada com sucesso!");
+            mostrarMensagemSucesso("Matrícula renovada para: " +
+                    (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : ""));
+
+            buscarAlunos(); // Recarrega a lista
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao renovar matrícula: " + e.getMessage());
+            e.printStackTrace();
+            mostrarMensagemErro("Erro ao renovar matrícula: " + e.getMessage());
+        }
+    }
+
+    // Renovar dados da matrícula
+    private void renovarDadosMatricula(Matricula matricula) {
+        // Atualizar situação para ATIVA
+        matricula.setSituacaoMatricula(Matricula.SituacaoMatricula.ATIVA);
+
+        // Limpar data de desligamento (se houver)
+        matricula.setDataDesligamento(null);
+
+        // Calcular nova data de vencimento (1 ano a partir de hoje)
+        LocalDate hoje = LocalDate.now();
+        matricula.setDataMatricula(Date.valueOf(hoje));
+        LocalDate novaDataVencimento = hoje.plusYears(1);
+        matricula.setDataVencimento(java.sql.Date.valueOf(novaDataVencimento));
+
+        // Avançar para a próxima série (se aplicável)
+        avancarSerie(matricula);
+
+        // Incrementar ano letivo
+        if (matricula.getAnoLetivo() != null) {
+            matricula.setAnoLetivo(matricula.getAnoLetivo() + 1);
+        } else {
+            matricula.setAnoLetivo(LocalDate.now().getYear());
+        }
+
+        System.out.println("🔄 Matrícula renovada - Nova série: " + matricula.getSerie() +
+                ", Novo ano: " + matricula.getAnoLetivo() +
+                ", Novo vencimento: " + matricula.getDataVencimento());
+    }
+
+    // ✅ MÉTODO AUXILIAR: Avançar para próxima série
+    private void avancarSerie(Matricula matricula) {
+        if (matricula.getSerie() == null) return;
+
+        String serieAtual = matricula.getSerie().toUpperCase();
+
+        switch (serieAtual) {
+            case "BERCARIO_I":
+                matricula.setSerie("BERCARIO_II");
+                break;
+            case "BERCARIO_II":
+                matricula.setSerie("MATERNAL_I");
+                break;
+            case "MATERNAL_I":
+                matricula.setSerie("MATERNAL_II");
+                break;
+            case "MATERNAL_II":
+                matricula.setSerie("PRE_I");
+                break;
+            case "PRE_I":
+                matricula.setSerie("PRE_II");
+                break;
+            case "PRE_II":
+                // Última série - manter Pré II
+                System.out.println("ℹ️ Aluno na última série (Pré II) - mantendo mesma série");
+                break;
+            default:
+                System.out.println("ℹ️ Série não reconhecida: " + serieAtual + " - mantendo mesma série");
+        }
     }
 
     private void visualizarMatricula(Matricula matricula) {
         System.out.println("👁️ Visualizando matrícula: " +
                 (matricula.getCrianca() != null ?
                         matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
-
         // TODO: Implementar visualização detalhada da matrícula
-        // - Abrir tela de detalhes
-        // - Mostrar histórico completo
     }
 
     private void mostrarMensagemErro(String mensagem) {
@@ -203,7 +279,6 @@ public class RematriculaController {
     private void mostrarMensagemSucesso(String mensagem) {
         // TODO: Implementar alerta de sucesso
         System.out.println("✅ SUCESSO: " + mensagem);
-
         // Recarregar a lista após rematrícula
         carregarMatriculasVencidas();
     }

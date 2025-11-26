@@ -49,6 +49,10 @@ public class Matricula {
         ATIVA, CONCLUIDA, CANCELADA, VENCIDA
     }
 
+    public enum Serie {
+        BERCARIO_I, BERCARIO_II, MATERNAL_I, MATERNAL_II, PRE_I, PRE_II
+    }
+
     public Matricula() {
     }
 
