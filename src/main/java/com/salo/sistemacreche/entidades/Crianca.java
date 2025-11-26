@@ -93,6 +93,12 @@ public class Crianca {
     @Column(name = "RESPONSAVEL_BENEFICIARIO_AUXILIO_GOV")
     private Boolean responsavelBeneficiarioAuxilioGov;
 
+    /*@OneToMany(mappedBy = "crianca", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComposicaoFamiliar> composicaoFamiliar = new ArrayList<>();
+
+    @OneToMany(mappedBy = "crianca", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SituacaoHabitacional> situacaoHabitacional = new ArrayList<>();
+    */
     @ManyToOne
     @JoinColumn(name = "ID_RESPONSAVEL")
     private Responsavel responsavel;
@@ -231,6 +237,12 @@ public class Crianca {
     public Boolean getResponsavelBeneficiarioAuxilioGov() { return responsavelBeneficiarioAuxilioGov; }
     public void setResponsavelBeneficiarioAuxilioGov(Boolean responsavelBeneficiarioAuxilioGov) { this.responsavelBeneficiarioAuxilioGov = responsavelBeneficiarioAuxilioGov; }
 
+    /*public List<ComposicaoFamiliar> getComposicaoFamiliar() {return composicaoFamiliar;}
+    public void setComposicaoFamiliar(List<ComposicaoFamiliar> composicaoFamiliar) {this.composicaoFamiliar = composicaoFamiliar;}
+
+    public List<SituacaoHabitacional> getSituacaoHabitacional() {return situacaoHabitacional;}
+    public void setSitacaoHabitacional(List<SituacaoHabitacional> situacaoHabitacional) {this.situacaoHabitacional = situacaoHabitacional;}
+    */
     public Responsavel getResponsavel() { return responsavel; }
     public void setResponsavel(Responsavel responsavel) { this.responsavel = responsavel; }
 
