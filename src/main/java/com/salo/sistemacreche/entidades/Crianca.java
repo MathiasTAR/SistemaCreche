@@ -3,6 +3,8 @@ package com.salo.sistemacreche.entidades;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "CRIANCA")
@@ -93,12 +95,13 @@ public class Crianca {
     @Column(name = "RESPONSAVEL_BENEFICIARIO_AUXILIO_GOV")
     private Boolean responsavelBeneficiarioAuxilioGov;
 
-    /*@OneToMany(mappedBy = "crianca", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "crianca", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ComposicaoFamiliar> composicaoFamiliar = new ArrayList<>();
 
     @OneToMany(mappedBy = "crianca", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SituacaoHabitacional> situacaoHabitacional = new ArrayList<>();
-    */
+
+
     @ManyToOne
     @JoinColumn(name = "ID_RESPONSAVEL")
     private Responsavel responsavel;
