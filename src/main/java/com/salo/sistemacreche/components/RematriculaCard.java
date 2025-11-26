@@ -129,7 +129,7 @@ public class RematriculaCard extends VBox {
             return ChronoUnit.DAYS.between(dataVencimento, hoje);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao calcular dias vencidos: " + e.getMessage());
+            System.err.println("Erro ao calcular dias vencidos: " + e.getMessage());
             return 0;
         }
     }
@@ -158,11 +158,11 @@ public class RematriculaCard extends VBox {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == btnSim) {
-            System.out.println("✅ Confirmação recebida para renovação: " + nomeCrianca);
+            System.out.println("Confirmação recebida para renovação: " + nomeCrianca);
             onRenovarAction.run();
             toggleAcoesVisiveis();
         } else {
-            System.out.println("❌ Renovação cancelada pelo usuário");
+            System.out.println("Renovação cancelada pelo usuário");
         }
     }
 

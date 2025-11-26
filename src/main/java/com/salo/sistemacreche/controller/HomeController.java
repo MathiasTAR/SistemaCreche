@@ -29,19 +29,18 @@ public class HomeController {
         carregarListasRecentes();
     }
 
-    // === 📊 INDICADORES MELHORADOS ===
     private void carregarIndicadores() {
         EntityManager em = null;
         try {
             em = DBConnection.getEntityManager();
 
-            // ✅ PRÉ-MATRÍCULAS: Conta apenas as que estão EM_ANALISE
+            // PRÉ-MATRÍCULAS: Conta apenas as que estão EM_ANALISE
             Long preMatriculasEmAnalise = em.createQuery(
                             "SELECT COUNT(p) FROM PreMatricula p WHERE p.situacaoPreMatricula = :situacao", Long.class
                     ).setParameter("situacao", SituacaoPreMatricula.EM_ANALISE)
                     .getSingleResult();
 
-            // ✅ MATRÍCULAS: Conta apenas as que estão ATIVAS (matriculadas)
+            // MATRÍCULAS: Conta apenas as que estão ATIVAS (matriculadas)
             Long matriculasAtivas = em.createQuery(
                             "SELECT COUNT(m) FROM Matricula m WHERE m.situacaoMatricula = :situacao", Long.class
                     ).setParameter("situacao", SituacaoMatricula.ATIVA)
@@ -50,11 +49,8 @@ public class HomeController {
             labelPreMatriculas.setText(String.valueOf(preMatriculasEmAnalise));
             labelMatriculas.setText(String.valueOf(matriculasAtivas));
 
-            System.out.println("📊 Indicadores - Pré-matrículas em análise: " + preMatriculasEmAnalise +
-                    ", Matrículas ativas: " + matriculasAtivas);
-
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar indicadores: " + e.getMessage());
+            System.err.println("Erro ao carregar indicadores: " + e.getMessage());
             e.printStackTrace();
 
             // Valores padrão em caso de erro
@@ -71,7 +67,7 @@ public class HomeController {
         try {
             em = DBConnection.getEntityManager();
 
-            // ✅ Últimas 5 PRÉ-MATRÍCULAS EM ANÁLISE (mais recentes primeiro)
+            // Últimas 5 PRÉ-MATRÍCULAS EM ANÁLISE
             List<PreMatricula> ultimasPreMatriculas = em.createQuery(
                             "SELECT p FROM PreMatricula p " +
                                     "WHERE p.situacaoPreMatricula = :situacao " +
@@ -80,7 +76,7 @@ public class HomeController {
                     .setMaxResults(5)
                     .getResultList();
 
-            // ✅ Últimas 5 MATRÍCULAS ATIVAS (mais recentes primeiro)
+            // Últimas 5 MATRÍCULAS ATIVAS
             List<Matricula> ultimasMatriculas = em.createQuery(
                             "SELECT m FROM Matricula m " +
                                     "WHERE m.situacaoMatricula = :situacao " +
@@ -92,12 +88,8 @@ public class HomeController {
             atualizarCardsMatriculas(ultimasMatriculas);
             atualizarCardsPreMatriculas(ultimasPreMatriculas);
 
-            System.out.println("📋 Listas recentes - " +
-                    ultimasPreMatriculas.size() + " pré-matrículas em análise, " +
-                    ultimasMatriculas.size() + " matrículas ativas");
-
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar listas recentes: " + e.getMessage());
+            System.err.println("Erro ao carregar listas recentes: " + e.getMessage());
             e.printStackTrace();
 
             // Exibir mensagens de erro nas listas
@@ -134,7 +126,7 @@ public class HomeController {
             for (PreMatricula pm : preMatriculas) {
                 PreMatriculaCard card = new PreMatriculaCard(pm);
 
-                // ✅ Adicionar ações específicas para pré-matrículas em análise
+                // Adicionar ações específicas para pré-matrículas em análise
                 card.setOnAprovarAction(() -> aprovarPreMatricula(pm));
                 card.setOnReprovarAction(() -> reprovarPreMatricula(pm));
                 card.setOnCancelarAction(() -> cancelarPreMatricula(pm));
@@ -146,17 +138,14 @@ public class HomeController {
 
     // === MÉTODOS PARA AÇÕES DAS PRÉ-MATRÍCULAS ===
     private void aprovarPreMatricula(PreMatricula preMatricula) {
-        System.out.println("✅ Aprovando pré-matrícula: " + preMatricula.getId());
         atualizarSituacaoPreMatricula(preMatricula, SituacaoPreMatricula.APROVADA);
     }
 
     private void reprovarPreMatricula(PreMatricula preMatricula) {
-        System.out.println("❌ Reprovando pré-matrícula: " + preMatricula.getId());
         atualizarSituacaoPreMatricula(preMatricula, SituacaoPreMatricula.REPROVADA);
     }
 
     private void cancelarPreMatricula(PreMatricula preMatricula) {
-        System.out.println("🚫 Cancelando pré-matrícula: " + preMatricula.getId());
         atualizarSituacaoPreMatricula(preMatricula, SituacaoPreMatricula.CANCELADA);
     }
 
@@ -171,8 +160,6 @@ public class HomeController {
 
             em.getTransaction().commit();
 
-            System.out.println("✅ Pré-matrícula " + preMatricula.getId() + " atualizada para: " + novaSituacao);
-
             // Recarregar os dados após alteração
             carregarIndicadores();
             carregarListasRecentes();
@@ -181,7 +168,7 @@ public class HomeController {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("❌ Erro ao atualizar pré-matrícula: " + e.getMessage());
+            System.err.println("Erro ao atualizar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (em != null && em.isOpen()) {
@@ -191,9 +178,7 @@ public class HomeController {
     }
 
     private void editarMatricula(Matricula matricula) {
-        System.out.println("📝 Editar clicado na matrícula: " + matricula.getId());
-        // Aqui você pode abrir a tela de edição
-        // Exemplo: MainApplication.abrirTelaEdicaoMatricula(matricula);
+        System.out.println("Editar clicado na matrícula: " + matricula.getId());
     }
 
     // === MÉTODO PARA MOSTRAR ERRO NAS LISTAS ===

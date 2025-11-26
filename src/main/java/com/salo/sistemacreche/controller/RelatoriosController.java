@@ -25,7 +25,7 @@ public class RelatoriosController {
     @FXML private ComboBox<String> comboPeriodo;
 
     @FXML private ComboBox<String> comboSexo;
-    @FXML private ComboBox<String> comboAlergia; // "Sim" / "Não"
+    @FXML private ComboBox<String> comboAlergia;
     @FXML private ComboBox<String> comboRaca;
     @FXML private ComboBox<String> comboMobilidade;
 

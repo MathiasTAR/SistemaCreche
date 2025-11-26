@@ -15,9 +15,6 @@ import java.util.Objects;
 
 public class CadastroMatriculaService {
 
-    /**
-     * Salva toda a pré-matrícula em uma transação unificada
-     */
     public PreMatricula salvarPreMatriculaCompleta(
             // Dados da Criança
             String nomeCrianca,
@@ -127,14 +124,12 @@ public class CadastroMatriculaService {
 
             transaction.commit();
 
-            System.out.println("✅ Pré-matrícula salva com ID: " + preMatricula.getId());
-
             return preMatricula;
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            System.err.println("❌ Erro ao salvar pré-matrícula: " + e.getMessage());
+            System.err.println("Erro ao salvar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Erro ao salvar pré-matrícula: " + e.getMessage(), e);
         } finally {
@@ -261,7 +256,7 @@ public class CadastroMatriculaService {
                 crianca.setClassificacaoEspecial(classificacao);
                 crianca.setStatusClassificacaoEspecial(true);
             } catch (Exception e) {
-                System.err.println("❌ Classificação especial não encontrada: " + classificacaoEspecial);
+                System.err.println("Classificação especial não encontrada: " + classificacaoEspecial);
                 crianca.setStatusClassificacaoEspecial(false);
             }
         } else {
@@ -291,7 +286,7 @@ public class CadastroMatriculaService {
                 ).setParameter("nome", tipoAuxilio).getSingleResult();
                 crianca.setTipoAuxilio(tipoAuxilioObj);
             } catch (Exception e) {
-                System.err.println("❌ Tipo de auxílio não encontrado: " + tipoAuxilio);
+                System.err.println("Tipo de auxílio não encontrado: " + tipoAuxilio);
             }
         }
 
@@ -311,7 +306,7 @@ public class CadastroMatriculaService {
                     ).setParameter("pessoaId", mae.getId()).getSingleResult();
                     maeResponsavel.setNumeroNis(nis);
                 } catch (Exception e) {
-                    System.err.println("❌ Responsável não encontrado para a mãe: " + e.getMessage());
+                    System.err.println("Responsável não encontrado para a mãe: " + e.getMessage());
                 }
             }
         }
@@ -334,8 +329,6 @@ public class CadastroMatriculaService {
 
         // === VALIDAÇÃO FINAL DOS CAMPOS OBRIGATÓRIOS ===
         validarCamposCrianca(crianca);
-
-        System.out.println("✅ Criança criada com sucesso: " + crianca.getNome());
 
         return crianca;
     }
@@ -392,7 +385,7 @@ public class CadastroMatriculaService {
             try {
                 situacao.setValorAluguel(new BigDecimal(valorAluguel.trim().replace(",", ".")));
             } catch (NumberFormatException e) {
-                System.err.println("❌ Erro ao converter valor do aluguel");
+                System.err.println("Erro ao converter valor do aluguel");
             }
         }
 
@@ -401,7 +394,7 @@ public class CadastroMatriculaService {
             try {
                 situacao.setNumeroComodos(Integer.parseInt(numeroComodos.trim()));
             } catch (NumberFormatException e) {
-                System.err.println("❌ Erro ao converter número de cômodos");
+                System.err.println("Erro ao converter número de cômodos");
             }
         }
 
@@ -435,7 +428,7 @@ public class CadastroMatriculaService {
             try {
                 preMatricula.setAnoLetivoTemp(Integer.parseInt(anoLetivo.trim()));
             } catch (NumberFormatException e) {
-                System.err.println("❌ Erro ao converter ano letivo: " + anoLetivo);
+                System.err.println("Erro ao converter ano letivo: " + anoLetivo);
                 // Usar ano atual como fallback
                 preMatricula.setAnoLetivoTemp(LocalDate.now().getYear());
             }
@@ -444,14 +437,11 @@ public class CadastroMatriculaService {
             preMatricula.setAnoLetivoTemp(LocalDate.now().getYear());
         }
 
-        System.out.println("✅ Pré-matrícula criada - Série: " + serie + ", Ano: " + preMatricula.getAnoLetivoTemp());
-
         return preMatricula;
     }
 
     private void salvarBensFamilia(EntityManager em, Crianca crianca, List<TipoBem> bensSelecionados) {
         if (bensSelecionados == null || bensSelecionados.isEmpty()) {
-            System.out.println("ℹ️ Nenhum bem selecionado para salvar");
             return;
         }
 
@@ -462,9 +452,7 @@ public class CadastroMatriculaService {
                     "SELECT cf FROM ComposicaoFamiliar cf WHERE cf.crianca = :crianca",
                     ComposicaoFamiliar.class
             ).setParameter("crianca", crianca).getSingleResult();
-            System.out.println("✅ Composição familiar encontrada: ID " + composicaoFamiliar.getId());
         } catch (NoResultException e) {
-            System.out.println("ℹ️ Composição familiar não encontrada, criando nova...");
             composicaoFamiliar = new ComposicaoFamiliar();
             composicaoFamiliar.setCrianca(crianca);
             composicaoFamiliar.setRendaFamiliarTotal(BigDecimal.ZERO);
@@ -472,7 +460,6 @@ public class CadastroMatriculaService {
             composicaoFamiliar.setTotalMembros(1); // Pelo menos a criança
 
             em.persist(composicaoFamiliar);
-            System.out.println("✅ Nova composição familiar criada");
         }
 
         for (TipoBem tipoBem : bensSelecionados) {
@@ -480,7 +467,7 @@ public class CadastroMatriculaService {
                 // Buscar o TipoBem gerenciado
                 TipoBem managedTipoBem = em.find(TipoBem.class, tipoBem.getIdTipoBem());
                 if (managedTipoBem == null) {
-                    System.err.println("❌ TipoBem não encontrado: " + tipoBem.getIdTipoBem());
+                    System.err.println("TipoBem não encontrado: " + tipoBem.getIdTipoBem());
                     continue;
                 }
 
@@ -488,25 +475,20 @@ public class CadastroMatriculaService {
                 BensFamilia bemFamilia = new BensFamilia();
                 bemFamilia.setComposicaoFamiliar(composicaoFamiliar);
                 bemFamilia.setTipoBem(managedTipoBem);
-                bemFamilia.setPossui(true); // Se está na lista, possui
+                bemFamilia.setPossui(true);
                 bemFamilia.setQuantidade(1); // Quantidade padrão
 
                 em.persist(bemFamilia);
 
-                System.out.println("✅ Bem salvo: " + managedTipoBem.getNomeBem());
-
             } catch (Exception e) {
-                System.err.println("❌ Erro ao salvar bem: " + tipoBem.getNomeBem() + " - " + e.getMessage());
+                System.err.println("Erro ao salvar bem: " + tipoBem.getNomeBem() + " - " + e.getMessage());
                 e.printStackTrace();
             }
         }
-
-        System.out.println("✅ " + bensSelecionados.size() + " bem(ns) da família salvos no banco");
     }
 
     private void salvarMembrosFamilia(EntityManager em, Crianca crianca, List<MembroFamilia> membrosFamiliares) {
         if (membrosFamiliares == null || membrosFamiliares.isEmpty()) {
-            System.out.println("ℹ️ Nenhum membro familiar para salvar");
             return;
         }
 
@@ -522,13 +504,10 @@ public class CadastroMatriculaService {
 
             em.persist(novoMembro);
         }
-
-        System.out.println("✅ " + membrosFamiliares.size() + " membro(s) familiar(es) salvo(s)");
     }
 
     private void salvarPessoasAutorizadas(EntityManager em, Crianca crianca, List<PessoaAutorizada> pessoasAutorizadas) {
         if (pessoasAutorizadas == null || pessoasAutorizadas.isEmpty()) {
-            System.out.println("ℹ️ Nenhuma pessoa autorizada para salvar");
             return;
         }
 
@@ -541,8 +520,6 @@ public class CadastroMatriculaService {
                 em.persist(pessoa);
             }
         }
-
-        System.out.println("✅ " + pessoasAutorizadas.size() + " pessoa(s) autorizada(s) salva(s)");
     }
 
     private void salvarComposicaoFamiliar(EntityManager em, Crianca crianca, List<MembroFamilia> membrosFamiliares) {
@@ -553,12 +530,10 @@ public class CadastroMatriculaService {
                     "SELECT cf FROM ComposicaoFamiliar cf WHERE cf.crianca = :crianca",
                     ComposicaoFamiliar.class
             ).setParameter("crianca", crianca).getSingleResult();
-            System.out.println("✅ Composição familiar encontrada, atualizando...");
         } catch (NoResultException e) {
             // Se não existe, criar nova
             composicao = new ComposicaoFamiliar();
             composicao.setCrianca(crianca);
-            System.out.println("✅ Nova composição familiar criada");
         }
 
         BigDecimal rendaTotal = BigDecimal.ZERO;
@@ -571,7 +546,7 @@ public class CadastroMatriculaService {
         }
         composicao.setRendaFamiliarTotal(rendaTotal);
 
-        int totalMembros = (membrosFamiliares != null ? membrosFamiliares.size() : 0) + 1; // +1 para a criança
+        int totalMembros = (membrosFamiliares != null ? membrosFamiliares.size() : 0) + 1;
         if (totalMembros > 0) {
             BigDecimal rendaPerCapita = rendaTotal.divide(
                     new BigDecimal(totalMembros), 2, RoundingMode.HALF_UP
@@ -585,13 +560,13 @@ public class CadastroMatriculaService {
 
         if (composicao.getId() == null) {
             em.persist(composicao);
-            System.out.println("✅ Composição familiar persistida - ID: " + composicao.getId());
+            System.out.println("Composição familiar persistida - ID: " + composicao.getId());
         } else {
             em.merge(composicao);
-            System.out.println("✅ Composição familiar atualizada - ID: " + composicao.getId());
+            System.out.println("Composição familiar atualizada - ID: " + composicao.getId());
         }
 
-        System.out.println("💰 Composição familiar - Renda total: " + rendaTotal + ", Membros: " + totalMembros);
+        System.out.println("Composição familiar - Renda total: " + rendaTotal + ", Membros: " + totalMembros);
     }
 
     private SituacaoHabitacional.TipoPiso converterParaTipoPiso(String valor) {

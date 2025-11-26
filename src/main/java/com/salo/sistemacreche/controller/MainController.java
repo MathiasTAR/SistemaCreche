@@ -24,10 +24,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        System.out.println("🚀 MainController inicializado!");
-        System.out.println("🔗 NavigationController injetado: " + (navigationController != null));
 
-        // Agora o navigation está disponível!
         if (navigationController != null) {
             navigationController.setMainController(this);
         }
@@ -80,10 +77,10 @@ public class MainController {
             );
             telaDeclaracoes = loaderDeclaracoes.load();
 
-            System.out.println("✅ Todas as telas carregadas!");
+            System.out.println("Todas as telas carregadas!");
 
         } catch (IOException e) {
-            System.err.println("❌ Erro ao carregar telas: " + e.getMessage());
+            System.err.println("Erro ao carregar telas: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -91,38 +88,31 @@ public class MainController {
     // Métodos públicos para navegação
     public void mostrarTelaHome() {
         contentArea.getChildren().setAll(telaHome);
-        System.out.println("📋 Mostrando Home");
     }
 
     // Métodos públicos para navegação
     public void mostrarTelaListaMatriculas() {
         contentArea.getChildren().setAll(telaListaMatriculas);
-        System.out.println("📋 Mostrando lista de matrículas");
     }
 
     // Métodos públicos para navegação
     public void mostrarTelaListaPreMatriculas() {
         contentArea.getChildren().setAll(telaListaPreMatriculas);
-        System.out.println("📋 Mostrando lista de matrículas");
     }
 
     public void mostrarTelaCadastroMatricula() {
         contentArea.getChildren().setAll(telaCadastroMatricula);
-        System.out.println("➕ Mostrando cadastro de matrícula");
     }
 
     public void mostrarTelaRematricula() {
         contentArea.getChildren().setAll(telaRematricula);
-        System.out.println("🔄 Mostrando re-matrícula");
     }
 
     public void mostrarTelaRelatorios() {
         contentArea.getChildren().setAll(telaRelatorios);
-        System.out.println("📊 Mostrando relatórios");
     }
 
     public void mostrarTelaDeclaracoes() {
         contentArea.getChildren().setAll(telaDeclaracoes);
-        System.out.println("📄 Mostrando declarações");
     }
 }

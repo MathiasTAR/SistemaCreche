@@ -12,7 +12,6 @@ public class SituacaoHabitacional {
     @Column(name = "ID_SITUACAO_HAB")
     private Long id;
 
-    // 🔥 ADICIONAR: Relação com Criança
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CRIANCA")
     private Crianca crianca;
@@ -109,7 +108,6 @@ public class SituacaoHabitacional {
         this.id = id;
     }
 
-    // 🔥 ADICIONAR: Getter e Setter para Crianca
     public Crianca getCrianca() {
         return crianca;
     }

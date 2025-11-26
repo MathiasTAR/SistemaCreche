@@ -79,16 +79,16 @@ public class PessoaAutorizadaController {
                 pessoa.setNome(getNomeFormatadoParaBanco());
                 pessoa.setRg(getRgFormatadoParaBanco());
                 pessoa.setTelefone(getTelefoneFormatadoParaBanco());
-                pessoa.setCpf(gerarCpfTemporario()); // CPF temporário único
+                pessoa.setCpf(""); // CPF vazio
                 pessoa.setOutroContato(""); // Outro contato vazio
 
                 em.persist(pessoa);
 
-                // 2. Criar Pessoa Autorizada (a criança será definida na matrícula)
+                // 2. Criar Pessoa Autorizada
                 PessoaAutorizada pessoaAutorizada = new PessoaAutorizada();
                 pessoaAutorizada.setPessoa(pessoa);
 
-                // 🔥 AGORA USA O VALOR DIRETO DO COMBOBOX
+                // 3. Usa o Valor direto da comboBox
                 PessoaAutorizada.Parentesco parentescoEnum = converterStringParaParentesco(comboParentesco.getValue());
                 pessoaAutorizada.setParentesco(parentescoEnum);
                 pessoaAutorizada.setTelefone(getTelefoneFormatadoParaBanco());
@@ -98,24 +98,14 @@ public class PessoaAutorizadaController {
 
                 transaction.commit();
 
-                // Exibe no console
-                System.out.println("✅ DADOS PESSOA AUTORIZADA SALVOS NO BANCO:");
-                System.out.println("📝 Pessoa ID: " + pessoa.getId());
-                System.out.println("👤 Nome: " + pessoa.getNome());
-                System.out.println("🆔 RG: " + pessoa.getRg());
-                System.out.println("📞 Telefone: " + pessoa.getTelefone());
-                System.out.println("👪 Parentesco: " + pessoaAutorizada.getParentesco());
-                System.out.println("💾 Pessoa Autorizada ID: " + pessoaAutorizada.getId());
-
                 this.salvo = true;
-                mostrarMensagemSucesso("Pessoa autorizada salva com sucesso!");
                 fecharDialog();
 
             } catch (Exception e) {
                 if (transaction != null && transaction.isActive()) {
                     transaction.rollback();
                 }
-                System.err.println("❌ Erro ao salvar pessoa autorizada: " + e.getMessage());
+                System.err.println(" Erro ao salvar pessoa autorizada: " + e.getMessage());
                 e.printStackTrace();
                 mostrarErro("Erro ao salvar pessoa autorizada: " + e.getMessage());
             } finally {
@@ -124,12 +114,6 @@ public class PessoaAutorizadaController {
                 }
             }
         }
-    }
-
-    // Gera CPF temporário único baseado no timestamp
-    private String gerarCpfTemporario() {
-        long timestamp = System.currentTimeMillis() % 1000000000L;
-        return String.format("%011d", timestamp);
     }
 
     @FXML
@@ -265,11 +249,6 @@ public class PessoaAutorizadaController {
         return formatarNome(fieldNome.getText());
     }
 
-    // 🔥 REMOVIDO: validarParentesco() - não é mais necessário
-
-    // 🔥 REMOVIDO: formatarParentesco() - não é mais necessário
-
-    // 🔥 ATUALIZADO: Agora pega direto do ComboBox
     public String getParentescoFormatadoParaBanco() {
         return comboParentesco.getValue();
     }
@@ -346,16 +325,15 @@ public class PessoaAutorizadaController {
         });
     }
 
-    // 🔥 REMOVIDO: aplicarMascaraParentesco() - não é mais necessário
 
-    // === MÉTODO PARA CONVERTER STRING PARA ENUM PARENTESCO (SIMPLIFICADO) ===
+    // === MÉTODO PARA CONVERTER STRING PARA ENUM PARENTESCO ===
     private PessoaAutorizada.Parentesco converterStringParaParentesco(String parentesco) {
         if (parentesco == null) return PessoaAutorizada.Parentesco.NENHUM;
 
         try {
             return PessoaAutorizada.Parentesco.valueOf(parentesco);
         } catch (IllegalArgumentException e) {
-            System.err.println("❌ Valor de parentesco não encontrado: " + parentesco);
+            System.err.println("Valor de parentesco não encontrado: " + parentesco);
             return PessoaAutorizada.Parentesco.NENHUM;
         }
     }
@@ -378,7 +356,7 @@ public class PessoaAutorizadaController {
 
     // Getters para os dados
     public String getNome() { return fieldNome.getText(); }
-    public String getParentesco() { return comboParentesco.getValue(); } // 🔥 ATUALIZADO
+    public String getParentesco() { return comboParentesco.getValue(); }
     public String getRg() { return fieldRg.getText(); }
     public String getTelefone() { return fieldTelefone.getText(); }
 
@@ -386,7 +364,7 @@ public class PessoaAutorizadaController {
     public DadosPessoaAutorizada getDadosPessoa() {
         return new DadosPessoaAutorizada(
                 getNomeFormatadoParaBanco(),
-                comboParentesco.getValue(), // 🔥 ATUALIZADO
+                comboParentesco.getValue(),
                 getRgFormatadoParaBanco(),
                 getTelefoneFormatadoParaBanco()
         );
@@ -395,7 +373,7 @@ public class PessoaAutorizadaController {
     // Método para limpar os campos
     public void limparCampos() {
         fieldNome.clear();
-        comboParentesco.setValue(null); // 🔥 ATUALIZADO
+        comboParentesco.setValue(null);
         fieldRg.clear();
         fieldTelefone.clear();
         this.salvo = false;
@@ -405,7 +383,7 @@ public class PessoaAutorizadaController {
     // Método para preencher os campos se for edição
     public void setDadosPessoa(DadosPessoaAutorizada dados) {
         fieldNome.setText(dados.getNome());
-        comboParentesco.setValue(dados.getParentesco()); // 🔥 ATUALIZADO
+        comboParentesco.setValue(dados.getParentesco());
         fieldRg.setText(dados.getRg());
         fieldTelefone.setText(dados.getTelefone());
     }

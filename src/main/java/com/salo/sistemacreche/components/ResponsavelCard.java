@@ -32,7 +32,7 @@ public class ResponsavelCard extends VBox {
     // VERSÃO MELHORADA do método configurarCliqueNoCard
     private void configurarCliqueNoCard() {
         this.setOnMouseClicked(event -> {
-            // ✅ CORREÇÃO: Ignora completamente se o clique foi em checkbox ou botão
+            // Ignora completamente se o clique foi em checkbox ou botão
             boolean isCheckboxClick = event.getTarget() instanceof CheckBox ||
                     (event.getTarget() instanceof Label &&
                             ((Label) event.getTarget()).getGraphic() instanceof CheckBox);

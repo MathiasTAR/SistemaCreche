@@ -135,11 +135,11 @@ public class PreMatriculaCard extends VBox {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == btnSim) {
-            System.out.println("✅ Confirmação recebida para " + acao + " a pré-matrícula: " + nomeCrianca);
+            System.out.println("Confirmação recebida para " + acao + " a pré-matrícula: " + nomeCrianca);
             acaoCallback.run();
             toggleAcoesVisiveis();
         } else {
-            System.out.println("❌ Ação de " + acao + " cancelada pelo usuário");
+            System.out.println("Ação de " + acao + " cancelada pelo usuário");
         }
     }
 

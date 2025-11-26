@@ -32,6 +32,13 @@ import java.util.List;
 
 public class CadastroMatriculaController {
 
+    private static final String CPF_LENGTH = "11";
+    private static final String CNPJ_LENGTH = "14";
+    private static final String CEP_LENGTH = "8";
+    private static final String TELEFONE_LENGTH = "11";
+    private static final String NIS_LENGTH = "11";
+    private static final String ANO_LETIVO_LENGTH = "4";
+
     // Seção 1: Identificação da Criança
     @FXML private TextField fieldNomeCrianca;
     @FXML private TextField fieldRgCrianca;
@@ -132,7 +139,6 @@ public class CadastroMatriculaController {
         configurarTableViews();
         limparDetecaoIrmaos();
         configurarSelecaoResponsaveis();
-        aplicarMascaraNis();
         aplicarMascaras();
         configurarValidacoes();
     }
@@ -211,10 +217,9 @@ public class CadastroMatriculaController {
 
             comboClassificacaoEspecial.setItems(FXCollections.observableArrayList(nomesClassificacoes));
 
-            System.out.println("✅ " + classificacoes.size() + " classificação(ões) especial(is) carregada(s)");
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar classificações especiais: " + e.getMessage());
+            System.err.println("Erro ao carregar classificações especiais: " + e.getMessage());
             e.printStackTrace();
             comboClassificacaoEspecial.setItems(FXCollections.observableArrayList("Nenhum"));
         } finally {
@@ -243,10 +248,9 @@ public class CadastroMatriculaController {
 
             comboAlergias.setItems(FXCollections.observableArrayList(nomesAlergias));
 
-            System.out.println("✅ " + alergias.size() + " alergia(s) carregada(s)");
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar alergias: " + e.getMessage());
+            System.err.println("Erro ao carregar alergias: " + e.getMessage());
             e.printStackTrace();
             comboAlergias.setItems(FXCollections.observableArrayList("Nenhum"));
         } finally {
@@ -275,10 +279,8 @@ public class CadastroMatriculaController {
 
             comboTipoAuxilio.setItems(FXCollections.observableArrayList(nomesAuxilios));
 
-            System.out.println("✅ " + tiposAuxilio.size() + " tipo(s) de auxílio carregado(s)");
-
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar tipos de auxílio: " + e.getMessage());
+            System.err.println("Erro ao carregar tipos de auxílio: " + e.getMessage());
             e.printStackTrace();
             comboTipoAuxilio.setItems(FXCollections.observableArrayList("Nenhum"));
         } finally {
@@ -302,7 +304,7 @@ public class CadastroMatriculaController {
             containerBens.getChildren().add(checkBoxTemplateBens);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro crítico ao configurar bens da família: " + e.getMessage());
+            System.err.println("Erro crítico ao configurar bens da família: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -311,7 +313,6 @@ public class CadastroMatriculaController {
         EntityManager em = null;
         try {
             em = DBConnection.getEntityManager();
-            System.out.println("✅ EntityManager criado com sucesso");
 
             TypedQuery<TipoBem> query = em.createQuery(
                     "SELECT t FROM TipoBem t ORDER BY t.nomeBem",
@@ -323,7 +324,7 @@ public class CadastroMatriculaController {
             return tiposBem;
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar tipos de bem: " + e.getMessage());
+            System.err.println("Erro ao carregar tipos de bem: " + e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
         } finally {
@@ -333,24 +334,17 @@ public class CadastroMatriculaController {
         }
     }
 
-    // NOVO MÉTODO: Obter bens selecionados para salvar
+    // Obter bens selecionados para salvar
     private List<TipoBem> getBensSelecionados() {
         if (checkBoxTemplateBens != null) {
             List<TipoBem> selecionados = new ArrayList<>(checkBoxTemplateBens.getTiposBemSelecionados());
-            System.out.println("📋 " + selecionados.size() + " bem(ns) selecionado(s)");
-
-            // Debug detalhado
-            for (TipoBem bem : selecionados) {
-                System.out.println("   ✅ " + bem.getNomeBem());
-            }
 
             return selecionados;
         }
-        System.out.println("ℹ️ Nenhum bem selecionado");
         return new ArrayList<>();
     }
 
-    // NOVO MÉTODO: Limpar seleção de bens
+    // Limpar seleção de bens
     private void limparBensSelecionados() {
         if (checkBoxTemplateBens != null) {
             checkBoxTemplateBens.clearAllSelections();
@@ -416,10 +410,8 @@ public class CadastroMatriculaController {
 
             atualizarCardsContainer(container, resultados, mensagemVazio);
 
-            System.out.println("🔍 " + resultados.size() + " resultado(s) encontrado(s) para: " + termoPesquisa);
-
         } catch (Exception e) {
-            System.err.println("❌ Erro na pesquisa: " + e.getMessage());
+            System.err.println("Erro na pesquisa: " + e.getMessage());
             e.printStackTrace();
             limparContainerComMensagem(container, "Erro na pesquisa");
         } finally {
@@ -443,12 +435,11 @@ public class CadastroMatriculaController {
             ).setMaxResults(5).getResultList();
 
             atualizarCardsContainer(cardsContainerMaes, maes, "Nenhuma mãe cadastrada");
-            System.out.println("✅ " + maes.size() + " mãe(s) carregada(s)");
 
             atualizarSelecaoAposCarregar(cardsContainerMaes);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar mães: " + e.getMessage());
+            System.err.println("Erro ao carregar mães: " + e.getMessage());
             limparContainerComMensagem(cardsContainerMaes, "Erro ao carregar mães");
         } finally {
             if (em != null && em.isOpen()) em.close();
@@ -471,12 +462,11 @@ public class CadastroMatriculaController {
             ).setMaxResults(5).getResultList();
 
             atualizarCardsContainer(cardsContainerPais, pais, "Nenhum pai cadastrado");
-            System.out.println("✅ " + pais.size() + " pai(s) carregado(s)");
 
             atualizarSelecaoAposCarregar(cardsContainerPais);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar pais: " + e.getMessage());
+            System.err.println("Erro ao carregar pais: " + e.getMessage());
             limparContainerComMensagem(cardsContainerPais, "Erro ao carregar pais");
         } finally {
             if (em != null && em.isOpen()) em.close();
@@ -499,12 +489,11 @@ public class CadastroMatriculaController {
             ).setMaxResults(5).getResultList();
 
             atualizarCardsContainer(cardsContainerResponsaveis, responsaveis, "Nenhum responsável cadastrado");
-            System.out.println("✅ " + responsaveis.size() + " responsável(eis) carregado(s)");
 
             atualizarSelecaoAposCarregar(cardsContainerResponsaveis);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao carregar responsáveis: " + e.getMessage());
+            System.err.println("Erro ao carregar responsáveis: " + e.getMessage());
             limparContainerComMensagem(cardsContainerResponsaveis, "Erro ao carregar responsáveis");
         } finally {
             if (em != null && em.isOpen()) em.close();
@@ -523,13 +512,13 @@ public class CadastroMatriculaController {
                     final Responsavel responsavelFinal = responsavel;
                     ResponsavelCard card = new ResponsavelCard(responsavelFinal);
 
-                    // ✅ APENAS configurar ações do card
+                    // configura ações do card
                     configurarAcoesDoCard(card, container, responsavelFinal);
 
                     container.getChildren().add(card);
 
                 } catch (Exception e) {
-                    System.err.println("❌ Erro ao criar card: " + e.getMessage());
+                    System.err.println("Erro ao criar card: " + e.getMessage());
                     Label erroCard = new Label("Erro ao carregar");
                     erroCard.setStyle("-fx-background-color: #ffebee; -fx-border-color: #f44336; " +
                             "-fx-padding: 10; -fx-border-radius: 5;");
@@ -576,10 +565,9 @@ public class CadastroMatriculaController {
         });
     }
 
-    // ✅ MÉTODO ÚNICO para configurar ações - VERSÃO CORRIGIDA
+    // Método para configurar ações
     private void configurarAcoesDoCard(ResponsavelCard card, VBox container, Responsavel responsavel) {
         card.setOnSelectAction(() -> {
-            System.out.println("🎯 SELECT ACTION - Selecionado: " + responsavel.getPessoa().getNome());
 
             // Desmarca outros cards no mesmo container (seleção única)
             for (javafx.scene.Node outroNode : container.getChildren()) {
@@ -595,41 +583,33 @@ public class CadastroMatriculaController {
             // Atualiza a seleção baseada no container
             if (container == cardsContainerMaes) {
                 maeSelecionada = responsavel;
-                System.out.println("👩 Mãe selecionada: " + responsavel.getPessoa().getNome());
             } else if (container == cardsContainerPais) {
                 paiSelecionado = responsavel;
-                System.out.println("👨 Pai selecionado: " + responsavel.getPessoa().getNome());
             } else if (container == cardsContainerResponsaveis) {
                 responsavelSelecionado = responsavel;
-                System.out.println("👤 Responsável selecionado: " + responsavel.getPessoa().getNome());
             }
 
             detectarIrmaosAutomaticamente();
         });
 
         card.setOnDeselectAction(() -> {
-            System.out.println("❌ DESELECT ACTION - Deselecionado: " + responsavel.getPessoa().getNome());
+            System.out.println("Deselecionado: " + responsavel.getPessoa().getNome());
 
             // Remove a seleção
             if (container == cardsContainerMaes) {
                 maeSelecionada = null;
-                System.out.println("👩 Mãe deselecionada");
             } else if (container == cardsContainerPais) {
                 paiSelecionado = null;
-                System.out.println("👨 Pai deselecionado");
             } else if (container == cardsContainerResponsaveis) {
                 responsavelSelecionado = null;
-                System.out.println("👤 Responsável deselecionado");
             }
 
             limparDetecaoIrmaos();
         });
 
-        // ✅ CONFIGURAR AÇÃO DE EDIÇÃO SEPARADAMENTE
+        // CONFIGURAR AÇÃO DE EDIÇÃO SEPARADAMENTE
         card.setOnEditAction(() -> {
-            System.out.println("✏️ EDIT ACTION - Editando: " + responsavel.getPessoa().getNome());
-            // Aqui você pode abrir o modal de edição se necessário
-            // abrirEdicaoResponsavel(responsavel);
+            System.out.println("✏EDIT ACTION - Editando: " + responsavel.getPessoa().getNome());
         });
     }
 
@@ -693,7 +673,6 @@ public class CadastroMatriculaController {
                     } else {
                         carregarResponsaveis();
                     }
-                    System.out.println("✅ Responsável salvo com sucesso! Tipo: " + responsavelSalvo.getTipoResponsavel().getTipoResponsavel());
                 }
             }
 
@@ -726,7 +705,6 @@ public class CadastroMatriculaController {
             if (controller.isSalvo()) {
                 MembroFamiliarController.DadosMembroFamiliar dados = controller.getDadosMembro();
                 adicionarMembroFamiliar(dados);
-                System.out.println("✅ Membro familiar adicionado: " + dados.getNome());
             }
 
         } catch (IOException e) {
@@ -759,7 +737,6 @@ public class CadastroMatriculaController {
                 PessoaAutorizada pessoaSalva = controller.getPessoaAutorizadaSalva();
                 if (pessoaSalva != null) {
                     adicionarPessoaAutorizada(pessoaSalva);
-                    System.out.println("✅ Pessoa autorizada adicionada: " + pessoaSalva.getPessoa().getNome());
                 }
             }
 
@@ -884,10 +861,9 @@ public class CadastroMatriculaController {
             membrosFamiliares.add(membro);
             tableComposicaoFamiliar.refresh();
 
-            System.out.println("✅ Membro familiar adicionado: " + dados.getNome() + ", Idade: " + dados.getIdade());
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao adicionar membro familiar: " + e.getMessage());
+            System.err.println("Erro ao adicionar membro familiar: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagem("Erro", "Erro ao adicionar membro familiar: " + e.getMessage());
         }
@@ -899,11 +875,8 @@ public class CadastroMatriculaController {
             pessoaAutorizadas.add(pessoaAutorizada);
             tablePessoasAutorizadas.refresh();
 
-            System.out.println("✅ Pessoa autorizada adicionada à tabela: " +
-                    pessoaAutorizada.getPessoa().getNome());
-
         } catch (Exception e) {
-            System.err.println("❌ Erro ao adicionar pessoa autorizada: " + e.getMessage());
+            System.err.println("Erro ao adicionar pessoa autorizada: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagem("Erro", "Erro ao adicionar pessoa autorizada: " + e.getMessage());
         }
@@ -916,7 +889,7 @@ public class CadastroMatriculaController {
         try {
             return MembroFamilia.SituacaoEscolar.valueOf(escolaridade);
         } catch (IllegalArgumentException e) {
-            System.err.println("❌ Valor de escolaridade não encontrado: " + escolaridade);
+            System.err.println("Valor de escolaridade não encontrado: " + escolaridade);
             return MembroFamilia.SituacaoEscolar.NAO_INFORMADO;
         }
     }
@@ -928,7 +901,7 @@ public class CadastroMatriculaController {
         try {
             return MembroFamilia.SituacaoEmprego.valueOf(emprego);
         } catch (IllegalArgumentException e) {
-            System.err.println("❌ Valor de emprego não encontrado: " + emprego);
+            System.err.println("Valor de emprego não encontrado: " + emprego);
             return MembroFamilia.SituacaoEmprego.OUTRO;
         }
     }
@@ -983,17 +956,17 @@ public class CadastroMatriculaController {
         IrmaoCard card = new IrmaoCard(irmao);
 
         card.setOnGemeoSelected(() -> {
-            System.out.println("✅ " + irmao.getNome() + " marcado(a) como gêmeo(a)");
+            System.out.println(irmao.getNome() + " marcado(a) como gêmeo(a)");
         });
 
         card.setOnGemeoDeselected(() -> {
-            System.out.println("❌ " + irmao.getNome() + " desmarcado(a) como gêmeo(a)");
+            System.out.println(irmao.getNome() + " desmarcado(a) como gêmeo(a)");
         });
 
         return card;
     }
 
-    // ✅ ADICIONE ESTE MÉTODO para obter o irmão gêmeo selecionado:
+    // Método para obter o irmão gêmeo selecionado:
     private boolean possuiIrmaoGemeoSelecionado() {
         for (javafx.scene.Node node : containerIrmaos.getChildren()) {
             if (node instanceof IrmaoCard) {
@@ -1006,7 +979,7 @@ public class CadastroMatriculaController {
         return false;
     }
 
-    // ✅ MÉTODO para obter o irmão gêmeo selecionado (se precisar do objeto)
+    // MÉTODO para obter o irmão gêmeo selecionado
     private Crianca getIrmaoGemeoSelecionado() {
         for (javafx.scene.Node node : containerIrmaos.getChildren()) {
             if (node instanceof IrmaoCard) {
@@ -1020,7 +993,6 @@ public class CadastroMatriculaController {
     }
 
     public void limparSelecaoGemeos() {
-
         for (javafx.scene.Node node : containerIrmaos.getChildren()) {
             if (node instanceof IrmaoCard) {
                 IrmaoCard card = (IrmaoCard) node;
@@ -1029,14 +1001,12 @@ public class CadastroMatriculaController {
         }
     }
 
-    // MÉTODO PARA DETECTAR IRMÃOS AUTOMATICAMENTE - COM MELHOR DEBUG
+    // MÉTODO PARA DETECTAR IRMÃOS AUTOMATICAMENTE
     private void detectarIrmaosAutomaticamente() {
         System.out.println("🔍 INICIANDO DETECÇÃO DE IRMÃOS...");
 
         irmaosEncontrados.clear();
         containerIrmaos.getChildren().clear();
-
-        // ✅ CORREÇÃO: Usar as variáveis de instância diretamente
         Responsavel maeAtual = maeSelecionada;
         Responsavel paiAtual = paiSelecionado;
 
@@ -1058,7 +1028,7 @@ public class CadastroMatriculaController {
                     "SELECT c FROM Crianca c WHERE 1=1 "
             );
 
-            // ✅ CORREÇÃO: Usar IDs dos pais selecionados
+            // Usar IDs dos pais selecionados
             if (maeAtual != null) {
                 queryBuilder.append("AND c.mae.id = :idMae ");
             }
@@ -1072,11 +1042,11 @@ public class CadastroMatriculaController {
 
             if (maeAtual != null) {
                 query.setParameter("idMae", maeAtual.getPessoa().getId());
-                System.out.println("🔍 Buscando por mãe ID: " + maeAtual.getPessoa().getId());
+                System.out.println("Buscando por mãe ID: " + maeAtual.getPessoa().getId());
             }
             if (paiAtual != null) {
                 query.setParameter("idPai", paiAtual.getPessoa().getId());
-                System.out.println("🔍 Buscando por pai ID: " + paiAtual.getPessoa().getId());
+                System.out.println("Buscando por pai ID: " + paiAtual.getPessoa().getId());
             }
 
             List<Crianca> irmaos = query.getResultList();
@@ -1085,9 +1055,9 @@ public class CadastroMatriculaController {
                 irmaosEncontrados.addAll(irmaos);
                 exibirIrmaosEncontrados();
 
-                System.out.println("✅ " + irmaos.size() + " irmão(s) encontrado(s) com os mesmos pais");
+                System.out.println(irmaos.size() + " irmão(s) encontrado(s) com os mesmos pais");
                 for (Crianca irmao : irmaos) {
-                    System.out.println("   👶 " + irmao.getNome() + " - Nasc: " + irmao.getDataNascimento());
+                    System.out.println(irmao.getNome() + " - Nasc: " + irmao.getDataNascimento());
                 }
 
             } else {
@@ -1097,7 +1067,7 @@ public class CadastroMatriculaController {
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao detectar irmãos: " + e.getMessage());
+            System.err.println("Erro ao detectar irmãos: " + e.getMessage());
             e.printStackTrace();
             EmptyCard erroCard = new EmptyCard("Erro ao buscar irmãos: " + e.getMessage());
             containerIrmaos.getChildren().add(erroCard);
@@ -1112,58 +1082,9 @@ public class CadastroMatriculaController {
     public void cancelarCadastro() {
         limparFormulario();
         mostrarMensagem("Informação", "Cadastro de pré-matrícula cancelado");
-        // TODO: Fechar a tela ou voltar para lista de pré-matrículas
     }
 
-    private void aplicarMascaraNis() {
-        fieldNis.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                fieldNis.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            if (newValue.length() > 11) {
-                fieldNis.setText(newValue.substring(0, 11));
-            }
-            validarNis();
-        });
-    }
-
-    // NOVO: Aplicar máscaras para outros campos
-    private void aplicarMascaras() {
-        // Máscara para CPF
-        fieldCpfCrianca.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                fieldCpfCrianca.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            if (newValue.length() > 11) {
-                fieldCpfCrianca.setText(newValue.substring(0, 11));
-            }
-        });
-
-        // Máscara para CEP
-        fieldCEP.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                fieldCEP.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            if (newValue.length() > 8) {
-                fieldCEP.setText(newValue.substring(0, 8));
-            }
-        });
-
-        // Máscara para telefone
-        fieldTelefoneContato.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                fieldTelefoneContato.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-
-        fieldTelefoneResidencial.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                fieldTelefoneResidencial.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-    }
-
-    // NOVO: Configurar validações
+    // Configurar validações
     private void configurarValidacoes() {
         // Validar data de nascimento (não pode ser futura)
         datePickerNascimento.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -1184,7 +1105,6 @@ public class CadastroMatriculaController {
         });
     }
 
-    // MÉTODO ÚNICO com a lógica centralizada
     private boolean auxilioExigeNIS() {
         String tipoAuxilio = comboTipoAuxilio.getValue();
         return tipoAuxilio != null && !tipoAuxilio.equals("Nenhum");
@@ -1256,6 +1176,336 @@ public class CadastroMatriculaController {
         return true;
     }
 
+    // MÉTODO COMPLETO PARA APLICAR TODAS AS MÁSCARAS
+    private void aplicarMascaras() {
+        aplicarMascaraNis();
+        aplicarMascaraCPF();
+        aplicarMascaraCEP();
+        aplicarMascaraTelefone();
+        aplicarMascaraAnoLetivo();
+        aplicarMascaraValorAluguel();
+        aplicarMascaraNumeroComodos();
+        aplicarMascaraNumeroEndereco();
+        aplicarMascaraRG();
+        aplicarMascaraCertidao();
+        aplicarMascaraCartorio();
+    }
+
+    // MÁSCARA PARA NIS
+    private void aplicarMascaraNis() {
+        fieldNis.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar tamanho
+            if (apenasDigitos.length() > Integer.parseInt(NIS_LENGTH)) {
+                apenasDigitos = apenasDigitos.substring(0, Integer.parseInt(NIS_LENGTH));
+            }
+
+            fieldNis.setText(apenasDigitos);
+            validarNis();
+        });
+    }
+
+    // MÁSCARA PARA CPF
+    private void aplicarMascaraCPF() {
+        fieldCpfCrianca.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar tamanho
+            if (apenasDigitos.length() > Integer.parseInt(CPF_LENGTH)) {
+                apenasDigitos = apenasDigitos.substring(0, Integer.parseInt(CPF_LENGTH));
+            }
+
+            // Aplicar formatação: 000.000.000-00
+            if (apenasDigitos.length() <= 11) {
+                StringBuilder formatado = new StringBuilder();
+                for (int i = 0; i < apenasDigitos.length(); i++) {
+                    if (i == 3 || i == 6) {
+                        formatado.append(".");
+                    } else if (i == 9) {
+                        formatado.append("-");
+                    }
+                    formatado.append(apenasDigitos.charAt(i));
+                }
+                fieldCpfCrianca.setText(formatado.toString());
+            } else {
+                fieldCpfCrianca.setText(apenasDigitos);
+            }
+        });
+    }
+
+    // MÁSCARA PARA CEP
+    private void aplicarMascaraCEP() {
+        fieldCEP.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar tamanho
+            if (apenasDigitos.length() > Integer.parseInt(CEP_LENGTH)) {
+                apenasDigitos = apenasDigitos.substring(0, Integer.parseInt(CEP_LENGTH));
+            }
+
+            // Aplicar formatação: 00000-000
+            if (apenasDigitos.length() > 5) {
+                String parte1 = apenasDigitos.substring(0, 5);
+                String parte2 = apenasDigitos.substring(5);
+                fieldCEP.setText(parte1 + "-" + parte2);
+            } else {
+                fieldCEP.setText(apenasDigitos);
+            }
+        });
+    }
+
+    // MÁSCARA PARA TELEFONE (aceita celular e fixo)
+    private void aplicarMascaraTelefone() {
+        // Telefone residencial
+        fieldTelefoneResidencial.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar tamanho
+            if (apenasDigitos.length() > Integer.parseInt(TELEFONE_LENGTH)) {
+                apenasDigitos = apenasDigitos.substring(0, Integer.parseInt(TELEFONE_LENGTH));
+            }
+
+            fieldTelefoneResidencial.setText(formatarTelefone(apenasDigitos));
+        });
+
+        // Telefone contato
+        fieldTelefoneContato.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar tamanho
+            if (apenasDigitos.length() > Integer.parseInt(TELEFONE_LENGTH)) {
+                apenasDigitos = apenasDigitos.substring(0, Integer.parseInt(TELEFONE_LENGTH));
+            }
+
+            fieldTelefoneContato.setText(formatarTelefone(apenasDigitos));
+        });
+    }
+
+    // MÉTODO AUXILIAR PARA FORMATAR TELEFONE
+    private String formatarTelefone(String digitos) {
+        if (digitos == null || digitos.isEmpty()) return "";
+
+        if (digitos.length() == 11) { // Celular com DDD: (00) 00000-0000
+            return "(" + digitos.substring(0, 2) + ") " + digitos.substring(2, 7) + "-" + digitos.substring(7);
+        } else if (digitos.length() == 10) { // Fixo com DDD: (00) 0000-0000
+            return "(" + digitos.substring(0, 2) + ") " + digitos.substring(2, 6) + "-" + digitos.substring(6);
+        } else if (digitos.length() == 8) { // Número sem DDD: 0000-0000
+            return digitos.substring(0, 4) + "-" + digitos.substring(4);
+        } else {
+            return digitos;
+        }
+    }
+
+    // MÁSCARA PARA ANO LETIVO
+    private void aplicarMascaraAnoLetivo() {
+        fieldAnoLetivo.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar a 4 dígitos
+            if (apenasDigitos.length() > Integer.parseInt(ANO_LETIVO_LENGTH)) {
+                apenasDigitos = apenasDigitos.substring(0, Integer.parseInt(ANO_LETIVO_LENGTH));
+            }
+
+            fieldAnoLetivo.setText(apenasDigitos);
+
+            // Validação adicional: ano não pode ser menor que 2000
+            if (!apenasDigitos.isEmpty()) {
+                try {
+                    int ano = Integer.parseInt(apenasDigitos);
+                    if (ano < 2000) {
+                        fieldAnoLetivo.setStyle("-fx-border-color: #ff4444;");
+                    } else {
+                        fieldAnoLetivo.setStyle("");
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignora - já filtramos apenas dígitos
+                }
+            }
+        });
+    }
+
+    // MÁSCARA PARA VALOR DO ALUGUEL
+    private void aplicarMascaraValorAluguel() {
+        fieldValorAluguel.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isEmpty()) return;
+
+            // Permite números, vírgula e ponto
+            String valorLimpo = newValue.replaceAll("[^\\d,.]", "");
+
+            // Garante que há apenas uma vírgula ou ponto decimal
+            if (valorLimpo.chars().filter(ch -> ch == ',' || ch == '.').count() > 1) {
+                // Mantém o valor antigo se tentar adicionar múltiplos separadores
+                fieldValorAluguel.setText(oldValue);
+                return;
+            }
+
+            // Se terminar com vírgula ou ponto
+            if (valorLimpo.matches(".*[,.]$")) {
+                fieldValorAluguel.setText(valorLimpo);
+                return;
+            }
+
+            // Formata como moeda brasileira
+            try {
+                if (!valorLimpo.isEmpty()) {
+                    // Substitui vírgula por ponto para parse
+                    String paraParse = valorLimpo.replace(",", ".");
+                    double valor = Double.parseDouble(paraParse);
+
+                    // Formata para o padrão brasileiro: 1.234,56
+                    java.text.NumberFormat format = java.text.NumberFormat.getNumberInstance(new java.util.Locale("pt", "BR"));
+                    format.setMinimumFractionDigits(2);
+                    format.setMaximumFractionDigits(2);
+                    fieldValorAluguel.setText(format.format(valor));
+                }
+            } catch (NumberFormatException e) {
+                // Em caso de erro, mantém o valor limpo
+                fieldValorAluguel.setText(valorLimpo);
+            }
+        });
+    }
+
+    // MÁSCARA PARA NÚMERO DE CÔMODOS
+    private void aplicarMascaraNumeroComodos() {
+        fieldNumeroComodos.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            String apenasDigitos = newValue.replaceAll("[^\\d]", "");
+
+            // Limitar a 2 dígitos
+            if (apenasDigitos.length() > 2) {
+                apenasDigitos = apenasDigitos.substring(0, 2);
+            }
+
+            fieldNumeroComodos.setText(apenasDigitos);
+        });
+    }
+
+    // MÁSCARA PARA NÚMERO DO ENDEREÇO
+    private void aplicarMascaraNumeroEndereco() {
+        fieldNumero.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            // Permite números, letras e alguns caracteres especiais comuns em endereços
+            String valorLimpo = newValue.replaceAll("[^\\d\\w\\s\\-\\/]", "");
+
+            // Limitar tamanho
+            if (valorLimpo.length() > 10) {
+                valorLimpo = valorLimpo.substring(0, 10);
+            }
+
+            fieldNumero.setText(valorLimpo);
+        });
+    }
+
+    // MÁSCARA PARA RG
+    private void aplicarMascaraRG() {
+        fieldRgCrianca.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            // Permite números, pontos, traços e X (para dígito verificador)
+            String valorLimpo = newValue.replaceAll("[^\\d\\-\\.Xx]", "");
+
+            // Converte X para maiúsculo
+            valorLimpo = valorLimpo.toUpperCase();
+
+            fieldRgCrianca.setText(valorLimpo);
+        });
+    }
+
+    // MÁSCARA PARA CERTIDÃO DE NASCIMENTO
+    private void aplicarMascaraCertidao() {
+        fieldCertidaoNascimento.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            // Permite números, letras, traços, pontos e barras
+            String valorLimpo = newValue.replaceAll("[^\\d\\w\\-\\.\\/]", "");
+
+            fieldCertidaoNascimento.setText(valorLimpo);
+        });
+    }
+
+    // MÁSCARA PARA CARTÓRIO DE REGISTRO
+    private void aplicarMascaraCartorio() {
+        fieldCartorioRegistro.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            // Permite números, letras, traços, pontos e espaços
+            String valorLimpo = newValue.replaceAll("[^\\d\\w\\-\\.\\s]", "");
+
+            fieldCartorioRegistro.setText(valorLimpo);
+        });
+    }
+
+    // MÉTODOS PARA OBTER DADOS LIMPOS
+
+    private String getCpfLimpo() {
+        return fieldCpfCrianca.getText() != null ?
+                fieldCpfCrianca.getText().replaceAll("[^\\d]", "") : "";
+    }
+
+    private String getCepLimpo() {
+        return fieldCEP.getText() != null ?
+                fieldCEP.getText().replaceAll("[^\\d]", "") : "";
+    }
+
+    private String getTelefoneResidencialLimpo() {
+        return fieldTelefoneResidencial.getText() != null ?
+                fieldTelefoneResidencial.getText().replaceAll("[^\\d]", "") : "";
+    }
+
+    private String getTelefoneContatoLimpo() {
+        return fieldTelefoneContato.getText() != null ?
+                fieldTelefoneContato.getText().replaceAll("[^\\d]", "") : "";
+    }
+
+    private String getNisLimpo() {
+        return fieldNis.getText() != null ?
+                fieldNis.getText().replaceAll("[^\\d]", "") : "";
+    }
+
+    private BigDecimal getValorAluguelLimpo() {
+        if (fieldValorAluguel.getText() == null || fieldValorAluguel.getText().trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            String valorLimpo = fieldValorAluguel.getText()
+                    .replace(".", "")
+                    .replace(",", ".");
+            return new BigDecimal(valorLimpo);
+        } catch (NumberFormatException e) {
+            System.err.println("Erro ao converter valor do aluguel: " + fieldValorAluguel.getText());
+            return null;
+        }
+    }
+
+    private Integer getNumeroComodosLimpo() {
+        if (fieldNumeroComodos.getText() == null || fieldNumeroComodos.getText().trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(fieldNumeroComodos.getText());
+        } catch (NumberFormatException e) {
+            System.err.println("Erro ao converter número de cômodos: " + fieldNumeroComodos.getText());
+            return null;
+        }
+    }
+
     @FXML
     public void salvarPreMatricula() {
         try {
@@ -1277,7 +1527,7 @@ public class CadastroMatriculaController {
             boolean possuiIrmaoGemeo = possuiIrmaoGemeoSelecionado();
             Crianca irmaoGemeoSelecionado = getIrmaoGemeoSelecionado();
 
-            // Salvar tudo usando o service - AGORA COM SÉRIE E ANO LETIVO
+            // Salvar tudo usando o service
             PreMatricula preMatriculaSalva = service.salvarPreMatriculaCompleta(
                     fieldNomeCrianca.getText().trim(),
                     datePickerNascimento.getValue(),
@@ -1333,7 +1583,7 @@ public class CadastroMatriculaController {
             limparFormulario();
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao salvar pré-matrícula: " + e.getMessage());
+            System.err.println("Erro ao salvar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagem("Erro", "Erro ao salvar pré-matrícula: " + e.getMessage());
         }

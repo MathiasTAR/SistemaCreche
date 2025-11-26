@@ -73,7 +73,6 @@ public class FiliacaoResponsavelController {
                 if (pessoaExistente != null) {
                     // Usa a pessoa existente
                     pessoa = pessoaExistente;
-                    System.out.println("✅ Usando pessoa existente: " + pessoa.getNome());
                 } else {
                     // Cria nova pessoa
                     pessoa = new Pessoa();
@@ -84,7 +83,6 @@ public class FiliacaoResponsavelController {
                     pessoa.setOutroContato(getOutroContatoFormatadoParaBanco());
 
                     em.persist(pessoa);
-                    System.out.println("✅ Nova pessoa criada: " + pessoa.getNome());
                 }
 
                 // 2. Verificar se já existe um responsável com este tipo para esta pessoa
@@ -99,7 +97,6 @@ public class FiliacaoResponsavelController {
                     responsavelExistente.setNumeroNis("");
 
                     responsavelSalvo = em.merge(responsavelExistente);
-                    System.out.println("✅ Responsável existente atualizado");
                 } else {
                     // Cria novo responsável
                     Responsavel responsavel = new Responsavel();
@@ -119,22 +116,9 @@ public class FiliacaoResponsavelController {
 
                     em.persist(responsavel);
                     responsavelSalvo = responsavel;
-                    System.out.println("✅ Novo responsável criado");
                 }
 
                 transaction.commit();
-
-                // Exibe no console
-                System.out.println("=== DADOS SALVOS NO BANCO ===");
-                System.out.println("Pessoa ID: " + pessoa.getId());
-                System.out.println("Nome: " + pessoa.getNome());
-                System.out.println("CPF: " + pessoa.getCpf());
-                System.out.println("RG: " + pessoa.getRg());
-                System.out.println("Telefone: " + pessoa.getTelefone());
-                if (responsavelSalvo != null) {
-                    System.out.println("Responsável ID: " + responsavelSalvo.getId());
-                    System.out.println("Tipo Responsável: " + responsavelSalvo.getTipoResponsavel().getTipoResponsavel());
-                }
 
                 this.salvo = true;
                 fecharDialog();
@@ -164,7 +148,7 @@ public class FiliacaoResponsavelController {
                     .findFirst()
                     .orElse(null);
         } catch (Exception e) {
-            System.err.println("❌ Erro ao buscar pessoa por CPF: " + e.getMessage());
+            System.err.println("Erro ao buscar pessoa por CPF: " + e.getMessage());
             return null;
         }
     }
@@ -181,7 +165,7 @@ public class FiliacaoResponsavelController {
                     .findFirst()
                     .orElse(null);
         } catch (Exception e) {
-            System.err.println("❌ Erro ao buscar responsável existente: " + e.getMessage());
+            System.err.println("Erro ao buscar responsável existente: " + e.getMessage());
             return null;
         }
     }
@@ -190,7 +174,7 @@ public class FiliacaoResponsavelController {
     private Long getTipoResponsavelId() {
         String tipoSelecionado = comboTipoResponsavel.getValue();
         if (tipoSelecionado == null) {
-            return 3L; // Default para "Responsável"
+            return 3L;
         }
 
         switch (tipoSelecionado) {
@@ -527,7 +511,7 @@ public class FiliacaoResponsavelController {
     public String getTrabalho() { return fieldTrabalho.getText(); }
     public String getTipoResponsavel() { return comboTipoResponsavel.getValue(); }
 
-    // Método para obter todos os dados como objeto (opcional - mantido para compatibilidade)
+    // Método para obter todos os dados como objeto
     public DadosResponsavel getDadosResponsavel() {
         return new DadosResponsavel(
                 getNome(),
@@ -540,7 +524,7 @@ public class FiliacaoResponsavelController {
         );
     }
 
-    // Classe interna para transportar dados (opcional - mantida para compatibilidade)
+    // Classe interna para transportar dados
     public static class DadosResponsavel {
         private String nome;
         private String cpf;

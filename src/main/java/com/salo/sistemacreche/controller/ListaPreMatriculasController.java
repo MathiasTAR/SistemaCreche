@@ -75,12 +75,10 @@ public class ListaPreMatriculasController {
             em = DBConnection.getEntityManager();
 
             if (em == null || !em.isOpen()) {
-                System.err.println("❌ Erro de conexão com o banco");
+                System.err.println("Erro de conexão com o banco");
                 mostrarMensagemErro("Erro de conexão com o banco de dados");
                 return;
             }
-
-            System.out.println("🔍 Executando busca de pré-matrículas com filtros...");
 
             // CORREÇÃO: Query JPQL corrigida
             StringBuilder jpql = new StringBuilder(
@@ -120,24 +118,20 @@ public class ListaPreMatriculasController {
             // Ordenação por data de pré-matrícula mais recente primeiro
             jpql.append(" ORDER BY pm.dataPreMatricula DESC");
 
-            System.out.println("📝 JPQL: " + jpql.toString());
-
             // Criar e executar a query
             TypedQuery<PreMatricula> query = em.createQuery(jpql.toString(), PreMatricula.class);
 
             // Aplicar parâmetros
             for (int i = 0; i < parametros.size(); i++) {
                 query.setParameter(i + 1, parametros.get(i));
-                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i));
             }
 
             List<PreMatricula> preMatriculas = query.getResultList();
-            System.out.println("✅ " + preMatriculas.size() + " pré-matrícula(s) encontrada(s)");
 
             atualizarInterface(preMatriculas);
 
         } catch (Exception e) {
-            String errorMsg = "💥 Erro ao buscar pré-matrículas: " + e.getMessage();
+            String errorMsg = "Erro ao buscar pré-matrículas: " + e.getMessage();
             System.err.println(errorMsg);
             e.printStackTrace();
             mostrarMensagemErro("Erro ao buscar pré-matrículas: " + e.getMessage());
@@ -156,7 +150,6 @@ public class ListaPreMatriculasController {
             cardsContainer.getChildren().add(cardVazio);
         } else {
             for (PreMatricula preMatricula : preMatriculas) {
-                // Usar PreMatriculaCard específico para pré-matrículas
                 PreMatriculaCard card = new PreMatriculaCard(preMatricula);
                 card.setOnAprovarAction(() -> aprovarPreMatricula(preMatricula));
                 card.setOnReprovarAction(() -> reprovarPreMatricula(preMatricula));
@@ -174,10 +167,6 @@ public class ListaPreMatriculasController {
 
     private void editarPreMatricula(PreMatricula preMatricula) {
         System.out.println("📝 Editando pré-matrícula: " + preMatricula.getId());
-        // Implemente a lógica para abrir a tela de edição de pré-matrícula
-        String nomeCrianca = preMatricula.getCrianca() != null ?
-                preMatricula.getCrianca().getNome() : "Pré-matrícula " + preMatricula.getId();
-        System.out.println("Editando pré-matrícula: " + nomeCrianca);
     }
 
     private void aprovarPreMatricula(PreMatricula preMatricula) {
@@ -191,7 +180,7 @@ public class ListaPreMatriculasController {
             PreMatricula preMatriculaManaged = em.find(PreMatricula.class, preMatricula.getId());
             preMatriculaManaged.setSituacaoPreMatricula(SituacaoPreMatricula.APROVADA);
 
-            // ✅ CRIAR MATRÍCULA AUTOMATICAMENTE
+            // CRIAR MATRÍCULA AUTOMATICAMENTE
             Matricula novaMatricula = criarMatriculaAPartirPreMatricula(preMatriculaManaged);
             em.persist(novaMatricula);
 
@@ -199,17 +188,16 @@ public class ListaPreMatriculasController {
             em.getTransaction().commit();
             em.close();
 
-            System.out.println("✅ Pré-matrícula aprovada e matrícula criada com sucesso! ID Matrícula: " + novaMatricula.getId());
             buscarPreMatriculas(); // Recarrega a lista
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao aprovar pré-matrícula: " + e.getMessage());
+            System.err.println("Erro ao aprovar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagemErro("Erro ao aprovar pré-matrícula: " + e.getMessage());
         }
     }
 
-    // ✅ NOVO MÉTODO: Criar matrícula a partir da pré-matrícula
+    // Método para criar matrícula a partir da pré-matrícula
     private Matricula criarMatriculaAPartirPreMatricula(PreMatricula preMatricula) {
         Matricula matricula = new Matricula();
 
@@ -220,7 +208,6 @@ public class ListaPreMatriculasController {
 
         // Série e ano letivo (usar os dados temporários da pré-matrícula)
         if (preMatricula.getSerieTemp() != null && !preMatricula.getSerieTemp().isEmpty()) {
-            // Usar a string diretamente (não converter para enum)
             matricula.setSerie(preMatricula.getSerieTemp());
         }
 
@@ -240,17 +227,12 @@ public class ListaPreMatriculasController {
         matricula.setDataVencimento(java.sql.Date.valueOf(vencimento));
 
         // Outros campos
-        matricula.setOrientacaoRecebida(false); // Padrão
-
-        System.out.println("🎓 Nova matrícula criada - Série: " + matricula.getSerie() +
-                ", Ano: " + matricula.getAnoLetivo() +
-                ", Vencimento: " + matricula.getDataVencimento());
+        matricula.setOrientacaoRecebida(false);
 
         return matricula;
     }
 
     private void reprovarPreMatricula(PreMatricula preMatricula) {
-        System.out.println("❌ Reprovando pré-matrícula: " + preMatricula.getId());
 
         try {
             EntityManager em = DBConnection.getEntityManager();
@@ -264,17 +246,15 @@ public class ListaPreMatriculasController {
             em.getTransaction().commit();
             em.close();
 
-            System.out.println("✅ Pré-matrícula reprovada com sucesso!");
             buscarPreMatriculas(); // Recarrega a lista
         } catch (Exception e) {
-            System.err.println("❌ Erro ao reprovar pré-matrícula: " + e.getMessage());
+            System.err.println("Erro ao reprovar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagemErro("Erro ao reprovar pré-matrícula: " + e.getMessage());
         }
     }
 
     private void cancelarPreMatricula(PreMatricula preMatricula) {
-        System.out.println("🚫 Cancelando pré-matrícula: " + preMatricula.getId());
 
         try {
             EntityManager em = DBConnection.getEntityManager();
@@ -288,10 +268,9 @@ public class ListaPreMatriculasController {
             em.getTransaction().commit();
             em.close();
 
-            System.out.println("✅ Pré-matrícula cancelada com sucesso!");
             buscarPreMatriculas(); // Recarrega a lista
         } catch (Exception e) {
-            System.err.println("❌ Erro ao cancelar pré-matrícula: " + e.getMessage());
+            System.err.println("Erro ao cancelar pré-matrícula: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagemErro("Erro ao cancelar pré-matrícula: " + e.getMessage());
         }

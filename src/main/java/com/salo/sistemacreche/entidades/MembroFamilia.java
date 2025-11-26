@@ -16,7 +16,6 @@ public class MembroFamilia {
     @JoinColumn(name = "ID_CRIANCA", nullable = false)
     private Crianca crianca;
 
-    // 🔥 NOVOS CAMPOS ADICIONADOS
     @Column(name = "NOME", nullable = false, length = 150)
     private String nome;
 

@@ -75,12 +75,11 @@ public class ListaMatriculasController {
             em = DBConnection.getEntityManager();
 
             if (em == null || !em.isOpen()) {
-                System.err.println("❌ Erro de conexão com o banco");
                 mostrarMensagemErro("Erro de conexão com o banco de dados");
                 return;
             }
 
-            // CORREÇÃO: Query JPQL simplificada e corrigida
+            // Query JPQL para matriculas menos com estado vencida
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT m FROM Matricula m " +
                             "LEFT JOIN FETCH m.crianca c " +
@@ -117,24 +116,20 @@ public class ListaMatriculasController {
             // Ordenação por data mais recente primeiro
             jpql.append(" ORDER BY m.dataMatricula DESC");
 
-            System.out.println("📝 JPQL: " + jpql.toString());
-
             // Criar e executar a query
             TypedQuery<Matricula> query = em.createQuery(jpql.toString(), Matricula.class);
 
             // Aplicar parâmetros
             for (int i = 0; i < parametros.size(); i++) {
                 query.setParameter(i + 1, parametros.get(i));
-                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i));
             }
 
             List<Matricula> matriculas = query.getResultList();
-            System.out.println("✅ " + matriculas.size() + " matrícula(s) encontrada(s)");
 
             atualizarInterface(matriculas);
 
         } catch (Exception e) {
-            String errorMsg = "💥 Erro ao buscar matrículas: " + e.getMessage();
+            String errorMsg = "Erro ao buscar matrículas: " + e.getMessage();
             System.err.println(errorMsg);
             e.printStackTrace();
             mostrarMensagemErro("Erro ao buscar matrículas: " + e.getMessage());
@@ -167,7 +162,6 @@ public class ListaMatriculasController {
 
     // ADICIONE ESTES MÉTODOS NO CONTROLLER
     private void concluirMatricula(Matricula matricula) {
-        System.out.println("🎓 Concluindo matrícula: " + matricula.getId());
 
         try {
             EntityManager em = DBConnection.getEntityManager();
@@ -182,17 +176,15 @@ public class ListaMatriculasController {
             em.getTransaction().commit();
             em.close();
 
-            System.out.println("✅ Matrícula concluída com sucesso!");
             buscarMatriculas(); // Recarrega a lista
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao concluir matrícula: " + e.getMessage());
+            System.err.println("Erro ao concluir matrícula: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void cancelarMatricula(Matricula matricula) {
-        System.out.println("❌ Cancelando matrícula: " + matricula.getId());
 
         try {
             EntityManager em = DBConnection.getEntityManager();
@@ -207,11 +199,10 @@ public class ListaMatriculasController {
             em.getTransaction().commit();
             em.close();
 
-            System.out.println("✅ Matrícula cancelada com sucesso!");
             buscarMatriculas(); // Recarrega a lista
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao cancelar matrícula: " + e.getMessage());
+            System.err.println("Erro ao cancelar matrícula: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -223,14 +214,6 @@ public class ListaMatriculasController {
     }
 
     private void editarMatricula(Matricula matricula) {
-        System.out.println("📝 Editando matrícula: " + matricula.getId());
-        // Aqui você pode implementar a lógica para abrir a tela de edição
-        // Por exemplo:
-        // MainApplication.abrirTelaEdicaoMatricula(matricula);
-
-        // Mensagem temporária
-        String nomeCrianca = matricula.getCrianca() != null ?
-                matricula.getCrianca().getNome() : "Matrícula " + matricula.getId();
-        System.out.println("Editando matrícula: " + nomeCrianca);
+        System.out.println("Editando matrícula: " + matricula.getId());
     }
 }

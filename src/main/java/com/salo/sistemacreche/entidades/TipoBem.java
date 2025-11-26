@@ -19,13 +19,8 @@ public class TipoBem {
     @Column(name = "CATEGORIA", nullable = false)
     private CategoriaBem categoria;
 
-    // ⚠️ CONSTRUTOR PADRÃO OBRIGATÓRIO (sem argumentos)
     public TipoBem() {
-        // Construtor padrão necessário para o Hibernate
     }
-
-    // ⚠️ REMOVA ou CORRIJA este construtor problemático
-    // public TipoBem(Crianca crianca, TipoBem managedTipoBem) {}
 
     // Construtor com parâmetros úteis
     public TipoBem(NomeBem nomeBem, CategoriaBem categoria) {

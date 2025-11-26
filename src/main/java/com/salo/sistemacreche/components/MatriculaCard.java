@@ -106,7 +106,7 @@ public class MatriculaCard extends VBox {
     // MÉTODOS ESPECÍFICOS PARA CADA AÇÃO (CORREÇÃO)
     private void confirmarConclusao() {
         if (onConcluirAction == null) {
-            System.err.println("❌ onConcluirAction não está configurado");
+            System.err.println("onConcluirAction não está configurado");
             return;
         }
 
@@ -128,17 +128,17 @@ public class MatriculaCard extends VBox {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == btnSim) {
-            System.out.println("✅ Confirmação recebida para CONCLUSÃO da matrícula: " + nomeCrianca);
+            System.out.println("Confirmação recebida para CONCLUSÃO da matrícula: " + nomeCrianca);
             onConcluirAction.run();
             toggleAcoesVisiveis();
         } else {
-            System.out.println("❌ Conclusão cancelada pelo usuário");
+            System.out.println("Conclusão cancelada pelo usuário");
         }
     }
 
     private void confirmarCancelamento() {
         if (onCancelarAction == null) {
-            System.err.println("❌ onCancelarAction não está configurado");
+            System.err.println("onCancelarAction não está configurado");
             return;
         }
 
@@ -160,11 +160,11 @@ public class MatriculaCard extends VBox {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == btnSim) {
-            System.out.println("✅ Confirmação recebida para CANCELAMENTO da matrícula: " + nomeCrianca);
+            System.out.println("Confirmação recebida para CANCELAMENTO da matrícula: " + nomeCrianca);
             onCancelarAction.run();
             toggleAcoesVisiveis();
         } else {
-            System.out.println("❌ Cancelamento cancelado pelo usuário");
+            System.out.println("Cancelamento cancelado pelo usuário");
         }
     }
 
@@ -341,13 +341,13 @@ public class MatriculaCard extends VBox {
 
     public void setOnConcluirAction(Runnable onConcluirAction) {
         this.onConcluirAction = onConcluirAction;
-        System.out.println("✅ onConcluirAction configurado para: " +
+        System.out.println("onConcluirAction configurado para: " +
                 (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : "matrícula"));
     }
 
     public void setOnCancelarAction(Runnable onCancelarAction) {
         this.onCancelarAction = onCancelarAction;
-        System.out.println("✅ onCancelarAction configurado para: " +
+        System.out.println("onCancelarAction configurado para: " +
                 (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : "matrícula"));
     }
 

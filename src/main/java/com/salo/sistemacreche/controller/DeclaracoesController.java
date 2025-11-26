@@ -33,7 +33,6 @@ public class DeclaracoesController {
                 Desktop desktop = Desktop.getDesktop();
                 if (tempFile.exists()) {
                     desktop.open(tempFile);
-                    System.out.println("✅ PDF aberto com sucesso!");
                 }
 
 

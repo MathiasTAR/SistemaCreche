@@ -39,7 +39,7 @@ public class RematriculaController {
             em = DBConnection.getEntityManager();
 
             if (em == null || !em.isOpen()) {
-                System.err.println("❌ Erro de conexão com o banco");
+                System.err.println("Erro de conexão com o banco");
                 return;
             }
 
@@ -57,16 +57,16 @@ public class RematriculaController {
             em.getTransaction().commit();
 
             if (atualizadas > 0) {
-                System.out.println("✅ " + atualizadas + " matrícula(s) atualizada(s) para VENCIDA");
+                System.out.println(atualizadas + " matrícula(s) atualizada(s) para VENCIDA");
             } else {
-                System.out.println("ℹ️ Nenhuma matrícula vencida encontrada");
+                System.out.println("Nenhuma matrícula vencida encontrada");
             }
 
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("❌ Erro ao verificar matrículas vencidas: " + e.getMessage());
+            System.err.println("Erro ao verificar matrículas vencidas: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (em != null && em.isOpen()) {
@@ -90,12 +90,9 @@ public class RematriculaController {
             em = DBConnection.getEntityManager();
 
             if (em == null || !em.isOpen()) {
-                System.err.println("❌ Erro de conexão com o banco");
                 mostrarMensagemErro("Erro de conexão com o banco de dados");
                 return;
             }
-
-            System.out.println("🔍 Buscando matrículas VENCIDAS para rematrícula...");
 
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT m FROM Matricula m " +
@@ -132,16 +129,14 @@ public class RematriculaController {
             // Aplicar parâmetros dinâmicos
             for (int i = 0; i < parametros.size(); i++) {
                 query.setParameter(i + 1, parametros.get(i));
-                System.out.println("📌 Parâmetro " + (i + 1) + ": " + parametros.get(i));
             }
 
             List<Matricula> matriculasVencidas = query.getResultList();
-            System.out.println("✅ " + matriculasVencidas.size() + " matrícula(s) VENCIDA(S) encontrada(s)");
 
             atualizarInterface(matriculasVencidas);
 
         } catch (Exception e) {
-            String errorMsg = "💥 Erro ao buscar matrículas vencidas: " + e.getMessage();
+            String errorMsg = "Erro ao buscar matrículas vencidas: " + e.getMessage();
             System.err.println(errorMsg);
             e.printStackTrace();
             mostrarMensagemErro("Erro ao buscar matrículas vencidas: " + e.getMessage());
@@ -172,9 +167,6 @@ public class RematriculaController {
     }
 
     private void renovarMatricula(Matricula matricula) {
-        System.out.println("🔄 Renovando matrícula para: " +
-                (matricula.getCrianca() != null ?
-                        matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
 
         try {
             EntityManager em = DBConnection.getEntityManager();
@@ -190,14 +182,13 @@ public class RematriculaController {
             em.getTransaction().commit();
             em.close();
 
-            System.out.println("✅ Matrícula renovada com sucesso!");
             mostrarMensagemSucesso("Matrícula renovada para: " +
                     (matricula.getCrianca() != null ? matricula.getCrianca().getNome() : ""));
 
             buscarAlunos(); // Recarrega a lista
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao renovar matrícula: " + e.getMessage());
+            System.err.println("Erro ao renovar matrícula: " + e.getMessage());
             e.printStackTrace();
             mostrarMensagemErro("Erro ao renovar matrícula: " + e.getMessage());
         }
@@ -226,13 +217,9 @@ public class RematriculaController {
         } else {
             matricula.setAnoLetivo(LocalDate.now().getYear());
         }
-
-        System.out.println("🔄 Matrícula renovada - Nova série: " + matricula.getSerie() +
-                ", Novo ano: " + matricula.getAnoLetivo() +
-                ", Novo vencimento: " + matricula.getDataVencimento());
     }
 
-    // ✅ MÉTODO AUXILIAR: Avançar para próxima série
+    // Avançar para próxima série
     private void avancarSerie(Matricula matricula) {
         if (matricula.getSerie() == null) return;
 
@@ -256,18 +243,17 @@ public class RematriculaController {
                 break;
             case "PRE_II":
                 // Última série - manter Pré II
-                System.out.println("ℹ️ Aluno na última série (Pré II) - mantendo mesma série");
+                System.out.println("Aluno na última série (Pré II) - mantendo mesma série");
                 break;
             default:
-                System.out.println("ℹ️ Série não reconhecida: " + serieAtual + " - mantendo mesma série");
+                System.out.println("ℹSérie não reconhecida: " + serieAtual + " - mantendo mesma série");
         }
     }
 
     private void visualizarMatricula(Matricula matricula) {
-        System.out.println("👁️ Visualizando matrícula: " +
+        System.out.println("👁Visualizando matrícula: " +
                 (matricula.getCrianca() != null ?
                         matricula.getCrianca().getNome() : "Matrícula " + matricula.getId()));
-        // TODO: Implementar visualização detalhada da matrícula
     }
 
     private void mostrarMensagemErro(String mensagem) {
@@ -277,8 +263,6 @@ public class RematriculaController {
     }
 
     private void mostrarMensagemSucesso(String mensagem) {
-        // TODO: Implementar alerta de sucesso
-        System.out.println("✅ SUCESSO: " + mensagem);
         // Recarregar a lista após rematrícula
         carregarMatriculasVencidas();
     }
