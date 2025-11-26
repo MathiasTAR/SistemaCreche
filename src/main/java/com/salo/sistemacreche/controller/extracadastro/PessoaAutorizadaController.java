@@ -79,7 +79,7 @@ public class PessoaAutorizadaController {
                 pessoa.setNome(getNomeFormatadoParaBanco());
                 pessoa.setRg(getRgFormatadoParaBanco());
                 pessoa.setTelefone(getTelefoneFormatadoParaBanco());
-                pessoa.setCpf(""); // CPF vazio
+                pessoa.setCpf(gerarCpfTemporario()); // CPF temporário único
                 pessoa.setOutroContato(""); // Outro contato vazio
 
                 em.persist(pessoa);
@@ -114,6 +114,12 @@ public class PessoaAutorizadaController {
                 }
             }
         }
+    }
+
+    // Gera CPF temporário único baseado no timestamp
+    private String gerarCpfTemporario() {
+        long timestamp = System.currentTimeMillis() % 1000000000L;
+        return String.format("%011d", timestamp);
     }
 
     @FXML

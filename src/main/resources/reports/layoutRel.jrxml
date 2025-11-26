@@ -1,94 +1,99 @@
 <!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
 <jasperReport name="relatorio_amostragem" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c431d253-b3f4-4cf5-ae08-a8c6d2f91b32">
-	<parameter name="sexo" class="java.lang.String"/>
-	<parameter name="corRaca" class="java.lang.String"/>
-	<parameter name="idadeDe" class="java.lang.Integer"/>
-	<parameter name="idadeAte" class="java.lang.Integer"/>
-	<parameter name="restricaoAlimentar" class="java.lang.String"/>
-	<parameter name="alergia" class="java.lang.String"/>
-	<parameter name="tipoMoradia" class="java.lang.String"/>
-	<parameter name="beneficioSocial" class="java.lang.String"/>
-	<parameter name="rendaMin" class="java.lang.String"/>
-	<parameter name="rendaMax" class="java.lang.String"/>
-	<parameter name="totalCriancas" class="java.lang.Integer"/>
-	<parameter name="totalSexo" class="java.lang.Integer"/>
-	<parameter name="totalCor" class="java.lang.Integer"/>
-	<parameter name="totalFaixaIdade" class="java.lang.Integer"/>
-	<parameter name="totalRestricao" class="java.lang.Integer"/>
-	<parameter name="totalAlergia" class="java.lang.Integer"/>
-	<parameter name="totalTipoMoradia" class="java.lang.Integer"/>
-	<parameter name="totalBeneficio" class="java.lang.Integer"/>
-	<parameter name="dataInicio" class="java.sql.Date"/>
-	<parameter name="dataFim" class="java.sql.Date"/>
-	<parameter name="dataPreDef" class="java.lang.String"/>
-	<detail>
-		<band height="802">
-			<element kind="textField" uuid="db706e28-4fbe-414b-9e5f-f578a78c4479" x="0" y="60" width="210" height="20">
-				<expression><![CDATA["De"+ $P{dataInicio} +"até"+ $P{dataFim}]]></expression>
-			</element>
-			<element kind="textField" uuid="a09c3dcc-2212-45b5-94ca-f213acba4137" x="120" y="170" width="164" height="20">
-				<expression><![CDATA[$P{rendaMin}+" - "+$P{rendaMax}]]></expression>
-			</element>
-			<element kind="staticText" uuid="2680e52f-0d4e-4faf-b4cb-94f43f5f0d63" x="0" y="200" width="555" height="30" fontSize="16.0" bold="true">
-				<text><![CDATA[Resumo da Amostragem]]></text>
-			</element>
-			<element kind="line" uuid="6f8d2232-7fe4-47c1-9af6-a8494f3b78f5" x="0" y="190" width="555" height="1"/>
-			<element kind="staticText" uuid="17a8c5d7-fc6d-4f03-b844-03b9814681a1" x="0" y="230" width="350" height="20">
-				<text><![CDATA[Total de crianças encontradas:]]></text>
-			</element>
-			<element kind="textField" uuid="c70a1430-0e7b-4a72-aac6-1bfef9e3a09d" x="147" y="230" width="100" height="20">
-				<expression><![CDATA[$P{totalCriancas}]]></expression>
-			</element>
-			<element kind="staticText" uuid="82f693f3-e524-4506-8922-799d30d3fcf7" x="0" y="170" width="120" height="20">
-				<text><![CDATA[Renda Min - Renda Max:]]></text>
-			</element>
-			<element kind="textField" uuid="93cdb711-117a-4065-b2ed-0a4b00568d56" x="370" y="130" width="120" height="20">
-				<expression><![CDATA[$P{beneficioSocial}]]></expression>
-			</element>
-			<element kind="staticText" uuid="06f37669-9b2a-4318-af70-812aaa3874ac" x="290" y="130" width="120" height="20">
-				<text><![CDATA[Benefício Social:]]></text>
-			</element>
-			<element kind="textField" uuid="ac3183fa-fc72-46a0-9bf5-1dd8d574a38d" x="360" y="110" width="120" height="20">
-				<expression><![CDATA[$P{tipoMoradia}]]></expression>
-			</element>
-			<element kind="staticText" uuid="699f7555-4edd-4f2d-9bcf-9906dfe92cd8" x="290" y="110" width="120" height="20">
-				<text><![CDATA[Tipo Moradia:]]></text>
-			</element>
-			<element kind="textField" uuid="a53564c2-4a54-4319-b0f0-64a0bf02d895" x="40" y="150" width="120" height="20">
-				<expression><![CDATA[$P{alergia}]]></expression>
-			</element>
-			<element kind="staticText" uuid="4afb707b-0db7-4710-a239-6da8d25fb08d" x="0" y="150" width="120" height="20">
-				<text><![CDATA[Alergia:]]></text>
-			</element>
-			<element kind="textField" uuid="20b83f0b-c253-4c5f-987f-7df4a44cf09b" x="50" y="110" width="150" height="20">
-				<expression><![CDATA[$P{corRaca}]]></expression>
-			</element>
-			<element kind="staticText" uuid="7107e92f-5c34-4cc7-9a6d-1f28a845f695" x="0" y="110" width="120" height="20">
-				<text><![CDATA[Cor/Raça:]]></text>
-			</element>
-			<element kind="textField" uuid="9e923927-7f7f-4c21-886a-5515289f9e42" x="30" y="130" width="150" height="20">
-				<expression><![CDATA[$P{sexo}]]></expression>
-			</element>
-			<element kind="staticText" uuid="8ee27352-31b2-4fb3-985e-6d87c0c7f5e1" x="0" y="130" width="120" height="20">
-				<text><![CDATA[Sexo:]]></text>
-			</element>
-			<element kind="staticText" uuid="f01cbb88-eb27-4e03-ac05-a2e4938c8a66" x="0" y="80" width="555" height="20" fontSize="14.0" bold="true">
-				<text><![CDATA[Filtros Aplicados]]></text>
-			</element>
-			<element kind="textField" uuid="cd13d0a6-0c31-435c-bde2-553b20f46138" x="350" y="60" width="120" height="20">
-				<expression><![CDATA[$P{dataPreDef}]]></expression>
-			</element>
-			<element kind="staticText" uuid="346d32c7-c330-42df-b0e9-be191e04ca43" x="250" y="60" width="120" height="20">
-				<text><![CDATA[Período Pré-definido:]]></text>
-			</element>
-			<element kind="staticText" uuid="b3146247-ec10-48a4-bb48-1a2998d3733a" x="0" y="40" width="555" height="20" fontSize="14.0" bold="true">
-				<text><![CDATA[Período]]></text>
-			</element>
-			<element kind="line" uuid="59749136-c7d3-40a9-b7a9-e64f88715bc0" x="0" y="80" width="555" height="1"/>
-			<element kind="staticText" uuid="3a46fb54-ec61-42e0-97e8-3a0cb9755118" x="0" y="0" width="555" height="40" fontSize="22.0" bold="true" hTextAlign="Center">
-				<text><![CDATA[Relatório de Amostragem das Crianças]]></text>
-			</element>
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-		</band>
-	</detail>
+    <parameter name="sexo" class="java.lang.String"/>
+    <parameter name="corRaca" class="java.lang.String"/>
+    <parameter name="idadeDe" class="java.lang.Integer"/>
+    <parameter name="idadeAte" class="java.lang.Integer"/>
+    <parameter name="restricaoAlimentar" class="java.lang.String"/>
+    <parameter name="alergia" class="java.lang.String"/>
+    <parameter name="tipoMoradia" class="java.lang.String"/>
+    <parameter name="beneficioSocial" class="java.lang.String"/>
+    <parameter name="rendaMin" class="java.lang.String"/>
+    <parameter name="rendaMax" class="java.lang.String"/>
+    <parameter name="totalCriancas" class="java.lang.Integer"/>
+    <parameter name="totalSexo" class="java.lang.Integer"/>
+    <parameter name="totalCor" class="java.lang.Integer"/>
+    <parameter name="totalFaixaIdade" class="java.lang.Integer"/>
+    <parameter name="totalRestricao" class="java.lang.Integer"/>
+    <parameter name="totalAlergia" class="java.lang.Integer"/>
+    <parameter name="totalTipoMoradia" class="java.lang.Integer"/>
+    <parameter name="totalBeneficio" class="java.lang.Integer"/>
+    <parameter name="dataInicio" class="java.sql.Date"/>
+    <parameter name="dataFim" class="java.sql.Date"/>
+    <parameter name="dataPreDef" class="java.lang.String"/>
+    <detail>
+        <band height="802">
+            <element kind="textField" uuid="913b86e4-48bc-469f-b1fc-6b14244d9d98" x="0" y="60" width="210" height="20">
+                <expression><![CDATA[$P{dataInicio} == null ? "" : "De: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{dataInicio})
+			    ]]></expression>
+            </element>
+            <element kind="textField" uuid="a09c3dcc-2212-45b5-94ca-f213acba4137" x="120" y="170" width="164" height="20">
+                <expression><![CDATA[$P{rendaMin}+" - "+$P{rendaMax}]]></expression>
+            </element>
+            <element kind="staticText" uuid="2680e52f-0d4e-4faf-b4cb-94f43f5f0d63" x="0" y="200" width="555" height="30" fontSize="16.0" bold="true">
+                <text><![CDATA[Resumo da Amostragem]]></text>
+            </element>
+            <element kind="line" uuid="6f8d2232-7fe4-47c1-9af6-a8494f3b78f5" x="0" y="190" width="555" height="1"/>
+            <element kind="staticText" uuid="17a8c5d7-fc6d-4f03-b844-03b9814681a1" x="0" y="230" width="350" height="20">
+                <text><![CDATA[Total de crianças encontradas:]]></text>
+            </element>
+            <element kind="textField" uuid="c70a1430-0e7b-4a72-aac6-1bfef9e3a09d" x="147" y="230" width="100" height="20">
+                <expression><![CDATA[$P{totalCriancas}]]></expression>
+            </element>
+            <element kind="staticText" uuid="82f693f3-e524-4506-8922-799d30d3fcf7" x="0" y="170" width="120" height="20">
+                <text><![CDATA[Renda Min - Renda Max:]]></text>
+            </element>
+            <element kind="textField" uuid="93cdb711-117a-4065-b2ed-0a4b00568d56" x="370" y="130" width="120" height="20">
+                <expression><![CDATA[$P{beneficioSocial}]]></expression>
+            </element>
+            <element kind="staticText" uuid="06f37669-9b2a-4318-af70-812aaa3874ac" x="290" y="130" width="120" height="20">
+                <text><![CDATA[Benefício Social:]]></text>
+            </element>
+            <element kind="textField" uuid="ac3183fa-fc72-46a0-9bf5-1dd8d574a38d" x="360" y="110" width="120" height="20">
+                <expression><![CDATA[$P{tipoMoradia}]]></expression>
+            </element>
+            <element kind="staticText" uuid="699f7555-4edd-4f2d-9bcf-9906dfe92cd8" x="290" y="110" width="120" height="20">
+                <text><![CDATA[Tipo Moradia:]]></text>
+            </element>
+            <element kind="textField" uuid="a53564c2-4a54-4319-b0f0-64a0bf02d895" x="40" y="150" width="120" height="20">
+                <expression><![CDATA[$P{alergia}]]></expression>
+            </element>
+            <element kind="staticText" uuid="4afb707b-0db7-4710-a239-6da8d25fb08d" x="0" y="150" width="120" height="20">
+                <text><![CDATA[Alergia:]]></text>
+            </element>
+            <element kind="textField" uuid="20b83f0b-c253-4c5f-987f-7df4a44cf09b" x="50" y="110" width="150" height="20">
+                <expression><![CDATA[$P{corRaca}]]></expression>
+            </element>
+            <element kind="staticText" uuid="7107e92f-5c34-4cc7-9a6d-1f28a845f695" x="0" y="110" width="120" height="20">
+                <text><![CDATA[Cor/Raça:]]></text>
+            </element>
+            <element kind="textField" uuid="9e923927-7f7f-4c21-886a-5515289f9e42" x="30" y="130" width="150" height="20">
+                <expression><![CDATA[$P{sexo}]]></expression>
+            </element>
+            <element kind="staticText" uuid="8ee27352-31b2-4fb3-985e-6d87c0c7f5e1" x="0" y="130" width="120" height="20">
+                <text><![CDATA[Sexo:]]></text>
+            </element>
+            <element kind="staticText" uuid="f01cbb88-eb27-4e03-ac05-a2e4938c8a66" x="0" y="80" width="555" height="20" fontSize="14.0" bold="true">
+                <text><![CDATA[Filtros Aplicados]]></text>
+            </element>
+            <element kind="textField" uuid="cd13d0a6-0c31-435c-bde2-553b20f46138" x="380" y="61" width="120" height="20">
+                <expression><![CDATA[$P{dataPreDef}]]></expression>
+            </element>
+            <element kind="staticText" uuid="346d32c7-c330-42df-b0e9-be191e04ca43" x="280" y="61" width="120" height="20">
+                <text><![CDATA[Período Pré-definido:]]></text>
+            </element>
+            <element kind="staticText" uuid="b3146247-ec10-48a4-bb48-1a2998d3733a" x="0" y="40" width="555" height="20" fontSize="14.0" bold="true">
+                <text><![CDATA[Período]]></text>
+            </element>
+            <element kind="line" uuid="59749136-c7d3-40a9-b7a9-e64f88715bc0" x="0" y="80" width="555" height="1"/>
+            <element kind="staticText" uuid="3a46fb54-ec61-42e0-97e8-3a0cb9755118" x="0" y="0" width="555" height="40" fontSize="22.0" bold="true" hTextAlign="Center">
+                <text><![CDATA[Relatório de Amostragem das Crianças]]></text>
+            </element>
+            <element kind="textField" uuid="7c43ad14-2b5c-4a52-a815-90b568a7fc71" x="140" y="60" width="210" height="20">
+                <expression><![CDATA[$P{dataFim} == null ? "" : "Até: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{dataFim})
+			    ]]></expression>
+            </element>
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </detail>
 </jasperReport>

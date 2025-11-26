@@ -14,6 +14,7 @@ import java.awt.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.List;
@@ -25,7 +26,7 @@ public class RelatoriosController {
     @FXML private ComboBox<String> comboPeriodo;
 
     @FXML private ComboBox<String> comboSexo;
-    @FXML private ComboBox<String> comboAlergia;
+    @FXML private ComboBox<String> comboAlergia; // "Sim" / "Não"
     @FXML private ComboBox<String> comboRaca;
     @FXML private ComboBox<String> comboMobilidade;
 
@@ -53,7 +54,6 @@ public class RelatoriosController {
             default: return null;
         }
     }
-
     public void gerarPDF() {
         EntityManager em = DBConnection.getEntityManager();
 
@@ -75,6 +75,7 @@ public class RelatoriosController {
 
         if (periodoPreDefinido != null) {
             switch (periodoPreDefinido) {
+
                 case "Últimos 7 dias" -> {
                     inicio = LocalDate.now().minusDays(7);
                     fim = LocalDate.now();
@@ -97,9 +98,6 @@ public class RelatoriosController {
                 }
             }
         }
-
-        if (inicio != null) params.put("dataInicio", java.sql.Date.valueOf(inicio));
-        if (fim != null) params.put("dataFim", java.sql.Date.valueOf(fim));
 
         // =============================
         // FILTROS
@@ -198,7 +196,6 @@ public class RelatoriosController {
 
             Map<String, Object> parametros = new HashMap<>();
 
-            // Alteração aqui: usar string vazia em vez de null para campos não preenchidos
             parametros.put("sexo", comboSexo.getValue() != null ? comboSexo.getValue() : "");
             parametros.put("corRaca", comboRaca.getValue() != null ? comboRaca.getValue() : "");
             parametros.put("alergia", comboAlergia.getValue() != null ? comboAlergia.getValue() : "");
@@ -210,6 +207,7 @@ public class RelatoriosController {
             parametros.put("dataFim", fim != null ? java.sql.Date.valueOf(fim) : null);
             parametros.put("dataPreDef", periodoPreDefinido != null ? periodoPreDefinido : "");
             parametros.put("totalCriancas", resultado.size());
+
 
             List<Object> listaResumo = List.of(new Object()); // lista de tamanho 1
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(listaResumo);
