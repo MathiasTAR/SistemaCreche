@@ -43,18 +43,19 @@
 
 ```bash
 # Clone o repositório
-git clone https://github.com/JoaoPedro77/Libris.git
+git clone https://github.com/MathiasTAR/SistemaCreche.git
 
-# Instale as dependências
-npm install
+# Instale Banco de dados (mysql)
+arquivos em src/bancodados
 
 # Execute em modo desenvolvimento
-npm start
+Launcher.java
 ````
 
 ## 📌 Próximos Passos
 
-- [x] implementar banco de dados MySQL
+- [ ] Implementar visulização de matricula
+- [ ] Implementar foto da criança
 
 ## 🤝 Como Contribuir
 
@@ -63,6 +64,10 @@ npm start
 3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
 4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
+
+## Sobre Projeto
+Projeto Densenvolvido para Creche Estrela Oriente com tutela do Professor Carlos Cardoso, sobre pretexto do apredizado de java com orientação a objeto.
+
 
 ## 📄 Licença
 
