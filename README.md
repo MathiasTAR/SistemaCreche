@@ -3,7 +3,6 @@
 
 <div align="center">
   <img src="src/main/resources/com/salo/sistemacreche/icons/logoPreenchida.png" width="200" alt="Logo Creche">
-  <p>Sistema completo com cadastro, listagem, relatorio</p>
   
   ![GitHub last commit](https://img.shields.io/github/last-commit/MathiasTAR/SistemaCreche)
   ![GitHub repo size](https://img.shields.io/github/repo-size/MathiasTAR/SistemaCreche)
@@ -11,7 +10,23 @@
 
 ## ✨ Demonstração
 
-![Interface do Sistema](assets/screenshot.png)
+|Tela Home| Tela Cadastro |
+|---------|---------------|
+|<img src="src/main/resources/com/salo/sistemacreche/imagens/telahome.png" width="500">|<img src="src/main/resources/com/salo/sistemacreche/imagens/telacadastro.png" width="500">|
+
+|Tela Prematriculas| Tela Matriculas |
+|---------|---------------|
+|<img src="src/main/resources/com/salo/sistemacreche/imagens/telaprematricula.png" width="500">|<img src="src/main/resources/com/salo/sistemacreche/imagens/telamatricula.png" width="500">|
+
+|Tela Rematriculas| Tela Relatorio |
+|---------|---------------|
+|<img src="src/main/resources/com/salo/sistemacreche/imagens/telarematricula.png" width="500">|<img src="src/main/resources/com/salo/sistemacreche/imagens/telarelatorio.png" width="500">|
+
+<div align="center">
+  <img src="src/main/resources/com/salo/sistemacreche/imagens/teladeclaracao.png" width="500">
+</div>
+
+---
 
 ## 🚀 Funcionalidades
 
@@ -66,7 +81,7 @@ Launcher.java
 5. Abra um Pull Request
 
 ## Sobre Projeto
-Projeto Densenvolvido para Creche Estrela Oriente com tutela do Professor Carlos Cardoso, sobre pretexto do apredizado de java com orientação a objeto.
+Projeto Densenvolvido para Creche Estrela Oriente com tutela do Professor Carlos Cardoso, sobre pretexto do apredizado de java e o conceito de orientação a objeto.
 
 
 ## 📄 Licença
