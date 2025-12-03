@@ -2,42 +2,33 @@
 <jasperReport name="relatorio_amostragem" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c431d253-b3f4-4cf5-ae08-a8c6d2f91b32">
     <parameter name="sexo" class="java.lang.String"/>
     <parameter name="corRaca" class="java.lang.String"/>
-    <parameter name="idadeDe" class="java.lang.Integer"/>
-    <parameter name="idadeAte" class="java.lang.Integer"/>
-    <parameter name="restricaoAlimentar" class="java.lang.String"/>
     <parameter name="alergia" class="java.lang.String"/>
     <parameter name="tipoMoradia" class="java.lang.String"/>
     <parameter name="beneficioSocial" class="java.lang.String"/>
     <parameter name="rendaMin" class="java.lang.String"/>
     <parameter name="rendaMax" class="java.lang.String"/>
     <parameter name="totalCriancas" class="java.lang.Integer"/>
-    <parameter name="totalSexo" class="java.lang.Integer"/>
-    <parameter name="totalCor" class="java.lang.Integer"/>
-    <parameter name="totalFaixaIdade" class="java.lang.Integer"/>
-    <parameter name="totalRestricao" class="java.lang.Integer"/>
-    <parameter name="totalAlergia" class="java.lang.Integer"/>
-    <parameter name="totalTipoMoradia" class="java.lang.Integer"/>
-    <parameter name="totalBeneficio" class="java.lang.Integer"/>
     <parameter name="dataInicio" class="java.sql.Date"/>
     <parameter name="dataFim" class="java.sql.Date"/>
     <parameter name="dataPreDef" class="java.lang.String"/>
+    <parameter name="totalCreche" class="java.lang.Integer"/>
     <detail>
         <band height="802">
             <element kind="textField" uuid="913b86e4-48bc-469f-b1fc-6b14244d9d98" x="0" y="60" width="210" height="20">
-                <expression><![CDATA[$P{dataInicio} == null ? "" : "De: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{dataInicio})
+                <expression><![CDATA[$P{dataInicio} == null ? "" : "De " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{dataInicio})
 			    ]]></expression>
             </element>
-            <element kind="textField" uuid="a09c3dcc-2212-45b5-94ca-f213acba4137" x="120" y="170" width="164" height="20">
-                <expression><![CDATA[$P{rendaMin}+" - "+$P{rendaMax}]]></expression>
+            <element kind="textField" uuid="a09c3dcc-2212-45b5-94ca-f213acba4137" x="120" y="170" width="200" height="20">
+                <expression><![CDATA[$P{rendaMin}+" R$ - "+$P{rendaMax}+"R$"]]></expression>
             </element>
             <element kind="staticText" uuid="2680e52f-0d4e-4faf-b4cb-94f43f5f0d63" x="0" y="200" width="555" height="30" fontSize="16.0" bold="true">
                 <text><![CDATA[Resumo da Amostragem]]></text>
             </element>
             <element kind="line" uuid="6f8d2232-7fe4-47c1-9af6-a8494f3b78f5" x="0" y="190" width="555" height="1"/>
-            <element kind="staticText" uuid="17a8c5d7-fc6d-4f03-b844-03b9814681a1" x="0" y="230" width="350" height="20">
+            <element kind="staticText" uuid="17a8c5d7-fc6d-4f03-b844-03b9814681a1" x="0" y="250" width="350" height="20">
                 <text><![CDATA[Total de crianças encontradas:]]></text>
             </element>
-            <element kind="textField" uuid="c70a1430-0e7b-4a72-aac6-1bfef9e3a09d" x="147" y="230" width="100" height="20">
+            <element kind="textField" uuid="c70a1430-0e7b-4a72-aac6-1bfef9e3a09d" x="140" y="250" width="100" height="20">
                 <expression><![CDATA[$P{totalCriancas}]]></expression>
             </element>
             <element kind="staticText" uuid="82f693f3-e524-4506-8922-799d30d3fcf7" x="0" y="170" width="120" height="20">
@@ -90,8 +81,14 @@
                 <text><![CDATA[Relatório de Amostragem das Crianças]]></text>
             </element>
             <element kind="textField" uuid="7c43ad14-2b5c-4a52-a815-90b568a7fc71" x="140" y="60" width="210" height="20">
-                <expression><![CDATA[$P{dataFim} == null ? "" : "Até: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{dataFim})
+                <expression><![CDATA[$P{dataFim} == null ? "" : "Até " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{dataFim})
 			    ]]></expression>
+            </element>
+            <element kind="staticText" uuid="352fb6bd-9754-41db-8b8b-4688affc6ced" x="0" y="230" width="350" height="20">
+                <text><![CDATA[Total de crianças da creche:]]></text>
+            </element>
+            <element kind="textField" uuid="7f6fd3c5-d83b-4634-8aa7-f8b659f14094" x="130" y="230" width="100" height="20">
+                <expression><![CDATA[$P{totalCreche}]]></expression>
             </element>
             <property name="com.jaspersoft.studio.unit.height" value="px"/>
         </band>
