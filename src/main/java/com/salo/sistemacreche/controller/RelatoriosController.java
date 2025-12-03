@@ -13,6 +13,7 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import java.awt.*;
 import java.io.File;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
@@ -62,6 +63,10 @@ public class RelatoriosController {
                         "LEFT JOIN c.situacaoHabitacional s " +
                         "LEFT JOIN c.composicaoFamiliar cf " +
                         "WHERE 1=1 "
+        );
+
+        StringBuilder jpqlCount = new StringBuilder(
+                "SELECT COUNT(c) FROM Crianca c "
         );
 
         Map<String, Object> params = new HashMap<>();
@@ -177,10 +182,14 @@ public class RelatoriosController {
             } catch (NumberFormatException ignored) {}
         }
 
+        //OBTEM O NUMERO TOTAL DE CRIANÇAS NO BANCO
+        TypedQuery<Long> query1 = em.createQuery(jpqlCount.toString(), Long.class);
+        Long totalCreche = query1.getSingleResult();
+
         // =============================
         // EXECUTA CONSULTA
         // =============================
-        TypedQuery<Crianca> query = em.createQuery(jpql.toString(), Crianca.class);
+        TypedQuery<Crianca> query = em.createQuery(jpql.toString(), Crianca.class); //VERIFICAR AS CLASSES SITUACAOHABITACIONAL E COMPOSICAOFAMILIAR
         params.forEach(query::setParameter);
 
         List<Crianca> resultado = query.getResultList();
@@ -203,9 +212,10 @@ public class RelatoriosController {
             parametros.put("beneficioSocial", comboBeneficioSocial.getValue() != null ? comboBeneficioSocial.getValue() : "");
             parametros.put("rendaMin", txtRendaMinima.getText() != null && !txtRendaMinima.getText().isEmpty() ? txtRendaMinima.getText() : "");
             parametros.put("rendaMax", txtRendaMaxima.getText() != null && !txtRendaMaxima.getText().isEmpty() ? txtRendaMaxima.getText() : "");
-            parametros.put("dataInicio", inicio != null ? java.sql.Date.valueOf(inicio) : null);
-            parametros.put("dataFim", fim != null ? java.sql.Date.valueOf(fim) : null);
+            parametros.put("dataInicio", inicio != null ? Date.valueOf(inicio) : null);
+            parametros.put("dataFim", fim != null ? Date.valueOf(fim) : null);
             parametros.put("dataPreDef", periodoPreDefinido != null ? periodoPreDefinido : "");
+            parametros.put("totalCreche", totalCreche.intValue());
             parametros.put("totalCriancas", resultado.size());
 
 
